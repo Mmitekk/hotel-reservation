@@ -1,0 +1,708 @@
+/* ============================================
+   Hotel Reservation — Global Admin Styles v1.2
+   Comprehensive styling for ALL admin pages.
+   Includes: calendar, pricing, reservation view,
+   room type badges, form enhancements, status
+   badges, print styles.
+   ============================================ */
+
+/* === CSS Variables === */
+:root {
+  --hr-admin-primary: #d97706;
+  --hr-admin-primary-dark: #b45309;
+  --hr-admin-primary-light: #fbbf24;
+  --hr-admin-primary-bg: #fffbeb;
+  --hr-admin-primary-border: #fde68a;
+  --hr-admin-text: #111827;
+  --hr-admin-text-secondary: #6b7280;
+  --hr-admin-text-muted: #9ca3af;
+  --hr-admin-bg: #ffffff;
+  --hr-admin-bg-alt: #f9fafb;
+  --hr-admin-bg-hover: #f3f4f6;
+  --hr-admin-border: #e5e7eb;
+  --hr-admin-border-light: #f3f4f6;
+  --hr-admin-radius: 10px;
+  --hr-admin-radius-sm: 6px;
+  --hr-admin-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --hr-admin-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --hr-admin-shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --hr-admin-shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
+  --hr-admin-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --hr-admin-success: #059669;
+  --hr-admin-success-bg: #d1fae5;
+  --hr-admin-success-border: #a7f3d0;
+  --hr-admin-danger: #dc2626;
+  --hr-admin-danger-bg: #fee2e2;
+  --hr-admin-danger-border: #fecaca;
+  --hr-admin-warning: #d97706;
+  --hr-admin-warning-bg: #fef3c7;
+  --hr-admin-warning-border: #fde68a;
+  --hr-admin-info: #2563eb;
+  --hr-admin-info-bg: #dbeafe;
+  --hr-admin-info-border: #93c5fd;
+  --hr-admin-purple: #7c3aed;
+  --hr-admin-purple-bg: #ede9fe;
+  --hr-admin-purple-border: #c4b5fd;
+}
+
+/* === Room Type Badges === */
+.hr-admin-room-type {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.hr-admin-room-type--standard { background: #f3f4f6; color: #4b5563; border-color: #e5e7eb; }
+.hr-admin-room-type--superior { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+.hr-admin-room-type--deluxe { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.hr-admin-room-type--suite { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
+.hr-admin-room-type--apartment { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+.hr-admin-room-type--villa { background: #fce7f3; color: #9d174d; border-color: #fbcfe8; }
+.hr-admin-room-type--family { background: #ffedd5; color: #9a3412; border-color: #fed7aa; }
+.hr-admin-room-type--economy { background: #f9fafb; color: #374151; border-color: #d1d5db; }
+
+/* === Status Badges === */
+.hr-admin-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hr-admin-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hr-admin-status--pending { background: var(--hr-admin-warning-bg); color: #92400e; border: 1px solid var(--hr-admin-warning-border); }
+.hr-admin-status--pending::before { background: var(--hr-admin-warning); }
+.hr-admin-status--confirmed { background: var(--hr-admin-success-bg); color: #065f46; border: 1px solid var(--hr-admin-success-border); }
+.hr-admin-status--confirmed::before { background: var(--hr-admin-success); }
+.hr-admin-status--checked_in { background: var(--hr-admin-info-bg); color: #1e40af; border: 1px solid var(--hr-admin-info-border); }
+.hr-admin-status--checked_in::before { background: var(--hr-admin-info); }
+.hr-admin-status--checked_out { background: var(--hr-admin-bg-alt); color: #4b5563; border: 1px solid var(--hr-admin-border); }
+.hr-admin-status--checked_out::before { background: #9ca3af; }
+.hr-admin-status--cancelled { background: var(--hr-admin-danger-bg); color: #991b1b; border: 1px solid var(--hr-admin-danger-border); }
+.hr-admin-status--cancelled::before { background: var(--hr-admin-danger); }
+.hr-admin-status--expired { background: var(--hr-admin-bg-alt); color: #6b7280; border: 1px solid var(--hr-admin-border); }
+.hr-admin-status--expired::before { background: #9ca3af; }
+
+/* ============================================
+   Reservation View / Check-in Slip
+   ============================================ */
+.hr-res-view {
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--hr-admin-bg);
+  border-radius: 16px;
+  box-shadow: var(--hr-admin-shadow-lg);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--hr-admin-text);
+  animation: hr-admin-slideUp 0.35s ease;
+}
+
+@keyframes hr-admin-slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hr-res-view__header {
+  background: linear-gradient(135deg, #1e293b, #334155);
+  padding: 28px 28px 24px;
+  color: #ffffff;
+}
+
+.hr-res-view__logo {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.hr-res-view__subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.hr-res-view__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.hr-res-view__col {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--hr-admin-border-light);
+}
+
+.hr-res-view__col--price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hr-admin-primary-bg);
+  border-left: 1px solid var(--hr-admin-border-light);
+}
+
+.hr-res-view__section {
+  margin-bottom: 4px;
+}
+
+.hr-res-view__section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--hr-admin-text-secondary);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hr-admin-border-light);
+}
+
+.hr-res-view__field {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.hr-res-view__label {
+  color: var(--hr-admin-text-secondary);
+  font-weight: 500;
+}
+
+.hr-res-view__value {
+  font-weight: 600;
+  color: var(--hr-admin-text);
+}
+
+.hr-res-view__status {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hr-res-view__status--pending { background: var(--hr-admin-warning-bg); color: #92400e; }
+.hr-res-view__status--confirmed { background: var(--hr-admin-success-bg); color: #065f46; }
+.hr-res-view__status--checked_in { background: var(--hr-admin-info-bg); color: #1e40af; }
+.hr-res-view__status--checked_out { background: var(--hr-admin-bg-alt); color: #4b5563; }
+.hr-res-view__status--cancelled { background: var(--hr-admin-danger-bg); color: #991b1b; }
+.hr-res-view__status--expired { background: var(--hr-admin-bg-alt); color: #6b7280; }
+
+.hr-res-view__price-box {
+  text-align: center;
+}
+
+.hr-res-view__price-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hr-admin-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.hr-res-view__price-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--hr-admin-primary-dark);
+  letter-spacing: -0.02em;
+}
+
+.hr-res-view__notes {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--hr-admin-border-light);
+}
+
+.hr-res-view__notes p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--hr-admin-text-secondary);
+  line-height: 1.6;
+}
+
+.hr-res-view__footer {
+  padding: 12px 24px;
+  text-align: center;
+}
+
+.hr-res-view__footer p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--hr-admin-text-muted);
+}
+
+/* ============================================
+   Calendar — Complete Overhaul
+   ============================================ */
+.hr-calendar-container {
+  overflow-x: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--hr-admin-bg);
+  border-radius: var(--hr-admin-radius);
+  box-shadow: var(--hr-admin-shadow);
+  padding: 24px;
+}
+
+.hr-calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hr-admin-border-light);
+}
+
+.hr-calendar-nav__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--hr-admin-text);
+  letter-spacing: -0.01em;
+}
+
+.hr-calendar-nav__links {
+  display: flex;
+  gap: 8px;
+}
+
+.hr-calendar-nav__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--hr-admin-radius-sm);
+  background: var(--hr-admin-bg-alt);
+  color: var(--hr-admin-text);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all var(--hr-admin-transition);
+ border: 1px solid var(--hr-admin-border);
+}
+
+.hr-calendar-nav__link:hover {
+  background: var(--hr-admin-primary-bg);
+  color: var(--hr-admin-primary-dark);
+  border-color: var(--hr-admin-primary-border);
+  transform: translateY(-1px);
+  box-shadow: var(--hr-admin-shadow-sm);
+}
+
+/* Legend */
+.hr-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: var(--hr-admin-bg-alt);
+  border-radius: var(--hr-admin-radius-sm);
+  border: 1px solid var(--hr-admin-border-light);
+}
+
+.hr-calendar-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--hr-admin-text-secondary);
+  font-weight: 500;
+}
+
+.hr-calendar-legend__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--hr-admin-radius-sm);
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.hr-calendar-legend__badge.hr-calendar-reservation--pending { background: var(--hr-admin-warning); }
+.hr-calendar-legend__badge.hr-calendar-reservation--confirmed { background: var(--hr-admin-success); }
+.hr-calendar-legend__badge.hr-calendar-reservation--checked_in { background: var(--hr-admin-info); }
+.hr-calendar-legend__badge.hr-calendar-reservation--checked_out { background: #9ca3af; }
+
+/* Calendar Table */
+.hr-calendar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+  min-width: 900px;
+  border: 1px solid var(--hr-admin-border);
+  border-radius: var(--hr-admin-radius-sm);
+  overflow: hidden;
+}
+
+.hr-calendar-table th,
+.hr-calendar-table td {
+  border: 1px solid var(--hr-admin-border-light);
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.hr-calendar-table thead th {
+  background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+  font-weight: 600;
+  color: var(--hr-admin-text-secondary);
+ padding: 10px 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+ position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 2px solid var(--hr-admin-border);
+}
+
+.hr-calendar-table thead th .hr-calendar-day-name {
+  font-size: 10px;
+  color: var(--hr-admin-text-muted);
+  margin-bottom: 2px;
+}
+
+.hr-calendar-table thead th div:last-child {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hr-admin-text);
+}
+
+/* Room name column */
+.hr-calendar-table .hr-calendar-room-name {
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 170px;
+ padding: 10px 14px;
+ background: #ffffff;
+ position: sticky;
+  left: 0;
+  z-index: 1;
+ border-right: 2px solid var(--hr-admin-border);
+  font-size: 13px;
+  color: var(--hr-admin-text);
+}
+
+.hr-calendar-table .hr-calendar-room-name small {
+  font-size: 11px;
+  color: var(--hr-admin-text-muted);
+  font-weight: 500;
+}
+
+.hr-calendar-table thead .hr-calendar-room-name {
+  z-index: 3;
+  background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+  border-right: 2px solid var(--hr-admin-border);
+}
+
+/* Day cells */
+.hr-calendar-day {
+  min-width: 40px;
+  height: 38px;
+  position: relative;
+  cursor: default;
+  transition: background-color 0.15s;
+}
+
+.hr-calendar-day--weekend {
+  background: #fffbeb;
+}
+
+.hr-calendar-day--today {
+  background: #eff6ff !important;
+  box-shadow: inset 0 0 0 2px var(--hr-admin-info);
+}
+
+.hr-calendar-day--past {
+  opacity: 0.45;
+}
+
+.hr-calendar-day:hover:not(.hr-calendar-day--past) {
+  background: var(--hr-admin-bg-hover);
+}
+
+/* Reservation badges in cells */
+.hr-calendar-reservation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+ transition: all var(--hr-admin-transition);
+ box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.hr-calendar-reservation:hover {
+  transform: scale(1.2);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 1;
+  position: relative;
+}
+
+.hr-calendar-reservation--pending { background: var(--hr-admin-warning); color: #ffffff; }
+.hr-calendar-reservation--confirmed { background: var(--hr-admin-success); color: #ffffff; }
+.hr-calendar-reservation--checked_in { background: var(--hr-admin-info); color: #ffffff; }
+.hr-calendar-reservation--checked_out { background: #9ca3af; color: #ffffff; }
+.hr-calendar-reservation--cancelled,
+.hr-calendar-reservation--expired { background: #d1d5db; color: #ffffff; text-decoration: line-through; }
+
+/* Weekend column headers */
+.hr-calendar-table th[data-weekend] {
+ background: linear-gradient(to bottom, #fffbeb, #fef3c7);
+}
+
+/* ============================================
+   Room Pricing — Complete Overhaul
+   ============================================ */
+.pricing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pricing-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--hr-admin-radius-sm);
+  background: var(--hr-admin-bg);
+  color: var(--hr-admin-text);
+  text-decoration: none;
+ font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--hr-admin-border);
+ transition: all var(--hr-admin-transition);
+}
+
+.pricing-nav a:hover {
+  background: var(--hr-admin-primary-bg);
+  color: var(--hr-admin-primary-dark);
+  border-color: var(--hr-admin-primary-border);
+}
+
+.room-pricing-form {
+  margin-top: 8px;
+}
+
+.room-pricing-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--hr-admin-border);
+  border-radius: var(--hr-admin-radius-sm);
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.room-pricing-table thead th {
+  background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+  font-weight: 600;
+  color: var(--hr-admin-text-secondary);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 12px;
+  border-bottom: 2px solid var(--hr-admin-border);
+}
+
+.room-pricing-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--hr-admin-border-light);
+  vertical-align: middle;
+}
+
+.room-pricing-table tbody tr:hover {
+  background: var(--hr-admin-bg-alt);
+}
+
+.room-pricing-table tr.has-custom-price {
+  background: var(--hr-admin-primary-bg) !important;
+}
+
+.room-pricing-table tr.has-custom-price td {
+  border-bottom-color: var(--hr-admin-primary-border);
+}
+
+.room-pricing-table input[type="number"] {
+  width: 100px;
+  padding: 6px 8px;
+  border: 1.5px solid var(--hr-admin-border);
+  border-radius: var(--hr-admin-radius-sm);
+  font-size: 13px;
+  text-align: right;
+  color: var(--hr-admin-text);
+ transition: border-color var(--hr-admin-transition), box-shadow var(--hr-admin-transition);
+ outline: none;
+}
+
+.room-pricing-table input[type="number"]:focus {
+  border-color: var(--hr-admin-primary);
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.15);
+}
+
+.price-increase { color: var(--hr-admin-danger); font-weight: 600; font-size: 11px; }
+.price-decrease { color: var(--hr-admin-success); font-weight: 600; font-size: 11px; }
+.price-same { color: var(--hr-admin-text-muted); font-size: 11px; }
+
+.form-actions .button--primary {
+  background: linear-gradient(135deg, var(--hr-admin-primary), var(--hr-admin-primary-dark)) !important;
+  border: none;
+  color: #ffffff !important;
+  padding: 10px 28px;
+  border-radius: var(--hr-admin-radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  transition: all var(--hr-admin-transition);
+ box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
+}
+
+.form-actions .button--primary:hover {
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Weekend rows */
+.room-pricing-table tr.hr-pricing-weekend {
+ background: #fffbeb;
+}
+
+/* Today indicator */
+.room-pricing-table tr.hr-pricing-today {
+ box-shadow: inset 3px 0 0 var(--hr-admin-primary);
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+  .hr-calendar-container { box-shadow: none; padding: 0; }
+  .hr-res-view { box-shadow: none; }
+  .hr-dashboard-wrapper { padding: 0; }
+  .hr-calendar-nav__links,
+  .hr-calendar-legend,
+ .hr-dashboard-btn,
+ .form-actions { display: none !important; }
+  .hr-calendar-table { border: 1px solid #ccc; }
+}
+
+/* ============================================
+   Reservation List Enhancements
+   ============================================ */
+.reservation-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+ gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding: 16px;
+ background: var(--hr-admin-bg);
+  border: 1px solid var(--hr-admin-border);
+  border-radius: var(--hr-admin-radius);
+}
+
+.reservation-filter-form .form-item {
+  margin: 0;
+}
+
+.reservation-filter-form .button--primary {
+  background: linear-gradient(135deg, var(--hr-admin-primary), var(--hr-admin-primary-dark)) !important;
+  border: none;
+  color: #ffffff !important;
+  border-radius: var(--hr-admin-radius-sm);
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.2);
+}
+
+/* Export link style */
+.hr-admin-export-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--hr-admin-bg);
+  border: 1px solid var(--hr-admin-border);
+  border-radius: var(--hr-admin-radius-sm);
+  color: var(--hr-admin-text);
+  font-size: 13px;
+  font-weight: 500;
+ text-decoration: none;
+  transition: all var(--hr-admin-transition);
+}
+
+.hr-admin-export-link:hover {
+  background: var(--hr-admin-bg-hover);
+  border-color: var(--hr-admin-text-secondary);
+  color: var(--hr-admin-text);
+}
+
+/* Back link style */
+.back-link {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.back-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--hr-admin-text-secondary);
+  text-decoration: none;
+  transition: color var(--hr-admin-transition);
+}
+
+.back-link a:hover {
+  color: var(--hr-admin-primary);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .hr-res-view__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hr-res-view__col--price {
+    border-left: none;
+    border-top: 1px solid var(--hr-admin-border-light);
+  }
+
+  .hr-calendar-nav {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .hr-calendar-nav__title {
+    text-align: center;
+  }
+
+  .hr-calendar-nav__links {
+    justify-content: center;
+ }
+}

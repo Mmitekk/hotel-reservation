@@ -185,17 +185,85 @@ class DashboardController extends ControllerBase {
       'avg_occupancy' => $avg_occupancy,
     ];
 
+    // --- Weekly revenue (last 7 days) ---
+    $weekly_revenue = [];
+    $weekly_total = 0.0;
+    $max_daily = 0.0;
+    $day_of_week_map = [
+      0 => ['day' => 'Monday', 'day_short' => 'Mon', 'Пн'],
+      1 => ['day' => 'Tuesday', 'day_short' => 'Tue', 'Вт'],
+      2 => ['day' => 'Wednesday', 'day_short' => 'Wed', 'Ср'],
+      3 => ['day' => 'Thursday', 'day_short' => 'Thu', 'Чт'],
+      4 => ['day' => 'Friday', 'day_short' => 'Fri', 'Пт'],
+      5 => ['day' => 'Saturday', 'day_short' => 'Sat', 'Сб'],
+      6 => ['day' => 'Sunday', 'day_short' => 'Sun', 'Вс'],
+    ];
+    for ($d = 6; $d >= 0; $d--) {
+      $day_dt = (clone $today_dt)->modify('-' . $d . ' days');
+      $day_str = $day_dt->format('Y-m-d');
+      $next_day_str = (clone $day_dt)->modify('+1 day')->format('Y-m-d');
+
+      $day_rev_query = $reservation_storage->getQuery()
+        ->condition('status', ['confirmed', 'checked_in'], 'IN')
+        ->condition('check_in', $next_day_str, '<')
+        ->condition('check_out', $day_str, '>=')
+        ->accessCheck(FALSE);
+
+      $day_rev_ids = $day_rev_query->execute();
+      $day_total = 0.0;
+      if (!empty($day_rev_ids)) {
+        $day_res = $reservation_storage->loadMultiple($day_rev_ids);
+        foreach ($day_res as $day_rev) {
+          $day_total += (float) $day_rev->get('total_price')->value;
+          $nights = 0;
+          $ci = $day_rev->get('check_in')->value;
+          $co = $day_rev->get('check_out')->value;
+          if ($ci && $co) {
+            $nights = (new \DateTime($co))->diff(new \DateTime($ci))->days;
+            if ($nights > 0) {
+              $day_total = (float) $day_rev->get('total_price')->value / $nights * 1;
+            }
+          }
+        }
+      }
+
+      if ($day_total > $max_daily) {
+        $max_daily = $day_total;
+      }
+
+      $weekly_revenue[] = [
+        'day' => $day_of_week_map[$day_dt->format('w')]['day'],
+        'day_short' => $day_of_week_map[$day_dt->format('w')]['day_short'],
+        'amount' => $day_total,
+        'formatted_amount' => number_format($day_total, 0, '.', ' ') . ' ' . $currency,
+        'height_pct' => $max_daily > 0 ? max(5, round(($day_total / $max_daily) * 100)) : 5,
+        'is_today' => $d === 0,
+      ];
+      $weekly_total += $day_total;
+    }
+    // Reverse to chronological order.
+    $weekly_revenue = array_reverse($weekly_revenue);
+
+    $export_url = Url::fromRoute('hotel_reservation.export_csv')->toString();
+
     $build = [
       '#theme' => 'hotel_reservation_dashboard',
       '#stats' => $stats,
       '#pending_reservations' => $pending_reservations_list,
       '#upcoming_checkins' => $upcoming_checkins,
       '#currency' => $currency,
+      '#weekly_revenue' => $weekly_revenue,
+      '#weekly_total' => number_format($weekly_total, 2, '.', ' ') . ' ' . $currency,
+      '#export_url' => $export_url,
       '#attached' => [
         'library' => [
           'hotel_reservation/admin-styles',
           'hotel_reservation/dashboard',
         ],
+      ],
+      '#cache' => [
+        'tags' => ['hr_reservation_list', 'hr_room_list'],
+        'max-age' => 0,
       ],
     ];
 

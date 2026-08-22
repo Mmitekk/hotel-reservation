@@ -17,6 +17,7 @@ class RoomListBuilder extends EntityListBuilder {
  */
   public function buildHeader() {
     $header['name'] = $this->t('Room Name');
+    $header['room_type'] = $this->t('Type');
     $header['capacity'] = $this->t('Capacity');
     $header['base_price'] = $this->t('Base Price');
     $header['status'] = $this->t('Status');
@@ -38,6 +39,21 @@ class RoomListBuilder extends EntityListBuilder {
       '#type' => 'link',
       '#title' => $entity->label(),
       '#url' => $entity->toUrl('edit-form'),
+    ];
+
+    $room_type_options = [
+      'standard' => 'Standard',
+      'superior' => 'Superior',
+      'deluxe' => 'Deluxe',
+      'suite' => 'Suite',
+      'apartment' => 'Apartment',
+      'villa' => 'Villa',
+      'family' => 'Family',
+      'economy' => 'Economy',
+    ];
+    $rt = $entity->get('room_type')->value;
+    $row['room_type']['data'] = [
+      '#markup' => '<span class="hr-admin-room-type hr-admin-room-type--' . $rt . '">' . ($room_type_options[$rt] ?? $rt) . '</span>',
     ];
 
     $row['capacity'] = $entity->get('capacity')->value;

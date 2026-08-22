@@ -1,75 +1,106 @@
 {#
   @file
-  Default theme implementation for the Hotel Reservation admin dashboard.
+  Dashboard template v1.2 — adds weekly revenue chart and export button.
 
-  Available variables:
-  - stats: Array with keys: total_rooms, published_rooms, total_reservations,
-    pending_reservations, confirmed_reservations, checked_in_reservations,
-    total_revenue, avg_occupancy.
-  - pending_reservations: Array of arrays with keys: id, guest_name, room_name,
-    check_in, check_out, total_price, created, confirm_url, cancel_url.
-  - upcoming_checkins: Array of arrays with keys: id, guest_name, room_name,
-    check_in.
-  - currency: The currency symbol string.
+  Variables:
+  - stats: total_rooms, published_rooms, total_reservations, pending_reservations,
+    confirmed_reservations, checked_in_reservations, total_revenue, avg_occupancy.
+  - pending_reservations: [id, guest_name, room_name, check_in, check_out, total_price, created, confirm_url, cancel_url]
+  - upcoming_checkins: [id, guest_name, room_name, check_in]
+  - currency: e.g. "₽"
+  - weekly_revenue: [{day: "Mon", day_short: "Пн", amount: 5000}, ...] (7 items, Mon-Sun)
+  - weekly_total: formatted total string
+  - export_url: URL to CSV export
 #}
 
 <div class="hr-dashboard-wrapper">
 
   {# === STAT CARDS GRID === #}
   <div class="hr-dashboard-grid">
-
     <div class="hr-dashboard-card hr-dashboard-card--rooms">
       <div class="hr-dashboard-card__icon">🏨</div>
       <div class="hr-dashboard-card__body">
-        <div class="hr-dashboard-card__label">Всего номеров</div>
+        <div class="hr-dashboard-card__label">{{ 'Rooms'|t }}</div>
         <div class="hr-dashboard-card__value">{{ stats.published_rooms }}</div>
-        <div class="hr-dashboard-card__trend">из {{ stats.total_rooms }} созданных</div>
+        <div class="hr-dashboard-card__trend">{{ 'of @total created'|t({'@total': stats.total_rooms }) }}</div>
       </div>
     </div>
 
     <div class="hr-dashboard-card hr-dashboard-card--pending">
       <div class="hr-dashboard-card__icon">⏳</div>
       <div class="hr-dashboard-card__body">
-        <div class="hr-dashboard-card__label">Ожидают подтверждения</div>
+        <div class="hr-dashboard-card__label">{{ 'Pending'|t }}</div>
         <div class="hr-dashboard-card__value">{{ stats.pending_reservations }}</div>
-        <div class="hr-dashboard-card__trend">из {{ stats.total_reservations }} бронирований</div>
+        <div class="hr-dashboard-card__trend">{{ 'of @total total'|t({'@total': stats.total_reservations }) }}</div>
       </div>
     </div>
 
     <div class="hr-dashboard-card hr-dashboard-card--revenue">
       <div class="hr-dashboard-card__icon">💰</div>
       <div class="hr-dashboard-card__body">
-        <div class="hr-dashboard-card__label">Подтверждённый доход</div>
+        <div class="hr-dashboard-card__label">{{ 'Revenue'|t }}</div>
         <div class="hr-dashboard-card__value">{{ stats.total_revenue }} {{ currency }}</div>
-        <div class="hr-dashboard-card__trend">{{ stats.confirmed_reservations }} подтверждённых, {{ stats.checked_in_reservations }} заселено</div>
+        <div class="hr-dashboard-card__trend">{{ stats.confirmed_reservations }} {{ 'confirmed'|t }}, {{ stats.checked_in_reservations }} {{ 'checked in'|t }}</div>
       </div>
     </div>
 
     <div class="hr-dashboard-card hr-dashboard-card--checkins">
       <div class="hr-dashboard-card__icon">🔑</div>
       <div class="hr-dashboard-card__body">
-        <div class="hr-dashboard-card__label">Заселения (3 дня)</div>
+        <div class="hr-dashboard-card__label">{{ 'Check-ins (3d)'|t }}</div>
         <div class="hr-dashboard-card__value">{{ upcoming_checkins|length }}</div>
-        <div class="hr-dashboard-card__trend">Загруженность: {{ stats.avg_occupancy }}%</div>
+        <div class="hr-dashboard-card__trend">{{ 'Occupancy: @pct%'|t({'@pct': stats.avg_occupancy }) }}</div>
       </div>
     </div>
-
   </div>
+
+  {# === WEEKLY REVENUE CHART === #}
+  {% if weekly_revenue is not empty %}
+  <div class="hr-dashboard-section">
+      <div class="hr-dashboard-section__title">
+        {{ 'Revenue This Week'|t }}
+        <a href="{{ export_url }}" class="hr-dashboard-btn hr-dashboard-btn--export">📥 {{ 'Export CSV'|t }}</a>
+      </div>
+      <div class="hr-dash-chart">
+        <div class="hr-dash-chart__bars">
+          {% for day in weekly_revenue %}
+            {% set bar_height = day.height_pct ~ '%' %}
+            <div class="hr-dash-chart__bar-col">
+              <div class="hr-dash-chart__bar{% if day.amount == 0 %} hr-dash-chart__bar--empty{% endif %}"
+                   style="height: {{ bar_height }}"
+                   data-amount="{{ day.formatted_amount }}">
+              </div>
+              <span class="hr-dash-chart__day{% if day.is_today %} hr-dash-chart__day--today{% endif %}">{{ day.day_short }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="hr-dash-chart__total">
+          <span class="hr-dash-chart__total-label">{{ 'Weekly Total'|t }}</span>
+          <span class="hr-dash-chart__total-value">{{ weekly_total }} {{ currency }}</span>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
   {# === PENDING RESERVATIONS TABLE === #}
   <div class="hr-dashboard-section">
-    <h2 class="hr-dashboard-section__title">⏳ Ожидающие бронирования</h2>
+    <div class="hr-dashboard-section__title">
+      {{ 'Pending Reservations'|t }}
+      {% if export_url %}
+        <a href="{{ export_url }}" class="hr-dashboard-btn hr-dashboard-btn--export">📥 {{ 'Export All'|t }}</a>
+      {% endif %}
+    </div>
     {% if pending_reservations is not empty %}
       <table class="hr-dashboard-table">
         <thead>
           <tr>
-            <th>Гость</th>
-            <th>Номер</th>
-            <th>Заезд</th>
-            <th>Выезд</th>
-            <th>Сумма</th>
-            <th>Создано</th>
-            <th>Действия</th>
+            <th>{{ 'Guest'|t }}</th>
+            <th>{{ 'Room'|t }}</th>
+            <th>{{ 'Check-in'|t }}</th>
+            <th>{{ 'Check-out'|t }}</th>
+            <th>{{ 'Amount'|t }}</th>
+            <th>{{ 'Created'|t }}</th>
+            <th>{{ 'Actions'|t }}</th>
           </tr>
         </thead>
         <tbody>
@@ -77,26 +108,26 @@
             <tr class="hr-dashboard-table__row">
               <td class="hr-dashboard-table__cell hr-dashboard-table__cell--guest">{{ res.guest_name }}</td>
               <td class="hr-dashboard-table__cell">{{ res.room_name }}</td>
-              <td class="hr-dashboard-table__cell">{{ res.check_in }}</td>
-              <td class="hr-dashboard-table__cell">{{ res.check_out }}</td>
+              <td class="hr-dashboard-table__cell hr-dashboard-table__cell--date">{{ res.check_in }}</td>
+              <td class="hr-dashboard-table__cell hr-dashboard-table__cell--date">{{ res.check_out }}</td>
               <td class="hr-dashboard-table__cell hr-dashboard-table__cell--price">{{ res.total_price }} {{ currency }}</td>
               <td class="hr-dashboard-table__cell hr-dashboard-table__cell--date">{{ res.created }}</td>
               <td class="hr-dashboard-table__cell hr-dashboard-table__cell--actions">
-                <a href="{{ res.confirm_url }}" class="hr-dashboard-btn hr-dashboard-btn--confirm">Подтвердить</a>
-                <a href="{{ res.cancel_url }}" class="hr-dashboard-btn hr-dashboard-btn--cancel">Отменить</a>
+                <a href="{{ res.confirm_url }}" class="hr-dashboard-btn hr-dashboard-btn--confirm">{{ 'Confirm'|t }}</a>
+                <a href="{{ res.cancel_url }}" class="hr-dashboard-btn hr-dashboard-btn--cancel">{{ 'Cancel'|t }}</a>
               </td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     {% else %}
-      <p class="hr-dashboard-empty">Нет ожидающих бронирований. Все заявки обработаны! 🎉</p>
+      <p class="hr-dashboard-empty">{{ 'No pending reservations. All processed!'|t }} ✅</p>
     {% endif %}
   </div>
 
-  {# === UPCOMING CHECK-INS LIST === #}
+  {# === UPCOMING CHECK-INS === #}
   <div class="hr-dashboard-section">
-    <h2 class="hr-dashboard-section__title">🔑 Предстоящие заселения (ближайшие 3 дня)</h2>
+    <h2 class="hr-dashboard-section__title">🔑 {{ 'Upcoming Check-ins (3 days)'|t }}</h2>
     {% if upcoming_checkins is not empty %}
       <div class="hr-dashboard-checkins">
         {% for checkin in upcoming_checkins %}
@@ -113,7 +144,7 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="hr-dashboard-empty">Нет предстоящих заселений в ближайшие 3 дня.</p>
+      <p class="hr-dashboard-empty">{{ 'No upcoming check-ins in the next 3 days.'|t }}</p>
     {% endif %}
   </div>
 

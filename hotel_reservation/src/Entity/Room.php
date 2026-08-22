@@ -271,6 +271,35 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['room_type'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Room Type'))
+      ->setDescription(t('The category or type of the room.'))
+      ->setSettings([
+        'allowed_values' => [
+          'standard' => 'Standard',
+          'superior' => 'Superior',
+          'deluxe' => 'Deluxe',
+          'suite' => 'Suite',
+          'apartment' => 'Apartment',
+          'villa' => 'Villa',
+          'family' => 'Family',
+          'economy' => 'Economy',
+        ],
+        'allowed_values_function' => '',
+      ])
+      ->setDefaultValue('standard')
+      ->setDisplayOptions('view', [
+        'label' => 'inline',
+        'type' => 'list_default',
+        'weight' => 0,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_select',
+        'weight' => -4,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['capacity'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Capacity'))
       ->setDescription(t('The maximum number of guests the room can accommodate.'))

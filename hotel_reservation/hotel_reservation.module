@@ -70,8 +70,22 @@ function hotel_reservation_theme($existing, $type, $theme, $path) {
         'pending_reservations' => [],
         'upcoming_checkins' => [],
         'currency' => '₽',
+        'weekly_revenue' => [],
+        'weekly_total' => '',
+        'export_url' => '',
       ],
       'template' => 'dashboard',
+    ],
+    'hotel_reservation_view' => [
+      'variables' => [
+        'reservation' => NULL,
+        'room' => NULL,
+        'currency' => '₽',
+        'hotel_name' => '',
+        'check_in_time' => '14:00',
+        'check_out_time' => '12:00',
+      ],
+      'template' => 'reservation-view',
     ],
   ];
 }

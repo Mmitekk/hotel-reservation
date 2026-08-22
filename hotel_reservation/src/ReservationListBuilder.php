@@ -342,6 +342,17 @@ class ReservationListBuilder extends EntityListBuilder {
   public function render() {
     $build['filter'] = $this->buildFilterForm();
 
+    $build['filter']['actions'] = [
+      '#type' => 'container',
+      '#attributes' => ['style' => 'margin-bottom: 12px; display: flex; align-items: center; gap: 8px;'],
+      'link' => [
+        '#type' => 'link',
+        '#title' => $this->t('Export CSV ↓'),
+        '#url' => Url::fromRoute('hotel_reservation.export_csv'),
+        '#attributes' => ['class' => ['button', 'hr-dashboard-btn', 'hr-dashboard-btn--export']],
+      ],
+    ];
+
     $build['table'] = [
       '#type' => 'table',
       '#header' => $this->buildHeader(),
