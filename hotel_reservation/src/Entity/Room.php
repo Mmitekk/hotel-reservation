@@ -226,10 +226,6 @@ class Room extends ContentEntityBase {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setReadOnly(TRUE);
-
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Room Name'))
       ->setDescription(t('The name of the room.'))

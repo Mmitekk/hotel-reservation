@@ -190,13 +190,13 @@ class DashboardController extends ControllerBase {
     $weekly_total = 0.0;
     $max_daily = 0.0;
     $day_of_week_map = [
-      0 => ['day' => 'Monday', 'day_short' => 'Mon', 'Пн'],
-      1 => ['day' => 'Tuesday', 'day_short' => 'Tue', 'Вт'],
-      2 => ['day' => 'Wednesday', 'day_short' => 'Wed', 'Ср'],
-      3 => ['day' => 'Thursday', 'day_short' => 'Thu', 'Чт'],
-      4 => ['day' => 'Friday', 'day_short' => 'Fri', 'Пт'],
-      5 => ['day' => 'Saturday', 'day_short' => 'Sat', 'Сб'],
-      6 => ['day' => 'Sunday', 'day_short' => 'Sun', 'Вс'],
+      0 => ['day' => 'Monday', 'day_short' => 'Пн'],
+      1 => ['day' => 'Tuesday', 'day_short' => 'Вт'],
+      2 => ['day' => 'Wednesday', 'day_short' => 'Ср'],
+      3 => ['day' => 'Thursday', 'day_short' => 'Чт'],
+      4 => ['day' => 'Friday', 'day_short' => 'Пт'],
+      5 => ['day' => 'Saturday', 'day_short' => 'Сб'],
+      6 => ['day' => 'Sunday', 'day_short' => 'Вс'],
     ];
     for ($d = 6; $d >= 0; $d--) {
       $day_dt = (clone $today_dt)->modify('-' . $d . ' days');
@@ -214,16 +214,18 @@ class DashboardController extends ControllerBase {
       if (!empty($day_rev_ids)) {
         $day_res = $reservation_storage->loadMultiple($day_rev_ids);
         foreach ($day_res as $day_rev) {
-          $day_total += (float) $day_rev->get('total_price')->value;
-          $nights = 0;
+          $total = (float) $day_rev->get('total_price')->value;
           $ci = $day_rev->get('check_in')->value;
           $co = $day_rev->get('check_out')->value;
+          $nights = 1;
           if ($ci && $co) {
             $nights = (new \DateTime($co))->diff(new \DateTime($ci))->days;
-            if ($nights > 0) {
-              $day_total = (float) $day_rev->get('total_price')->value / $nights * 1;
+            if ($nights < 1) {
+              $nights = 1;
             }
           }
+          // Allocate a proportional share of total revenue to this day.
+          $day_total += $total / $nights;
         }
       }
 
