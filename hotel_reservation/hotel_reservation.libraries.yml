@@ -17,3 +17,9 @@ admin-styles:
     theme:
       css/admin-calendar.css: {}
       css/room-pricing.css: {}
+
+dashboard:
+  version: 1.0.0
+  css:
+    theme:
+      css/dashboard.css: {}

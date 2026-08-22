@@ -1,7 +1,14 @@
+hotel_reservation.dashboard:
+  title: 'Dashboard'
+  description: 'View reservation statistics and quick actions.'
+  route_name: hotel_reservation.dashboard
+  parent: hotel_reservation.admin
+  weight: -20
+
 hotel_reservation.admin:
   title: 'Hotel Reservation'
   description: 'Manage hotel rooms, reservations, and pricing.'
-  route_name: hotel_reservation.reservations_list
+  route_name: hotel_reservation.dashboard
   parent: system.admin
   weight: -10
 

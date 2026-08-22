@@ -5,6 +5,7 @@ namespace Drupal\hotel_reservation\Plugin\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\Component\Utility\Html;
 
 /**
  * Provides a 'Hotel Reservation Booking Form' block.
@@ -92,6 +93,9 @@ class BookingFormBlock extends BlockBase {
       'apiCheckUrl' => Url::fromRoute('hotel_reservation.api_check_availability')->toString(),
       'apiSubmitUrl' => Url::fromRoute('hotel_reservation.api_submit_reservation')->toString(),
     ];
+
+    // Add CSRF token for API submission.
+    $build['#attached']['drupalSettings']['hotelReservation']['csrfToken'] = \Drupal::csrfToken()->get('/api/hotel-reservation/submit');
 
     // Build the complete booking form HTML matching CSS/JS expectations.
     $html = '<div class="hr-booking-form">';
@@ -188,7 +192,7 @@ class BookingFormBlock extends BlockBase {
 
     $html .= '<div class="hr-form-group">';
     $html .= '<label for="hr-guest-email">' . $this->t('Email') . '</label>';
-    $html .= '<input type="email" id="hr-guest-email" class="hr-field-guest-email" placeholder="' . $this->t('your@email.com') . '">';
+    $html .= '<input type="email" id="hr-guest-email" class="hr-field-guest-email" placeholder="' . $this->t('your@email.com') . '">' ;
     $html .= '</div>';
 
     $html .= '<div class="hr-form-group">';
@@ -198,11 +202,10 @@ class BookingFormBlock extends BlockBase {
 
     // Booking conditions (if enabled).
     if (!empty($block_config['show_conditions']) && !empty($booking_conditions)) {
+      $escaped_conditions = Html::escape($booking_conditions);
       $html .= '<div class="hr-terms">';
       $html .= '<div class="hr-terms__title">' . $this->t('Booking Conditions') . '</div>';
-      $html .= '<div class="hr-terms__text">' . nl2br(\Drupal::service('renderer')->renderPlain(
-        ['#type' => 'processed_text', '#text' => $booking_conditions, '#format' => 'plain_text']
-      )) . '</div>';
+      $html .= '<div class="hr-terms__text">' . nl2br($escaped_conditions) . '</div>';
       $html .= '</div>';
     }
 

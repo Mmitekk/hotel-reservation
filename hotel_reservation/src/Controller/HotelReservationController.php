@@ -41,6 +41,21 @@ class HotelReservationController extends ControllerBase {
   }
 
   /**
+   * Status letter mapping for the calendar.
+   */
+  protected function getStatusLetter($status) {
+    $map = [
+      'pending' => 'P',
+      'confirmed' => 'C',
+      'checked_in' => 'I',
+      'checked_out' => 'O',
+      'cancelled' => 'X',
+      'expired' => 'E',
+    ];
+    return $map[$status] ?? '?';
+  }
+
+  /**
    * Displays the reservation calendar for a given month.
    *
    * @param int|null $month
@@ -53,6 +68,7 @@ class HotelReservationController extends ControllerBase {
    */
   public function calendar($month = NULL, $year = NULL) {
     $now = new \DateTime();
+    $today_str = $now->format('Y-m-d');
     $month = $month !== NULL ? (int) $month : (int) $now->format('n');
     $year = $year !== NULL ? (int) $year : (int) $now->format('Y');
 
@@ -65,7 +81,7 @@ class HotelReservationController extends ControllerBase {
     }
 
     $days_in_month = (int) (new \DateTime("{$year}-{$month}-01"))->format('t');
-    $month_label = $this->dateFormatter->format(strtotime("{$year}-{$month}-01"), 'custom', 'F Y');
+    $month_name = $this->dateFormatter->format(strtotime("{$year}-{$month}-01"), 'custom', 'F');
 
     // Load all rooms sorted by weight.
     $room_storage = $this->entityTypeManager->getStorage('hr_room');
@@ -95,46 +111,60 @@ class HotelReservationController extends ControllerBase {
       $reservations_by_room[$rid][] = $res;
     }
 
-    // Build calendar data.
+    // Build the days array for the template header.
+    $weekday_names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    $days = [];
+    for ($day = 1; $day <= $days_in_month; $day++) {
+      $date_str = sprintf('%04d-%02d-%02d', $year, $month, $day);
+      $day_dt = new \DateTime($date_str);
+      $dow = (int) $day_dt->format('w');
+      $days[] = [
+        'weekday' => $weekday_names[$dow],
+        'number' => $day,
+        'date' => $date_str,
+        'is_today' => $date_str === $today_str,
+        'is_weekend' => ($dow === 0 || $dow === 6),
+        'is_past' => $date_str < $today_str,
+      ];
+    }
+
+    // Build room data matching the template expectations.
+    // Template expects: room.label, room.capacity, room.reservations[date][]
+    // Each reservation: res.id, res.status, res.guest, res.letter
     $calendar_rooms = [];
     foreach ($rooms as $room) {
+      $room_reservations = $reservations_by_room[$room->id()] ?? [];
       $room_data = [
-        'id' => $room->id(),
-        'name' => $room->label(),
+        'label' => $room->label(),
         'capacity' => $room->getCapacity(),
-        'days' => [],
+        'reservations' => [],
       ];
 
-      $room_reservations = $reservations_by_room[$room->id()] ?? [];
-
-      for ($day = 1; $day <= $days_in_month; $day++) {
-        $date_str = sprintf('%04d-%02d-%02d', $year, $month, $day);
-        $day_data = [
-          'date' => $date_str,
-          'day' => $day,
-          'reservations' => [],
-        ];
-
-        foreach ($room_reservations as $res) {
-          $ci = $res->get('check_in')->value;
-          $co = $res->get('check_out')->value;
-          // Check if this date falls within the reservation (check_in <= date < check_out).
-          if ($date_str >= $ci && $date_str < $co) {
-            $day_data['reservations'][] = [
-              'id' => $res->id(),
-              'guest' => $res->get('guest_name')->value,
-              'status' => $res->get('status')->value,
-            ];
-          }
+      // Index this room's reservations by date.
+      foreach ($room_reservations as $res) {
+        $ci = $res->get('check_in')->value;
+        $co = $res->get('check_out')->value;
+        // Walk through each date of the reservation within this month.
+        $res_start = max($ci, $month_start);
+        $res_end = min($co, $month_end);
+        $res_dt = new \DateTime($res_start);
+        $end_dt = new \DateTime($res_end);
+        while ($res_dt < $end_dt) {
+          $date_key = $res_dt->format('Y-m-d');
+          $room_data['reservations'][$date_key][] = [
+            'id' => $res->id(),
+            'status' => $res->get('status')->value,
+            'guest' => $res->get('guest_name')->value,
+            'letter' => $this->getStatusLetter($res->get('status')->value),
+          ];
+          $res_dt->modify('+1 day');
         }
-
-        $room_data['days'][] = $day_data;
       }
 
       $calendar_rooms[] = $room_data;
     }
 
-    // Build month navigation links.
+    // Build navigation URLs.
     $prev_month = $month - 1;
     $prev_year = $year;
     if ($prev_month < 1) {
@@ -148,46 +178,23 @@ class HotelReservationController extends ControllerBase {
       $next_year++;
     }
 
-    $prev_url = Url::fromRoute('hotel_reservation.calendar', ['month' => $prev_month, 'year' => $prev_year]);
-    $next_url = Url::fromRoute('hotel_reservation.calendar', ['month' => $next_month, 'year' => $next_year]);
+    $prev_url = Url::fromRoute('hotel_reservation.calendar', ['month' => $prev_month, 'year' => $prev_year])->toString();
+    $current_url = Url::fromRoute('hotel_reservation.calendar', ['month' => (int) $now->format('n'), 'year' => (int) $now->format('Y')])->toString();
+    $next_url = Url::fromRoute('hotel_reservation.calendar', ['month' => $next_month, 'year' => $next_year])->toString();
 
     return [
       '#theme' => 'hotel_reservation_admin_calendar',
       '#rooms' => $calendar_rooms,
-      '#reservations' => $reservations,
-      '#month' => $month,
+      '#days' => $days,
+      '#month_name' => $month_name,
       '#year' => $year,
-      '#attached' => [
-        'library' => [
-          'hotel_reservation/admin-calendar',
-        ],
-        'drupalSettings' => [
-          'hotelReservation' => [
-            'monthLabel' => $month_label,
-            'daysInMonth' => $days_in_month,
-            'prevUrl' => $prev_url->toString(),
-            'nextUrl' => $next_url->toString(),
-          ],
-        ],
-      ],
+      '#prev_url' => $prev_url,
+      '#current_url' => $current_url,
+      '#next_url' => $next_url,
       '#cache' => [
         'tags' => ['hr_reservation_list', 'hr_room_list'],
         'contexts' => [],
         'max-age' => 0,
-      ],
-      'nav' => [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['calendar-nav']],
-        'prev' => Link::fromTextAndUrl($this->t('‹ Previous'), $prev_url)->toRenderable(),
-        'current' => ['#markup' => '<strong>' . $month_label . '</strong>'],
-        'next' => Link::fromTextAndUrl($this->t('Next ›'), $next_url)->toRenderable(),
-      ],
-      'legend' => [
-        '#type' => 'container',
-        '#attributes' => ['class' => ['calendar-legend']],
-        '#markup' => '<span class="legend-item"><span class="legend-color legend-pending"></span> P = Pending</span>'
-          . '<span class="legend-item"><span class="legend-color legend-confirmed"></span> C = Confirmed</span>'
-          . '<span class="legend-item"><span class="legend-color legend-blank"></span> Blank = Available</span>',
       ],
     ];
   }

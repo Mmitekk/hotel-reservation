@@ -7,7 +7,6 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Url;
 
 /**
  * Defines the Room entity.
@@ -38,6 +37,7 @@ use Drupal\Core\Url;
  *     "label" = "name",
  *     "uuid" = "uuid",
  *     "status" = "status",
+ *     "published" = "status",
  *   },
  *   links = {
  *     "collection" = "/admin/hotel-reservation/rooms",
@@ -57,17 +57,6 @@ class Room extends ContentEntityBase {
    */
   public function label() {
     return $this->get('name')->value ?? '';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function toUrl($rel = 'edit-form', array $options = []) {
-    // Set the entity as a route parameter for canonical, edit, and delete.
-    if (in_array($rel, ['canonical', 'edit-form', 'delete-form'])) {
-      $options['hr_room'] = $this->id();
-    }
-    return parent::toUrl($rel, $options);
   }
 
   /**
@@ -236,6 +225,10 @@ class Room extends ContentEntityBase {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
+
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setReadOnly(TRUE);
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Room Name'))

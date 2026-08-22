@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for Hotel Reservation module.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+
+/**
+ * Implements hook_install().
+ */
+function hotel_reservation_install(bool $is_syncing) {
+  // Set default configuration values.
+  \Drupal::configFactory()->getEditable('hotel_reservation.settings')
+    ->set('hotel_name', \Drupal::config('system.site')->get('name'))
+    ->set('currency_symbol', '₽')
+    ->set('currency_code', 'RUB')
+    ->set('min_stay_nights', 1)
+    ->set('max_stay_nights', 30)
+    ->set('check_in_time', '14:00')
+    ->set('check_out_time', '12:00')
+    ->set('enable_admin_notification', TRUE)
+    ->set('enable_guest_confirmation', TRUE)
+    ->set('reservation_expiration_hours', 24)
+    ->set('booking_conditions', '')
+    ->save();
+
+  \Drupal::messenger()->addStatus(t('Hotel Reservation module installed successfully. Configure it at <a href=":url">Settings</a>.', [
+    ':url' => \Drupal\Core\Url::fromRoute('hotel_reservation.settings')->toString(),
+  ]));
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function hotel_reservation_uninstall(bool $is_syncing) {
+  // Delete all configuration.
+  \Drupal::configFactory()->getEditable('hotel_reservation.settings')->delete();
+  \Drupal::messenger()->addStatus(t('Hotel Reservation module has been uninstalled. All data remains in the database.'));
+}

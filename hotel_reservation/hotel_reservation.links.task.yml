@@ -1,3 +1,9 @@
+hotel_reservation.dashboard_tab:
+  route_name: hotel_reservation.dashboard
+  title: Dashboard
+  base_route: hotel_reservation.reservations_list
+  weight: 0
+
 hotel_reservation.rooms_tab:
   route_name: hotel_reservation.rooms_list
   title: Rooms

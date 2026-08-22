@@ -118,7 +118,7 @@
             guest_count: guestCount
           }),
           headers: {
-            'X-CSRF-Token': Drupal.csrfToken || $('meta[name="csrf-token"]').attr('content')
+            'X-CSRF-Token': (drupalSettings.hotelReservation && drupalSettings.hotelReservation.csrfToken) || ''
           },
           success: function (response) {
             searchResults = response.rooms || [];
@@ -279,7 +279,7 @@
             notes: notes
           }),
           headers: {
-            'X-CSRF-Token': Drupal.csrfToken || $('meta[name="csrf-token"]').attr('content')
+            'X-CSRF-Token': (drupalSettings.hotelReservation && drupalSettings.hotelReservation.csrfToken) || ''
           },
           success: function (response) {
             showStep('success');

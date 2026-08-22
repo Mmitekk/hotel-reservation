@@ -26,6 +26,7 @@ function hotel_reservation_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<li>' . t('Frontend booking form block (replaces standard Webform)') . '</li>';
       $output .= '<li>' . t('AJAX availability checking') . '</li>';
       $output .= '<li>' . t('Configurable booking conditions') . '</li>';
+      $output .= '<li>' . t('Admin dashboard with statistics and CSV export') . '</li>';
       $output .= '</ul>';
       return $output;
 
@@ -54,11 +55,23 @@ function hotel_reservation_theme($existing, $type, $theme, $path) {
     'hotel_reservation_admin_calendar' => [
       'variables' => [
         'rooms' => [],
-        'reservations' => [],
-        'month' => NULL,
+        'days' => [],
+        'month_name' => '',
         'year' => NULL,
+        'prev_url' => '',
+        'current_url' => '',
+        'next_url' => '',
       ],
       'template' => 'admin-calendar',
+    ],
+    'hotel_reservation_dashboard' => [
+      'variables' => [
+        'stats' => [],
+        'pending_reservations' => [],
+        'upcoming_checkins' => [],
+        'currency' => '₽',
+      ],
+      'template' => 'dashboard',
     ],
   ];
 }
@@ -140,6 +153,9 @@ function hotel_reservation_get_available_rooms($check_in, $check_out, $guests_co
   $available_rooms = [];
 
   // Get all reservations that overlap with the requested period.
+  // Note: For date-only datetime fields, Drupal stores values as just the
+  // date string (Y-m-d) without a time component, so Y-m-d string comparison
+  // against the check_in/check_out values works correctly here.
   $reservation_storage = \Drupal::entityTypeManager()->getStorage('hr_reservation');
   $res_query = $reservation_storage->getQuery()
     ->condition('status', ['pending', 'confirmed', 'checked_in'], 'IN')
@@ -209,7 +225,12 @@ function hotel_reservation_calculate_price($room_id, $check_in, $check_out) {
   if (!empty($pricing_ids)) {
     $pricings = $pricing_storage->loadMultiple($pricing_ids);
     foreach ($pricings as $pricing) {
-      $custom_prices[$pricing->get('date')->value] = (float) $pricing->get('price')->value;
+      $date_value = $pricing->get('date')->value;
+      // Extract just the date portion (Y-m-d) from datetime value.
+      if (strlen($date_value) > 10) {
+        $date_value = substr($date_value, 0, 10);
+      }
+      $custom_prices[$date_value] = (float) $pricing->get('price')->value;
     }
   }
 

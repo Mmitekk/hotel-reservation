@@ -1,3 +1,11 @@
+hotel_reservation.dashboard:
+  path: '/admin/hotel-reservation/dashboard'
+  defaults:
+    _controller: '\Drupal\hotel_reservation\Controller\DashboardController::dashboard'
+    _title: 'Dashboard'
+  requirements:
+    _permission: 'administer hotel reservation'
+
 hotel_reservation.settings:
   path: '/admin/config/hotel-reservation/settings'
   defaults:
@@ -39,10 +47,12 @@ hotel_reservation.room_delete:
     _permission: 'administer hotel reservation'
 
 hotel_reservation.room_pricing:
-  path: '/admin/hotel-reservation/rooms/{hr_room}/pricing'
+  path: '/admin/hotel-reservation/rooms/{hr_room}/pricing/{month}/{year}'
   defaults:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::roomPricing'
     _title: 'Room Pricing Calendar'
+    month: NULL
+    year: NULL
   requirements:
     _permission: 'administer hotel reservation'
 
@@ -96,10 +106,19 @@ hotel_reservation.reservation_status:
     _csrf_token: 'TRUE'
 
 hotel_reservation.calendar:
-  path: '/admin/hotel-reservation/calendar'
+  path: '/admin/hotel-reservation/calendar/{month}/{year}'
   defaults:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::calendar'
     _title: 'Reservation Calendar'
+    month: NULL
+    year: NULL
+  requirements:
+    _permission: 'administer hotel reservation'
+
+hotel_reservation.export_csv:
+  path: '/admin/hotel-reservation/reservations/export'
+  defaults:
+    _controller: '\Drupal\hotel_reservation\Controller\DashboardController::exportCsv'
   requirements:
     _permission: 'administer hotel reservation'
 

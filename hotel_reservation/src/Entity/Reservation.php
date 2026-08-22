@@ -50,52 +50,52 @@ class Reservation extends ContentEntityBase {
   use EntityChangedTrait;
 
   /**
- * Status constant: pending.
- */
+   * Status constant: pending.
+   */
   const STATUS_PENDING = 'pending';
 
   /**
- * Status constant: confirmed.
- */
+   * Status constant: confirmed.
+   */
   const STATUS_CONFIRMED = 'confirmed';
 
   /**
- * Status constant: checked in.
- */
+   * Status constant: checked in.
+   */
   const STATUS_CHECKED_IN = 'checked_in';
 
   /**
- * Status constant: checked out.
- */
+   * Status constant: checked out.
+   */
   const STATUS_CHECKED_OUT = 'checked_out';
 
   /**
- * Status constant: cancelled.
- */
+   * Status constant: cancelled.
+   */
   const STATUS_CANCELLED = 'cancelled';
 
   /**
- * Status constant: expired.
- */
+   * Status constant: expired.
+   */
   const STATUS_EXPIRED = 'expired';
 
   /**
- * Gets the human-readable status label.
- *
- * @return string
- *   The status label.
- */
+   * Gets the human-readable status label.
+   *
+   * @return string
+   *   The status label.
+   */
   public function getStatusLabel(): string {
     $labels = static::getStatusOptions();
     return $labels[$this->get('status')->value] ?? $this->get('status')->value;
   }
 
   /**
- * Returns an array of all status options.
- *
- * @return array
- *   An associative array of status labels keyed by status value.
- */
+   * Returns an array of all status options.
+   *
+   * @return array
+   *   An associative array of status labels keyed by status value.
+   */
   public static function getStatusOptions(): array {
     return [
       self::STATUS_PENDING => t('Pending')->__toString(),
@@ -108,8 +108,8 @@ class Reservation extends ContentEntityBase {
   }
 
   /**
- * {@inheritdoc}
- */
+   * {@inheritdoc}
+   */
   public function label() {
     $name = $this->get('guest_name')->value;
     if ($name) {
@@ -119,22 +119,22 @@ class Reservation extends ContentEntityBase {
   }
 
   /**
- * Gets the referenced room entity.
- *
- * @return \Drupal\hotel_reservation\Entity\Room|null
- *   The room entity or NULL.
- */
+   * Gets the referenced room entity.
+   *
+   * @return \Drupal\hotel_reservation\Entity\Room|null
+   *   The room entity or NULL.
+   */
   public function getRoom(): ?Room {
     $room = $this->get('room_id')->entity;
     return $room instanceof Room ? $room : NULL;
   }
 
   /**
- * Gets the check-in date as a DrupalDateTime object.
- *
- * @return \Drupal\Core\Datetime\DrupalDateTime|null
- *   The check-in date or NULL.
- */
+   * Gets the check-in date as a DrupalDateTime object.
+   *
+   * @return \Drupal\Core\Datetime\DrupalDateTime|null
+   *   The check-in date or NULL.
+   */
   public function getCheckInDate(): ?\Drupal\Core\Datetime\DrupalDateTime {
     $value = $this->get('check_in')->value;
     if ($value) {
@@ -144,11 +144,11 @@ class Reservation extends ContentEntityBase {
   }
 
   /**
- * Gets the check-out date as a DrupalDateTime object.
- *
- * @return \Drupal\Core\Datetime\DrupalDateTime|null
- *   The check-out date or NULL.
- */
+   * Gets the check-out date as a DrupalDateTime object.
+   *
+   * @return \Drupal\Core\Datetime\DrupalDateTime|null
+   *   The check-out date or NULL.
+   */
   public function getCheckOutDate(): ?\Drupal\Core\Datetime\DrupalDateTime {
     $value = $this->get('check_out')->value;
     if ($value) {
@@ -158,56 +158,60 @@ class Reservation extends ContentEntityBase {
   }
 
   /**
- * Gets the total price.
- *
- * @return string
- *   The total price as a decimal string.
- */
+   * Gets the total price.
+   *
+   * @return string
+   *   The total price as a decimal string.
+   */
   public function getTotalPrice(): string {
     return $this->get('total_price')->value ?? '0.00';
   }
 
   /**
- * Sets the total price.
- *
- * @param string $price
- *   The total price.
- *
- * @return $this
- */
+   * Sets the total price.
+   *
+   * @param string $price
+   *   The total price.
+   *
+   * @return $this
+   */
   public function setTotalPrice(string $price): self {
     $this->set('total_price', $price);
     return $this;
   }
 
   /**
- * Gets the creation timestamp.
- *
- * @return int
- *   The creation timestamp.
- */
+   * Gets the creation timestamp.
+   *
+   * @return int
+   *   The creation timestamp.
+   */
   public function getCreatedTime(): int {
     return (int) $this->get('created')->value;
   }
 
   /**
- * Sets the creation timestamp.
- *
- * @param int $timestamp
- *   The creation timestamp.
- *
- * @return $this
- */
+   * Sets the creation timestamp.
+   *
+   * @param int $timestamp
+   *   The creation timestamp.
+   *
+   * @return $this
+   */
   public function setCreatedTime(int $timestamp): self {
     $this->set('created', $timestamp);
     return $this;
   }
 
   /**
- * {@inheritdoc}
- */
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
+
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setReadOnly(TRUE);
 
     $fields['room_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Room'))
@@ -364,18 +368,26 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['status'] = BaseFieldDefinition::create('string')
+    $fields['status'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Status'))
       ->setDescription(t('The current status of the reservation.'))
       ->setSettings([
         'max_length' => 32,
-        'is_ascii' => TRUE,
+        'allowed_values' => [
+          'pending' => 'Pending',
+          'confirmed' => 'Confirmed',
+          'checked_in' => 'Checked in',
+          'checked_out' => 'Checked out',
+          'cancelled' => 'Cancelled',
+          'expired' => 'Expired',
+        ],
+        'allowed_values_function' => '',
       ])
-      ->setDefaultValue(self::STATUS_PENDING)
+      ->setDefaultValue('pending')
       ->setRequired(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'above',
-        'type' => 'string',
+        'type' => 'list_default',
         'weight' => 1,
       ])
       ->setDisplayOptions('form', [

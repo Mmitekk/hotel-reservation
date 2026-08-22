@@ -98,6 +98,10 @@ class RoomPricing extends ContentEntityBase {
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setReadOnly(TRUE);
+
     $fields['room_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Room'))
       ->setDescription(t('The room this pricing applies to.'))
