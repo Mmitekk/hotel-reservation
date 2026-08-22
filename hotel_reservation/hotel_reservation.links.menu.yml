@@ -1,0 +1,30 @@
+hotel_reservation.admin:
+  title: 'Hotel Reservation'
+  description: 'Manage hotel rooms, reservations, and pricing.'
+  route_name: hotel_reservation.reservations_list
+  parent: system.admin
+  weight: -10
+
+hotel_reservation.rooms:
+  title: 'Rooms'
+  description: 'Manage hotel rooms.'
+  route_name: hotel_reservation.rooms_list
+  parent: hotel_reservation.admin
+
+hotel_reservation.reservations:
+  title: 'Reservations'
+  description: 'Manage reservations.'
+  route_name: hotel_reservation.reservations_list
+  parent: hotel_reservation.admin
+
+hotel_reservation.calendar:
+  title: 'Calendar'
+  description: 'View reservation calendar.'
+  route_name: hotel_reservation.calendar
+  parent: hotel_reservation.admin
+
+hotel_reservation.settings_menu:
+  title: 'Settings'
+  description: 'Configure booking settings.'
+  route_name: hotel_reservation.settings
+  parent: hotel_reservation.admin

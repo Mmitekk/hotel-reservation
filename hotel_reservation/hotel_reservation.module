@@ -1,0 +1,234 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Hotel Reservation module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_help().
+ */
+function hotel_reservation_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.hotel_reservation':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Hotel Reservation module provides a complete room booking system for hotels. It includes:') . '</p>';
+      $output .= '<ul>';
+      $output .= '<li>' . t('Room management (add, edit, delete rooms with prices and capacity)') . '</li>';
+      $output .= '<li>' . t('Per-date pricing (set custom prices for specific dates like holidays)') . '</li>';
+      $output .= '<li>' . t('Reservation management (view, approve, reject bookings)') . '</li>';
+      $output .= '<li>' . t('Frontend booking form block (replaces standard Webform)') . '</li>';
+      $output .= '<li>' . t('AJAX availability checking') . '</li>';
+      $output .= '<li>' . t('Configurable booking conditions') . '</li>';
+      $output .= '</ul>';
+      return $output;
+
+    case 'hotel_reservation.settings':
+      $output = '<p>' . t('Configure the hotel reservation system settings, booking conditions, and notification preferences.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function hotel_reservation_theme($existing, $type, $theme, $path) {
+  return [
+    'hotel_reservation_booking_form' => [
+      'render element' => 'form',
+    ],
+    'hotel_reservation_room_card' => [
+      'variables' => [
+        'room' => NULL,
+        'price' => NULL,
+        'available' => TRUE,
+      ],
+      'template' => 'room-card',
+    ],
+    'hotel_reservation_admin_calendar' => [
+      'variables' => [
+        'rooms' => [],
+        'reservations' => [],
+        'month' => NULL,
+        'year' => NULL,
+      ],
+      'template' => 'admin-calendar',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ */
+function hotel_reservation_cron() {
+  // Auto-cancel expired pending reservations.
+  $config = \Drupal::config('hotel_reservation.settings');
+  $expiration_hours = $config->get('reservation_expiration_hours') ?: 24;
+
+  $query = \Drupal::entityTypeManager()->getStorage('hr_reservation')->getQuery()
+    ->condition('status', 'pending')
+    ->condition('created', strtotime("-{$expiration_hours} hours"), '<')
+    ->accessCheck(FALSE);
+
+  $ids = $query->execute();
+  if (!empty($ids)) {
+    $reservations = \Drupal::entityTypeManager()->getStorage('hr_reservation')->loadMultiple($ids);
+    foreach ($reservations as $reservation) {
+      $reservation->set('status', 'expired');
+      $reservation->save();
+    }
+    \Drupal::logger('hotel_reservation')->notice(t('Auto-expired @count pending reservation(s).', ['@count' => count($ids)]));
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function hotel_reservation_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'reservation_confirmation':
+      $message['subject'] = t('Подтверждение бронирования — @hotel', [
+        '@hotel' => \Drupal::config('system.site')->get('name'),
+      ]);
+      $message['body'][] = $params['message'];
+      break;
+
+    case 'reservation_admin_notification':
+      $message['subject'] = t('Новое бронирование от @guest', [
+        '@guest' => $params['guest_name'],
+      ]);
+      $message['body'][] = $params['message'];
+      break;
+  }
+}
+
+/**
+ * Get available rooms for given dates.
+ *
+ * @param string $check_in
+ *   Check-in date string (Y-m-d).
+ * @param string $check_out
+ *   Check-out date string (Y-m-d).
+ * @param int $guests_count
+ *   Number of guests.
+ *
+ * @return array
+ *   Array of available room entities.
+ */
+function hotel_reservation_get_available_rooms($check_in, $check_out, $guests_count = 1) {
+  $room_storage = \Drupal::entityTypeManager()->getStorage('hr_room');
+
+  // Get all active rooms with enough capacity.
+  $query = $room_storage->getQuery()
+    ->condition('status', 1)
+    ->condition('capacity', $guests_count, '>=')
+    ->accessCheck(FALSE);
+
+  $room_ids = $query->execute();
+
+  if (empty($room_ids)) {
+    return [];
+  }
+
+  $all_rooms = $room_storage->loadMultiple($room_ids);
+  $available_rooms = [];
+
+  // Get all reservations that overlap with the requested period.
+  $reservation_storage = \Drupal::entityTypeManager()->getStorage('hr_reservation');
+  $res_query = $reservation_storage->getQuery()
+    ->condition('status', ['pending', 'confirmed', 'checked_in'], 'IN')
+    ->condition('check_in', $check_out, '<')
+    ->condition('check_out', $check_in, '>')
+    ->accessCheck(FALSE);
+
+  $conflicting_reservation_ids = $res_query->execute();
+  $conflicting_rooms = [];
+
+  if (!empty($conflicting_reservation_ids)) {
+    $conflicting_reservations = $reservation_storage->loadMultiple($conflicting_reservation_ids);
+    foreach ($conflicting_reservations as $reservation) {
+      $conflicting_rooms[] = $reservation->get('room_id')->target_id;
+    }
+  }
+
+  // Filter out rooms with conflicting reservations.
+  foreach ($all_rooms as $room) {
+    if (!in_array($room->id(), $conflicting_rooms)) {
+      $available_rooms[$room->id()] = $room;
+    }
+  }
+
+  return $available_rooms;
+}
+
+/**
+ * Calculate total price for a room for given dates.
+ *
+ * @param int $room_id
+ *   The room entity ID.
+ * @param string $check_in
+ *   Check-in date string (Y-m-d).
+ * @param string $check_out
+ *   Check-out date string (Y-m-d).
+ *
+ * @return array
+ *   Associative array with 'total', 'nights', 'daily_prices'.
+ */
+function hotel_reservation_calculate_price($room_id, $check_in, $check_out) {
+  $room = \Drupal::entityTypeManager()->getStorage('hr_room')->load($room_id);
+  if (!$room) {
+    return ['total' => 0, 'nights' => 0, 'daily_prices' => []];
+  }
+
+  $base_price = (float) $room->get('base_price')->value;
+  $start = new \DateTime($check_in);
+  $end = new \DateTime($check_out);
+  $interval = $start->diff($end);
+  $nights = $interval->days;
+
+  if ($nights <= 0) {
+    return ['total' => 0, 'nights' => 0, 'daily_prices' => []];
+  }
+
+  // Load custom pricing for this room.
+  $pricing_storage = \Drupal::entityTypeManager()->getStorage('hr_room_pricing');
+  $pricing_query = $pricing_storage->getQuery()
+    ->condition('room_id', $room_id)
+    ->condition('date', [$check_in, (clone $end)->modify('-1 day')->format('Y-m-d')], 'BETWEEN')
+    ->accessCheck(FALSE);
+
+  $pricing_ids = $pricing_query->execute();
+  $custom_prices = [];
+
+  if (!empty($pricing_ids)) {
+    $pricings = $pricing_storage->loadMultiple($pricing_ids);
+    foreach ($pricings as $pricing) {
+      $custom_prices[$pricing->get('date')->value] = (float) $pricing->get('price')->value;
+    }
+  }
+
+  $daily_prices = [];
+  $total = 0;
+  $current = clone $start;
+
+  for ($i = 0; $i < $nights; $i++) {
+    $date_str = $current->format('Y-m-d');
+    $price = isset($custom_prices[$date_str]) ? $custom_prices[$date_str] : $base_price;
+    $daily_prices[$date_str] = $price;
+    $total += $price;
+    $current->modify('+1 day');
+  }
+
+  return [
+    'total' => $total,
+    'nights' => $nights,
+    'daily_prices' => $daily_prices,
+    'base_price' => $base_price,
+  ];
+}

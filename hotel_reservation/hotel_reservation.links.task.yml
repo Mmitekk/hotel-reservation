@@ -1,0 +1,23 @@
+hotel_reservation.rooms_tab:
+  route_name: hotel_reservation.rooms_list
+  title: Rooms
+  base_route: hotel_reservation.rooms_list
+  weight: 1
+
+hotel_reservation.reservations_tab:
+  route_name: hotel_reservation.reservations_list
+  title: Reservations
+  base_route: hotel_reservation.reservations_list
+  weight: 2
+
+hotel_reservation.calendar_tab:
+  route_name: hotel_reservation.calendar
+  title: Calendar
+  base_route: hotel_reservation.reservations_list
+  weight: 3
+
+hotel_reservation.settings_tab:
+  route_name: hotel_reservation.settings
+  title: Settings
+  base_route: hotel_reservation.settings
+  weight: 4

@@ -1,0 +1,89 @@
+{#
+  @file
+  Template for the reservation calendar page.
+#}
+
+{{ attach_library('hotel_reservation/admin-styles') }}
+
+<div class="hr-calendar-container">
+  {# Navigation #}
+  <div class="hr-calendar-nav">
+    <div class="hr-calendar-nav__title">
+      {{ month_name }} {{ year }}
+    </div>
+    <div class="hr-calendar-nav__links">
+      {% if prev_url %}
+        <a href="{{ prev_url }}" class="hr-calendar-nav__link">&#8592;</a>
+      {% endif %}
+      <a href="{{ current_url }}" class="hr-calendar-nav__link" title="{{ 'Today'|t }}">●</a>
+      {% if next_url %}
+        <a href="{{ next_url }}" class="hr-calendar-nav__link">&#8594;</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Legend #}
+  <div class="hr-calendar-legend">
+    <div class="hr-calendar-legend__item">
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--pending">P</span>
+      {{ 'Pending'|t }}
+    </div>
+    <div class="hr-calendar-legend__item">
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--confirmed">C</span>
+      {{ 'Confirmed'|t }}
+    </div>
+    <div class="hr-calendar-legend__item">
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--checked_in">I</span>
+      {{ 'Checked in'|t }}
+    </div>
+    <div class="hr-calendar-legend__item">
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--checked_out">O</span>
+      {{ 'Checked out'|t }}
+    </div>
+    <div class="hr-calendar-legend__item">
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--cancelled" style="text-decoration:line-through;">X</span>
+      {{ 'Cancelled'|t }}
+    </div>
+  </div>
+
+  {# Calendar Table #}
+  <table class="hr-calendar-table">
+    <thead>
+      <tr>
+        <th class="hr-calendar-room-name">{{ 'Room'|t }}</th>
+        {% for day in days %}
+          <th>
+            <div class="hr-calendar-day-name">{{ day.weekday }}</div>
+            <div>{{ day.number }}</div>
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for room in rooms %}
+        <tr>
+          <td class="hr-calendar-room-name">
+            {{ room.label }}
+            <br><small style="color:#9ca3af">{{ room.capacity }} {{ 'guests'|t }}</small>
+          </td>
+          {% for day in days %}
+            {% set cell_class = 'hr-calendar-day' %}
+            {% if day.is_today %}{% set cell_class = cell_class ~ ' hr-calendar-day--today' %}{% endif %}
+            {% if day.is_weekend %}{% set cell_class = cell_class ~ ' hr-calendar-day--weekend' %}{% endif %}
+            {% if day.is_past %}{% set cell_class = cell_class ~ ' hr-calendar-day--past' %}{% endif %}
+
+            <td class="{{ cell_class }}">
+              {% if room.reservations[day.date] is defined %}
+                {% for res in room.reservations[day.date] %}
+                  <a href="/admin/hotel-reservation/reservations/{{ res.id }}" class="hr-calendar-reservation hr-calendar-reservation--{{ res.status }}" title="{{ res.guest }}">
+                    {{ res.letter }}
+                  </a>
+                {% endfor %}
+              {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

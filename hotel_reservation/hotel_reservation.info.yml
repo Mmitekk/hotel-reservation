@@ -1,0 +1,14 @@
+name: 'Hotel Reservation'
+type: module
+description: 'Модуль бронирования номеров отеля с управлением ценами, календарём занятости и формой бронирования на сайте. | Hotel room reservation module with price management, occupancy calendar, and on-site booking form.'
+core_version_requirement: ^9 || ^10
+package: Hotel
+configure: hotel_reservation.settings
+dependencies:
+  - drupal:datetime
+  - drupal:options
+  - drupal:field
+  - drupal:user
+  - drupal:system
+version: '1.0.0'
+project: 'hotel_reservation'

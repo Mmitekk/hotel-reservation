@@ -1,0 +1,207 @@
+/* ============================================
+   Hotel Reservation — Room Pricing Styles
+   ============================================ */
+
+.hr-pricing-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.hr-pricing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hr-pricing-header__room-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.hr-pricing-header__base-price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #166534;
+}
+
+.hr-pricing-header__base-price strong {
+  font-size: 18px;
+}
+
+/* Pricing grid table */
+.hr-pricing-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.hr-pricing-table th,
+.hr-pricing-table td {
+  border: 1px solid #e5e7eb;
+  padding: 6px 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.hr-pricing-table thead th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  font-size: 12px;
+}
+
+.hr-pricing-table .hr-pricing-day-name {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.hr-pricing-table .hr-pricing-day-date {
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.hr-pricing-table input[type="number"] {
+  width: 90px;
+  padding: 6px 8px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: right;
+  color: #1a1a2e;
+  transition: border-color 0.2s;
+}
+
+.hr-pricing-table input[type="number"]:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.15);
+  outline: none;
+}
+
+.hr-pricing-table input[type="number"]:not(:focus):not(.hr-pricing-custom) {
+  color: #9ca3af;
+}
+
+.hr-pricing-table input.hr-pricing-custom {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+/* Diff indicator */
+.hr-pricing-diff {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.hr-pricing-diff--higher {
+  color: #dc2626;
+}
+
+.hr-pricing-diff--lower {
+  color: #059669;
+}
+
+.hr-pricing-diff--same {
+  color: #9ca3af;
+}
+
+/* Navigation */
+.hr-pricing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.hr-pricing-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.hr-pricing-nav__btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  text-decoration: none;
+  color: #1a1a2e;
+}
+
+.hr-pricing-nav__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+/* Weekday headers */
+.hr-pricing-weekday {
+  font-weight: 700;
+  background: #f3f4f6 !important;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* Save button */
+.hr-pricing-save {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.hr-pricing-save .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hr-pricing-save .button:hover {
+  background: linear-gradient(135deg, #b45309, #92400e);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+}
+
+/* Weekend rows */
+.hr-pricing-table tr.hr-pricing-weekend td {
+  background: #fefce8;
+}
+
+/* Today highlight */
+.hr-pricing-table tr.hr-pricing-today td:first-child {
+  position: relative;
+}
+
+.hr-pricing-table tr.hr-pricing-today td:first-child::after {
+  content: 'today';
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  font-size: 9px;
+  color: #d97706;
+  font-weight: 700;
+  text-transform: uppercase;
+}

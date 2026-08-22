@@ -1,0 +1,14 @@
+administer hotel reservation:
+  title: 'Administer hotel reservation'
+  description: 'Full access to manage rooms, reservations, and settings.'
+  restrict access: true
+
+view hotel reservation:
+  title: 'View hotel reservation'
+  description: 'View room availability and make reservations.'
+  restrict access: false
+
+create hotel reservation:
+  title: 'Create hotel reservation'
+  description: 'Create room reservations.'
+  restrict access: false
