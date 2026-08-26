@@ -167,8 +167,15 @@ class ReservationListBuilder extends EntityListBuilder {
       $query->condition('room_id', (int) $room);
     }
 
-    $header = $this->buildHeader();
-    $query->tableSort($header);
+    // Only pass sortable columns to tableSort (parent::buildHeader adds
+    // a checkbox column without 'field', which breaks addSort).
+    $sortable_header = [];
+    foreach ($this->buildHeader() as $key => $col) {
+      if (isset($col['field']) && $col['field'] !== '') {
+        $sortable_header[$key] = $col;
+      }
+    }
+    $query->tableSort($sortable_header);
     $query->pager($this->limit);
 
     return $query->execute();
