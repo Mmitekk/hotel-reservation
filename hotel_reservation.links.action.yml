@@ -1,5 +1,5 @@
 hotel_reservation.room_add:
-  route_name: hotel_reservation.room_add
+  route_name: entity.hr_room.add_form
   title: 'Add Room'
   appears_on:
-    - hotel_reservation.rooms_list
+    - entity.hr_room.collection

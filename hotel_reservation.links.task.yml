@@ -1,25 +1,25 @@
 hotel_reservation.dashboard_tab:
   route_name: hotel_reservation.dashboard
   title: Dashboard
-  base_route: hotel_reservation.reservations_list
+  base_route: entity.hr_reservation.collection
   weight: 0
 
 hotel_reservation.rooms_tab:
-  route_name: hotel_reservation.rooms_list
+  route_name: entity.hr_room.collection
   title: Rooms
-  base_route: hotel_reservation.rooms_list
+  base_route: entity.hr_room.collection
   weight: 1
 
 hotel_reservation.reservations_tab:
-  route_name: hotel_reservation.reservations_list
+  route_name: entity.hr_reservation.collection
   title: Reservations
-  base_route: hotel_reservation.reservations_list
+  base_route: entity.hr_reservation.collection
   weight: 2
 
 hotel_reservation.calendar_tab:
   route_name: hotel_reservation.calendar
   title: Calendar
-  base_route: hotel_reservation.reservations_list
+  base_route: entity.hr_reservation.collection
   weight: 3
 
 hotel_reservation.settings_tab:

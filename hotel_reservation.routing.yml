@@ -1,3 +1,8 @@
+# Hotel Reservation module — custom routes only.
+# Entity CRUD routes (collection, add-form, edit-form, delete-form, canonical)
+# are auto-generated from entity annotations by AdminHtmlRouteProvider.
+# Do NOT duplicate them here.
+
 hotel_reservation.dashboard:
   path: '/admin/hotel-reservation/dashboard'
   defaults:
@@ -11,38 +16,6 @@ hotel_reservation.settings:
   defaults:
     _form: '\Drupal\hotel_reservation\Form\SettingsForm'
     _title: 'Hotel Reservation Settings'
-  requirements:
-    _permission: 'administer hotel reservation'
-
-hotel_reservation.rooms_list:
-  path: '/admin/hotel-reservation/rooms'
-  defaults:
-    _entity_list: 'hr_room'
-    _title: 'Rooms'
-  requirements:
-    _permission: 'administer hotel reservation'
-
-hotel_reservation.room_add:
-  path: '/admin/hotel-reservation/rooms/add'
-  defaults:
-    _entity_form: 'hr_room.default'
-    _title: 'Add Room'
-  requirements:
-    _permission: 'administer hotel reservation'
-
-hotel_reservation.room_edit:
-  path: '/admin/hotel-reservation/rooms/{hr_room}/edit'
-  defaults:
-    _entity_form: 'hr_room.default'
-    _title: 'Edit Room'
-  requirements:
-    _permission: 'administer hotel reservation'
-
-hotel_reservation.room_delete:
-  path: '/admin/hotel-reservation/rooms/{hr_room}/delete'
-  defaults:
-    _entity_form: 'hr_room.delete'
-    _title: 'Delete Room'
   requirements:
     _permission: 'administer hotel reservation'
 
@@ -61,38 +34,6 @@ hotel_reservation.room_pricing_save:
   defaults:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::roomPricingSave'
     _title: 'Save Room Pricing'
-  requirements:
-    _permission: 'administer hotel reservation'
-
-hotel_reservation.reservations_list:
-  path: '/admin/hotel-reservation/reservations'
-  defaults:
-    _entity_list: 'hr_reservation'
-    _title: 'Reservations'
-  requirements:
-    _permission: 'administer hotel reservation'
-
-hotel_reservation.reservation_view:
-  path: '/admin/hotel-reservation/reservations/{hr_reservation}'
-  defaults:
-    _entity_view: 'hr_reservation'
-    _title: 'Reservation Details'
-  requirements:
-    _permission: 'administer hotel reservation'
-
-hotel_reservation.reservation_edit:
-  path: '/admin/hotel-reservation/reservations/{hr_reservation}/edit'
-  defaults:
-    _entity_form: 'hr_reservation.default'
-    _title: 'Edit Reservation'
-  requirements:
-    _permission: 'administer hotel reservation'
-
-hotel_reservation.reservation_delete:
-  path: '/admin/hotel-reservation/reservations/{hr_reservation}/delete'
-  defaults:
-    _entity_form: 'hr_reservation.delete'
-    _title: 'Delete Reservation'
   requirements:
     _permission: 'administer hotel reservation'
 

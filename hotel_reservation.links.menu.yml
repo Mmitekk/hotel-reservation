@@ -15,13 +15,13 @@ hotel_reservation.admin:
 hotel_reservation.rooms:
   title: 'Rooms'
   description: 'Manage hotel rooms.'
-  route_name: hotel_reservation.rooms_list
+  route_name: entity.hr_room.collection
   parent: hotel_reservation.admin
 
 hotel_reservation.reservations:
   title: 'Reservations'
   description: 'Manage reservations.'
-  route_name: hotel_reservation.reservations_list
+  route_name: entity.hr_reservation.collection
   parent: hotel_reservation.admin
 
 hotel_reservation.calendar:

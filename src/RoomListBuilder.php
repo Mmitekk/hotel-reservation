@@ -111,7 +111,7 @@ class RoomListBuilder extends EntityListBuilder {
 
     // Add "Add room" link only if the route exists.
     try {
-      $add_url = Url::fromRoute('entity.hr_room.add-form');
+      $add_url = Url::fromRoute('entity.hr_room.add_form');
       $build['add_link'] = [
         '#type' => 'operations',
         '#links' => [
