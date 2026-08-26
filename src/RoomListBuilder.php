@@ -103,13 +103,29 @@ class RoomListBuilder extends EntityListBuilder {
       '#type' => 'table',
       '#header' => $this->buildHeader(),
       '#rows' => [],
-      '#empty' => $this->t('No rooms available. <a href=":url">Add a room</a>.', [
-        ':url' => Url::fromRoute('entity.hr_room.add-form')->toString(),
-      ]),
+      '#empty' => $this->t('No rooms available.'),
       '#attributes' => [
         'class' => ['table-responsive'],
       ],
     ];
+
+    // Add "Add room" link only if the route exists.
+    try {
+      $add_url = Url::fromRoute('entity.hr_room.add-form');
+      $build['add_link'] = [
+        '#type' => 'operations',
+        '#links' => [
+          'add_room' => [
+            'title' => $this->t('Add room'),
+            'url' => $add_url,
+          ],
+        ],
+        '#attributes' => ['style' => 'margin-bottom: 1rem;'],
+      ];
+    }
+    catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
+      // Route not available — skip the link.
+    }
 
     foreach ($this->load() as $entity) {
       if ($row = $this->buildRow($entity)) {

@@ -22,6 +22,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   handlers = {
  *     "list_builder" = "Drupal\hotel_reservation\RoomListBuilder",
  *     "form" = {
+ *       "add" = "Drupal\hotel_reservation\Form\RoomForm",
  *       "default" = "Drupal\hotel_reservation\Form\RoomForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
