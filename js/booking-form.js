@@ -1,6 +1,5 @@
 /**
  * Hotel Reservation — Frontend Booking Form JS
- * Replaces .front-form-block with modern AJAX booking experience.
  */
 
 (function ($, Drupal, drupalSettings) {
@@ -21,25 +20,40 @@
       const checkOutTime = config.checkOutTime || '12:00';
       const bookingConditions = config.bookingConditions || '';
 
-      // Set minimum dates
-      const today = new Date().toISOString().split('T')[0];
+      // Set min datetime-local to now.
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const nowLocal = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
+        + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+
       const $checkIn = $form.find('.hr-field-check-in');
       const $checkOut = $form.find('.hr-field-check-out');
 
-      $checkIn.attr('min', today);
-      $checkOut.attr('min', today);
+      $checkIn.attr('min', nowLocal);
+      $checkOut.attr('min', nowLocal);
 
-      // State
+      // Set default times from config.
+      if (!$checkIn.val()) {
+        const todayStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+        $checkIn.val(todayStr + 'T' + checkInTime);
+      }
+
+      // State.
       let currentStep = 'search';
       let selectedRoom = null;
       let searchResults = [];
+
+      // ---- Extract date (Y-m-d) from datetime-local value ----
+      function extractDate(dtLocalVal) {
+        if (!dtLocalVal) return '';
+        return dtLocalVal.split('T')[0];
+      }
 
       // ---- Step Navigation ----
       function showStep(step) {
         $form.find('.hr-step').removeClass('active');
         if (step === 'search') {
-          $form.find('.hr-step[data-step="search"]').addClass('active');
-          $form.find('.hr-step[data-step="search"]').addClass('completed');
+          $form.find('.hr-step[data-step="search"]').addClass('active completed');
         } else if (step === 'select') {
           $form.find('.hr-step[data-step="search"]').addClass('completed');
           $form.find('.hr-step[data-step="select"]').addClass('active');
@@ -52,7 +66,6 @@
           $form.find('.hr-step[data-step="select"]').addClass('completed');
           $form.find('.hr-step[data-step="book"]').addClass('completed');
         }
-
         $form.find('.hr-section').hide();
         $form.find('.hr-section--' + step).show();
         currentStep = step;
@@ -60,29 +73,20 @@
 
       // ---- Validate Dates ----
       function validateDates() {
-        const checkIn = $checkIn.val();
-        const checkOut = $checkOut.val();
+        const checkIn = extractDate($checkIn.val());
+        const checkOut = extractDate($checkOut.val());
         const errors = [];
 
-        if (!checkIn) {
-          errors.push(Drupal.t('Select check-in date'));
-        }
-        if (!checkOut) {
-          errors.push(Drupal.t('Select check-out date'));
-        }
+        if (!checkIn) errors.push(Drupal.t('Select check-in date'));
+        if (!checkOut) errors.push(Drupal.t('Select check-out date'));
         if (checkIn && checkOut) {
           const d1 = new Date(checkIn);
           const d2 = new Date(checkOut);
           const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
-          if (nights <= 0) {
-            errors.push(Drupal.t('Check-out must be after check-in'));
-          } else if (nights < minStay) {
-            errors.push(Drupal.t('Minimum stay is @n nights', {'@n': minStay}));
-          } else if (nights > maxStay) {
-            errors.push(Drupal.t('Maximum stay is @n nights', {'@n': maxStay}));
-          }
+          if (nights <= 0) errors.push(Drupal.t('Check-out must be after check-in'));
+          else if (nights < minStay) errors.push(Drupal.t('Minimum stay is @n nights', {'@n': minStay}));
+          else if (nights > maxStay) errors.push(Drupal.t('Maximum stay is @n nights', {'@n': maxStay}));
         }
-
         return errors;
       }
 
@@ -91,8 +95,7 @@
         const $container = $form.find(container);
         $container.empty();
         if (errors.length === 0) return;
-        const html = errors.map(e => '<div class="hr-error">' + Drupal.checkPlain(e) + '</div>').join('');
-        $container.html(html);
+        $container.html(errors.map(e => '<div class="hr-error">' + Drupal.checkPlain(e) + '</div>').join(''));
       }
 
       // ---- Search Available Rooms ----
@@ -113,13 +116,10 @@
           contentType: 'application/json',
           dataType: 'json',
           data: JSON.stringify({
-            check_in: $checkIn.val(),
-            check_out: $checkOut.val(),
+            check_in: extractDate($checkIn.val()),
+            check_out: extractDate($checkOut.val()),
             guest_count: guestCount
           }),
-          headers: {
-            'X-CSRF-Token': (drupalSettings.hotelReservation && drupalSettings.hotelReservation.csrfToken) || ''
-          },
           success: function (response) {
             searchResults = response.rooms || [];
             renderResults(searchResults);
@@ -154,8 +154,8 @@
           return;
         }
 
-        const checkIn = $checkIn.val();
-        const checkOut = $checkOut.val();
+        const checkIn = extractDate($checkIn.val());
+        const checkOut = extractDate($checkOut.val());
         const d1 = new Date(checkIn);
         const d2 = new Date(checkOut);
         const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
@@ -195,12 +195,10 @@
         $form.find('.hr-room-card').removeClass('selected');
         $form.find('.hr-room-card[data-room-id="' + roomId + '"]').addClass('selected');
 
-        // Populate booking form
         $form.find('.hr-field-room-id').val(roomId);
         $form.find('.hr-room-selected-name').text(selectedRoom.name);
         $form.find('.hr-room-selected-price').text(currencySymbol + parseFloat(selectedRoom.total_price).toLocaleString('ru-RU'));
 
-        // Price breakdown
         renderPriceBreakdown(selectedRoom);
         showStep('book');
       }
@@ -225,7 +223,7 @@
           const price = parseFloat(room.daily_prices[date]);
           if (price !== basePrice) hasCustom = true;
           html += '<tr><td>' + formatDateRu(date) + '</td><td>' + currencySymbol + price.toLocaleString('ru-RU') +
-            (price !== basePrice ? ' <small style="color:#d97706">★</small>' : '') + '</td></tr>';
+            (price !== basePrice ? ' <small style="color:var(--hr-primary)">★</small>' : '') + '</td></tr>';
         });
 
         html += '</tbody>';
@@ -251,7 +249,7 @@
         const notes = $form.find('.hr-field-notes').val().trim();
 
         if (!guestName) errors.push(Drupal.t('Enter your name'));
-        if (!guestPhone) errors.push(Drupal.t('Enter your phone number'));
+        if (!guestPhone || guestPhone.replace(/[^\d]/g, '').length < 11) errors.push(Drupal.t('Enter a valid phone number'));
         if (guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
           errors.push(Drupal.t('Enter a valid email address'));
         }
@@ -261,7 +259,8 @@
 
         const $btn = $form.find('.hr-book-btn');
         const originalText = $btn.html();
-        $btn.prop('disabled', true).html('<span class="hr-spinner"></span>' + Drupal.t('Booking...'));
+        const loadingText = config.buttonText ? (Drupal.t('Booking...')) : Drupal.t('Booking...');
+        $btn.prop('disabled', true).html('<span class="hr-spinner"></span>' + loadingText);
 
         $.ajax({
           url: apiSubmitUrl,
@@ -270,20 +269,24 @@
           dataType: 'json',
           data: JSON.stringify({
             room_id: selectedRoom.id,
-            check_in: $checkIn.val(),
-            check_out: $checkOut.val(),
+            check_in: extractDate($checkIn.val()),
+            check_out: extractDate($checkOut.val()),
             guest_name: guestName,
             guest_phone: guestPhone,
             guest_email: guestEmail,
             guest_count: guestCount,
             notes: notes
           }),
-          headers: {
-            'X-CSRF-Token': (drupalSettings.hotelReservation && drupalSettings.hotelReservation.csrfToken) || ''
-          },
           success: function (response) {
             showStep('success');
             $form.find('.hr-success-id').text(response.reservation_id || '');
+            // Replace @id in success text.
+            const template = $form.find('.hr-success__text').data('template') || '';
+            if (template && response.reservation_id) {
+              $form.find('.hr-success__text').html(
+                Drupal.checkPlain(template.replace('@id', response.reservation_id))
+              );
+            }
           },
           error: function (xhr) {
             let msg = Drupal.t('Booking failed. Please try again.');
@@ -311,6 +314,41 @@
         return parseInt(parts[2]) + ' ' + months[parts[1]];
       }
 
+      // ---- Phone Mask +7 ----
+      function applyPhoneMask(input) {
+        let value = input.replace(/[^\d+]/g, '');
+        if (value.length === 0) return '';
+
+        // If starts with 8, replace with +7
+        if (value[0] === '8') value = '7' + value.substring(1);
+        // If starts with 7 without +, add +
+        if (value[0] === '7' && input.indexOf('+7') !== 0) value = '+' + value;
+        // If just digits starting with 9, assume +79xx
+        if (/^9\d{9}$/.test(value)) value = '+7' + value;
+
+        let digits = value.replace(/[^\d]/g, '');
+        if (digits.length === 0) return '';
+
+        // Ensure starts with 7
+        if (digits[0] !== '7') digits = '7' + digits;
+
+        let formatted = '+7';
+        if (digits.length > 1) {
+          formatted += ' (' + digits.substring(1, Math.min(4, digits.length));
+        }
+        if (digits.length >= 4) {
+          formatted += ') ' + digits.substring(4, Math.min(7, digits.length));
+        }
+        if (digits.length >= 7) {
+          formatted += '-' + digits.substring(7, Math.min(9, digits.length));
+        }
+        if (digits.length >= 9) {
+          formatted += '-' + digits.substring(9, Math.min(11, digits.length));
+        }
+
+        return formatted;
+      }
+
       // ---- Event Listeners ----
       // Search button
       $form.on('click', '.hr-search-btn', function (e) {
@@ -320,18 +358,14 @@
 
       // Room card click
       $form.on('click', '.hr-room-card', function () {
-        const roomId = parseInt($(this).data('room-id'));
-        selectRoom(roomId);
+        selectRoom(parseInt($(this).data('room-id')));
       });
 
       // Back buttons
       $form.on('click', '.hr-back-btn', function (e) {
         e.preventDefault();
-        if (currentStep === 'book') {
-          showStep('select');
-        } else if (currentStep === 'select') {
-          showStep('search');
-        }
+        if (currentStep === 'book') showStep('select');
+        else if (currentStep === 'select') showStep('search');
       });
 
       // Book button
@@ -340,7 +374,7 @@
         submitReservation();
       });
 
-      // New search button (from success)
+      // New search button
       $form.on('click', '.hr-new-search-btn', function (e) {
         e.preventDefault();
         selectedRoom = null;
@@ -355,23 +389,50 @@
         let val = parseInt($input.val()) || 1;
         if (val > 1) $input.val(val - 1);
       });
-
       $form.on('click', '.hr-guest-counter__btn--plus', function () {
         const $input = $(this).siblings('.hr-guest-counter__value');
         let val = parseInt($input.val()) || 1;
         if (val < 20) $input.val(val + 1);
       });
 
-      // Auto-set check-out minimum when check-in changes
+      // Auto-set check-out min when check-in changes
       $form.on('change', '.hr-field-check-in', function () {
         const val = $(this).val();
         if (val) {
           const next = new Date(val);
           next.setDate(next.getDate() + minStay);
-          $checkOut.attr('min', next.toISOString().split('T')[0]);
+          const nextStr = next.getFullYear() + '-' + pad(next.getMonth() + 1) + '-' + pad(next.getDate())
+            + 'T' + checkOutTime;
+          $checkOut.attr('min', val);
           if ($checkOut.val() && new Date($checkOut.val()) <= new Date(val)) {
-            $checkOut.val(next.toISOString().split('T')[0]);
+            $checkOut.val(nextStr);
           }
+        }
+      });
+
+      // Phone mask on input
+      $form.on('input', '.hr-field-guest-phone', function () {
+        const pos = this.selectionStart;
+        const oldLen = this.value.length;
+        this.value = applyPhoneMask(this.value);
+        // Adjust cursor position after formatting.
+        const newLen = this.value.length;
+        const diff = newLen - oldLen;
+        this.setSelectionRange(pos + diff, pos + diff);
+      });
+
+      // Focus formats phone field
+      $form.on('focus', '.hr-field-guest-phone', function () {
+        if (!this.value || this.value.replace(/[^\d]/g, '').length === 0) {
+          this.value = '+7 (';
+        }
+      });
+
+      // Blur cleans up incomplete phone
+      $form.on('blur', '.hr-field-guest-phone', function () {
+        const digits = this.value.replace(/[^\d]/g, '');
+        if (digits.length < 11) {
+          this.value = '';
         }
       });
 

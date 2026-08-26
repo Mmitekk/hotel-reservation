@@ -132,6 +132,7 @@
 
 /* ---------- Inputs ---------- */
 .hr-booking-form input[type="date"],
+.hr-booking-form input[type="datetime-local"],
 .hr-booking-form input[type="text"],
 .hr-booking-form input[type="email"],
 .hr-booking-form input[type="tel"],
@@ -162,9 +163,10 @@
   color: var(--hr-text-muted);
 }
 
-/* Fix date input calendar icon color in dark mode */
+/* Fix date/datetime input calendar icon */
 @media (prefers-color-scheme: dark) {
-  .hr-booking-form input[type="date"]::-webkit-calendar-picker-indicator {
+  .hr-booking-form input[type="date"]::-webkit-calendar-picker-indicator,
+  .hr-booking-form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     filter: invert(0.7);
     cursor: pointer;
   }

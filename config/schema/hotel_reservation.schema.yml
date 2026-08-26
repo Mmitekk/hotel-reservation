@@ -38,6 +38,34 @@ hotel_reservation.settings:
     enable_guest_confirmation:
       type: boolean
       label: 'Enable guest confirmation emails'
+    # Booking form design settings.
+    form_title:
+      type: string
+      label: 'Booking form title'
+    form_subtitle:
+      type: string
+      label: 'Booking form subtitle'
+    form_button_text:
+      type: string
+      label: 'Booking button text'
+    form_primary_color:
+      type: string
+      label: 'Primary color (hex)'
+    form_background_color:
+      type: string
+      label: 'Background color (hex)'
+    form_text_color:
+      type: string
+      label: 'Text color (hex)'
+    form_border_radius:
+      type: integer
+      label: 'Border radius (px)'
+    form_success_title:
+      type: string
+      label: 'Success message title'
+    form_success_text:
+      type: string
+      label: 'Success message text'
 
 hr_room.*:
   type: config_entity

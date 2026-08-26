@@ -89,7 +89,7 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('min_stay_nights') ?: 1,
       '#required' => TRUE,
       '#min' => 1,
-      '#max' => 365,
+      '#max' => 9999,
     ];
 
     $form['booking_rules']['max_stay_nights'] = [
@@ -99,7 +99,7 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('max_stay_nights') ?: 30,
       '#required' => TRUE,
       '#min' => 1,
-      '#max' => 365,
+      '#max' => 9999,
     ];
 
     $form['booking_rules']['check_in_time'] = [
@@ -190,6 +190,84 @@ class SettingsForm extends ConfigFormBase {
       '#max' => 720,
     ];
 
+    // ============================================================
+    // Fieldset: Booking Form Design
+    // ============================================================
+    $form['form_design'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Booking Form Design'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    ];
+
+    $form['form_design']['form_title'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Form Title'),
+      '#description' => $this->t('Leave blank to use hotel name.'),
+      '#default_value' => $config->get('form_title') ?: '',
+      '#maxlength' => 255,
+    ];
+
+    $form['form_design']['form_subtitle'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Form Subtitle'),
+      '#description' => $this->t('Text below the title. Leave blank for default (check-in/out times).'),
+      '#default_value' => $config->get('form_subtitle') ?: '',
+      '#maxlength' => 255,
+    ];
+
+    $form['form_design']['form_button_text'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Submit Button Text'),
+      '#default_value' => $config->get('form_button_text') ?: $this->t('Book Now'),
+      '#maxlength' => 50,
+    ];
+
+    $form['form_design']['form_primary_color'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Primary Color'),
+      '#description' => $this->t('Main color for buttons and accents.'),
+      '#default_value' => $config->get('form_primary_color') ?: '#d97706',
+    ];
+
+    $form['form_design']['form_background_color'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Background Color'),
+      '#description' => $this->t('Form background color.'),
+      '#default_value' => $config->get('form_background_color') ?: '#ffffff',
+    ];
+
+    $form['form_design']['form_text_color'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Text Color'),
+      '#description' => $this->t('Main text color.'),
+      '#default_value' => $config->get('form_text_color') ?: '#1a1a2e',
+    ];
+
+    $form['form_design']['form_border_radius'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Border Radius (px)'),
+      '#description' => $this->t('Roundness of form elements.'),
+      '#default_value' => $config->get('form_border_radius') ?: 10,
+      '#min' => 0,
+      '#max' => 30,
+    ];
+
+    $form['form_design']['form_success_title'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Success Message Title'),
+      '#default_value' => $config->get('form_success_title') ?: $this->t('Booking Submitted!'),
+      '#maxlength' => 100,
+    ];
+
+    $form['form_design']['form_success_text'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Success Message Text'),
+      '#description' => $this->t('Use @id placeholder for reservation number.'),
+      '#default_value' => $config->get('form_success_text') ?: $this->t('Your reservation #@id is pending confirmation. We will contact you shortly.'),
+      '#maxlength' => 255,
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -254,6 +332,15 @@ class SettingsForm extends ConfigFormBase {
       ->set('admin_notification_email', $form_state->getValue('admin_notification_email'))
       ->set('enable_guest_confirmation', (bool) $form_state->getValue('enable_guest_confirmation'))
       ->set('reservation_expiration_hours', (int) $form_state->getValue('reservation_expiration_hours'))
+      ->set('form_title', $form_state->getValue('form_title'))
+      ->set('form_subtitle', $form_state->getValue('form_subtitle'))
+      ->set('form_button_text', $form_state->getValue('form_button_text'))
+      ->set('form_primary_color', $form_state->getValue('form_primary_color'))
+      ->set('form_background_color', $form_state->getValue('form_background_color'))
+      ->set('form_text_color', $form_state->getValue('form_text_color'))
+      ->set('form_border_radius', (int) $form_state->getValue('form_border_radius'))
+      ->set('form_success_title', $form_state->getValue('form_success_title'))
+      ->set('form_success_text', $form_state->getValue('form_success_text'))
       ->save();
 
     parent::submitForm($form, $form_state);

@@ -10,9 +10,6 @@ use Drupal\Component\Utility\Html;
 /**
  * Provides a 'Hotel Reservation Booking Form' block.
  *
- * This block renders a modern 3-step AJAX booking form that replaces
- * the old .front-form-block Webform.
- *
  * @Block(
  *   id = "hotel_reservation_booking_form",
  *   admin_label = @Translation("Hotel Booking Form"),
@@ -27,7 +24,6 @@ class BookingFormBlock extends BlockBase {
   public function defaultConfiguration() {
     return [
       'show_conditions' => TRUE,
-      'title_text' => '',
     ];
   }
 
@@ -36,13 +32,6 @@ class BookingFormBlock extends BlockBase {
    */
   public function blockForm($form, FormStateInterface $form_state) {
     $config = $this->getConfiguration();
-
-    $form['title_text'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Form Title'),
-      '#description' => $this->t('Leave empty to use the hotel name from settings.'),
-      '#default_value' => $config['title_text'] ?? '',
-    ];
 
     $form['show_conditions'] = [
       '#type' => 'checkbox',
@@ -58,7 +47,6 @@ class BookingFormBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
-    $this->configuration['title_text'] = $form_state->getValue('title_text');
     $this->configuration['show_conditions'] = (bool) $form_state->getValue('show_conditions');
   }
 
@@ -75,14 +63,39 @@ class BookingFormBlock extends BlockBase {
     $check_out_time = $config->get('check_out_time') ?: '12:00';
     $booking_conditions = $config->get('booking_conditions') ?? '';
     $hotel_name = $config->get('hotel_name') ?: \Drupal::config('system.site')->get('name');
-    $form_title = !empty($block_config['title_text']) ? $block_config['title_text'] : $hotel_name;
+
+    // Design settings with defaults.
+    $form_title = $config->get('form_title') ?: '';
+    $form_subtitle = $config->get('form_subtitle') ?: '';
+    $button_text = $config->get('form_button_text') ?: $this->t('Book Now');
+    $primary_color = $config->get('form_primary_color') ?: '#d97706';
+    $bg_color = $config->get('form_background_color') ?: '#ffffff';
+    $text_color = $config->get('form_text_color') ?: '#1a1a2e';
+    $border_radius = (int) ($config->get('form_border_radius') ?: 10);
+    $success_title = $config->get('form_success_title') ?: $this->t('Booking Submitted!');
+    $success_text = $config->get('form_success_text') ?: $this->t('Your reservation #@id is pending confirmation. We will contact you shortly.');
+
+    $display_title = !empty($form_title) ? $form_title : $hotel_name;
+    $display_subtitle = !empty($form_subtitle) ? $form_subtitle : $this->t('Check-in from @in, check-out until @out', [
+      '@in' => $check_in_time,
+      '@out' => $check_out_time,
+    ]);
 
     $build = [];
 
     // Attach CSS/JS library.
     $build['#attached']['library'][] = 'hotel_reservation/booking-form';
 
-    // Pass settings to JS (keys must match what booking-form.js expects).
+    // CSS custom properties for theming.
+    $build['#attached']['html_head'][] = [
+      [
+        '#tag' => 'style',
+        '#value' => '.hr-booking-form{--hr-primary:' . $primary_color . ';--hr-bg:' . $bg_color . ';--hr-text:' . $text_color . ';--hr-radius:' . $border_radius . 'px;}',
+      ],
+      'hr-form-design',
+    ];
+
+    // Pass settings to JS.
     $build['#attached']['drupalSettings']['hotelReservation'] = [
       'currencySymbol' => $currency,
       'minStay' => $min_stay,
@@ -92,20 +105,17 @@ class BookingFormBlock extends BlockBase {
       'bookingConditions' => $booking_conditions,
       'apiCheckUrl' => Url::fromRoute('hotel_reservation.api_check_availability')->toString(),
       'apiSubmitUrl' => Url::fromRoute('hotel_reservation.api_submit_reservation')->toString(),
+      'buttonText' => $button_text,
+      'successTitle' => $success_title,
+      'successText' => $success_text,
     ];
 
-    // Add CSRF token for API submission.
-    $build['#attached']['drupalSettings']['hotelReservation']['csrfToken'] = \Drupal::csrfToken()->get('/api/hotel-reservation/submit');
-
-    // Build the complete booking form HTML matching CSS/JS expectations.
+    // Build HTML.
     $html = '<div class="hr-booking-form">';
 
     // Title.
-    $html .= '<h2 class="hr-booking-form__title">' . $this->t('Book Your Stay') . '</h2>';
-    $html .= '<p class="hr-booking-form__subtitle">' . $this->t('Check-in from @in, check-out until @out', [
-      '@in' => $check_in_time,
-      '@out' => $check_out_time,
-    ]) . '</p>';
+    $html .= '<h2 class="hr-booking-form__title">' . Html::escape($display_title) . '</h2>';
+    $html .= '<p class="hr-booking-form__subtitle">' . Html::escape($display_subtitle) . '</p>';
 
     // Step indicators.
     $html .= '<div class="hr-steps">';
@@ -126,11 +136,11 @@ class BookingFormBlock extends BlockBase {
     $html .= '<div class="hr-form-row">';
     $html .= '<div class="hr-form-group">';
     $html .= '<label for="hr-check-in">' . $this->t('Check-in') . '</label>';
-    $html .= '<input type="date" id="hr-check-in" class="hr-field-check-in" required>';
+    $html .= '<input type="datetime-local" id="hr-check-in" class="hr-field-check-in" required>';
     $html .= '</div>';
     $html .= '<div class="hr-form-group">';
     $html .= '<label for="hr-check-out">' . $this->t('Check-out') . '</label>';
-    $html .= '<input type="date" id="hr-check-out" class="hr-field-check-out" required>';
+    $html .= '<input type="datetime-local" id="hr-check-out" class="hr-field-check-out" required>';
     $html .= '</div>';
     $html .= '</div>';
 
@@ -163,11 +173,11 @@ class BookingFormBlock extends BlockBase {
     $html .= '<div class="hr-form-row">';
     $html .= '<div class="hr-form-group">';
     $html .= '<label>' . $this->t('Room') . '</label>';
-    $html .= '<div class="hr-room-selected-name" style="padding:10px 14px;background:#f9fafb;border-radius:10px;border:1.5px solid #e5e7eb;font-weight:600;color:#1a1a2e;">—</div>';
+    $html .= '<div class="hr-room-selected-name" style="padding:10px 14px;background:#f9fafb;border-radius:' . $border_radius . 'px;border:1.5px solid #e5e7eb;font-weight:600;">—</div>';
     $html .= '</div>';
     $html .= '<div class="hr-form-group">';
     $html .= '<label>' . $this->t('Total') . '</label>';
-    $html .= '<div class="hr-room-selected-price" style="padding:10px 14px;background:#fffbeb;border-radius:10px;border:1.5px solid #fde68a;font-weight:700;color:#d97706;font-size:18px;">0 ' . $currency . '</div>';
+    $html .= '<div class="hr-room-selected-price" style="padding:10px 14px;background:#fffbeb;border-radius:' . $border_radius . 'px;border:1.5px solid #fde68a;font-weight:700;color:#d97706;font-size:18px;">0 ' . $currency . '</div>';
     $html .= '</div>';
     $html .= '</div>';
 
@@ -192,7 +202,7 @@ class BookingFormBlock extends BlockBase {
 
     $html .= '<div class="hr-form-group">';
     $html .= '<label for="hr-guest-email">' . $this->t('Email') . '</label>';
-    $html .= '<input type="email" id="hr-guest-email" class="hr-field-guest-email" placeholder="' . $this->t('your@email.com') . '">' ;
+    $html .= '<input type="email" id="hr-guest-email" class="hr-field-guest-email" placeholder="' . $this->t('your@email.com') . '">';
     $html .= '</div>';
 
     $html .= '<div class="hr-form-group">';
@@ -200,7 +210,7 @@ class BookingFormBlock extends BlockBase {
     $html .= '<textarea id="hr-notes" class="hr-field-notes" rows="2" placeholder="' . $this->t('Special requests...') . '"></textarea>';
     $html .= '</div>';
 
-    // Booking conditions (if enabled).
+    // Booking conditions.
     if (!empty($block_config['show_conditions']) && !empty($booking_conditions)) {
       $escaped_conditions = Html::escape($booking_conditions);
       $html .= '<div class="hr-terms">';
@@ -209,22 +219,20 @@ class BookingFormBlock extends BlockBase {
       $html .= '</div>';
     }
 
-    $html .= '<button type="button" class="hr-btn hr-btn--primary hr-book-btn">' . $this->t('Book Now') . '</button>';
+    $html .= '<button type="button" class="hr-btn hr-btn--primary hr-book-btn" data-btn-text="' . Html::escape($button_text) . '">' . Html::escape($button_text) . '</button>';
     $html .= '</div>';
 
     // === Section 4: Success ===
     $html .= '<div class="hr-section hr-section--success" style="display:none">';
     $html .= '<div class="hr-success">';
     $html .= '<div class="hr-success__icon">✓</div>';
-    $html .= '<h3 class="hr-success__title">' . $this->t('Booking Submitted!') . '</h3>';
-    $html .= '<p class="hr-success__text">' . $this->t('Your reservation #@id is pending confirmation. We will contact you shortly.', [
-      '@id' => '<span class="hr-success-id"></span>',
-    ]) . '</p>';
+    $html .= '<h3 class="hr-success__title">' . Html::escape($success_title) . '</h3>';
+    $html .= '<p class="hr-success__text" data-template="' . Html::escape($success_text) . '">' . Html::escape($success_text) . '</p>';
     $html .= '<button type="button" class="hr-btn hr-btn--secondary hr-new-search-btn" style="margin-top:16px;">' . $this->t('Make Another Booking') . '</button>';
     $html .= '</div>';
     $html .= '</div>';
 
-    $html .= '</div>'; // .hr-booking-form
+    $html .= '</div>';
 
     $build['content'] = [
       '#type' => 'markup',
@@ -232,7 +240,7 @@ class BookingFormBlock extends BlockBase {
       '#allowed_tags' => [
         'div', 'h2', 'h3', 'h4', 'p', 'label', 'input', 'button', 'textarea',
         'span', 'small', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
-        'br', 'a', 'strong', 'em', 'pre',
+        'br', 'a', 'strong', 'em', 'pre', 'style',
       ],
     ];
 

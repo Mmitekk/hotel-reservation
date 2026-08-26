@@ -77,7 +77,6 @@ hotel_reservation.api_submit_reservation:
     _controller: '\Drupal\hotel_reservation\Controller\ApiController::submitReservation'
   requirements:
     _permission: 'access content'
-    _csrf_token: 'TRUE'
     _format: json
 
 hotel_reservation.api_room_prices:
