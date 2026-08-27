@@ -13,21 +13,21 @@ use Drupal\Core\Url;
 class RoomListBuilder extends EntityListBuilder {
 
   /**
- * {@inheritdoc}
- */
+   * {@inheritdoc}
+   */
   public function buildHeader() {
-    $header['name'] = $this->t('Room Name');
-    $header['room_type'] = $this->t('Type');
-    $header['capacity'] = $this->t('Capacity');
-    $header['base_price'] = $this->t('Base Price');
-    $header['status'] = $this->t('Status');
-    $header['operations'] = $this->t('Operations');
+    $header['name'] = $this->t('Название');
+    $header['room_type'] = $this->t('Тип');
+    $header['capacity'] = $this->t('Вместимость');
+    $header['base_price'] = $this->t('Базовая цена');
+    $header['status'] = $this->t('Статус');
+    $header['operations'] = $this->t('Действия');
     return $header + parent::buildHeader();
   }
 
   /**
- * {@inheritdoc}
- */
+   * {@inheritdoc}
+   */
   public function buildRow(EntityInterface $entity) {
     $currency_symbol = '₽';
     $config = \Drupal::config('hotel_reservation.settings');
@@ -42,14 +42,14 @@ class RoomListBuilder extends EntityListBuilder {
     ];
 
     $room_type_options = [
-      'standard' => 'Standard',
-      'superior' => 'Superior',
-      'deluxe' => 'Deluxe',
-      'suite' => 'Suite',
-      'apartment' => 'Apartment',
-      'villa' => 'Villa',
-      'family' => 'Family',
-      'economy' => 'Economy',
+      'standard' => 'Стандарт',
+      'superior' => 'Супериор',
+      'deluxe' => 'Делюкс',
+      'suite' => 'Сьют',
+      'apartment' => 'Апартаменты',
+      'villa' => 'Вилла',
+      'family' => 'Семейный',
+      'economy' => 'Эконом',
     ];
     $rt = $entity->get('room_type')->value;
     $row['room_type']['data'] = [
@@ -62,12 +62,12 @@ class RoomListBuilder extends EntityListBuilder {
 
     if ($entity->get('status')->value) {
       $row['status']['data'] = [
-        '#markup' => '<span class="badge badge-success">' . $this->t('Published') . '</span>',
+        '#markup' => '<span class="badge badge-success">' . $this->t('Опубликован') . '</span>',
       ];
     }
     else {
       $row['status']['data'] = [
-        '#markup' => '<span class="badge badge-danger">' . $this->t('Unpublished') . '</span>',
+        '#markup' => '<span class="badge badge-danger">' . $this->t('Скрыт') . '</span>',
       ];
     }
 
@@ -78,15 +78,15 @@ class RoomListBuilder extends EntityListBuilder {
       '#type' => 'operations',
       '#links' => [
         'edit' => [
-          'title' => $this->t('Edit'),
+          'title' => $this->t('Изменить'),
           'url' => $entity->toUrl('edit-form'),
         ],
         'delete' => [
-          'title' => $this->t('Delete'),
+          'title' => $this->t('Удалить'),
           'url' => $entity->toUrl('delete-form'),
         ],
         'pricing' => [
-          'title' => $this->t('Pricing'),
+          'title' => $this->t('Цены'),
           'url' => $pricing_url,
         ],
       ],
@@ -96,14 +96,14 @@ class RoomListBuilder extends EntityListBuilder {
   }
 
   /**
- * {@inheritdoc}
- */
+   * {@inheritdoc}
+   */
   public function render() {
     $build['table'] = [
       '#type' => 'table',
       '#header' => $this->buildHeader(),
       '#rows' => [],
-      '#empty' => $this->t('No rooms available.'),
+      '#empty' => $this->t('Нет номеров. <a href=":url">Добавить номер</a>.'),
       '#attributes' => [
         'class' => ['table-responsive'],
       ],
@@ -116,7 +116,7 @@ class RoomListBuilder extends EntityListBuilder {
         '#type' => 'operations',
         '#links' => [
           'add_room' => [
-            'title' => $this->t('Add room'),
+            'title' => $this->t('Добавить номер'),
             'url' => $add_url,
           ],
         ],

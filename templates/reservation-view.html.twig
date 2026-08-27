@@ -14,19 +14,19 @@
 <div class="hr-res-view">
   <div class="hr-res-view__header">
     <div class="hr-res-view__logo">{{ hotel_name }}</div>
-    <div class="hr-res-view__subtitle">{{ 'Reservation Voucher'|t }} #{{ reservation.id.value }}</div>
+    <div class="hr-res-view__subtitle">{{ 'Ваучер на бронирование'|t }} #{{ reservation.id.value }}</div>
   </div>
 
   <div class="hr-res-view__grid">
     <div class="hr-res-view__col">
       <div class="hr-res-view__section">
-        <h3 class="hr-res-view__section-title">{{ 'Guest Information'|t }}</h3>
+        <h3 class="hr-res-view__section-title">{{ 'Информация о госте'|t }}</h3>
         <div class="hr-res-view__field">
-          <span class="hr-res-view__label">{{ 'Full Name'|t }}</span>
+          <span class="hr-res-view__label">{{ 'ФИО'|t }}</span>
           <span class="hr-res-view__value">{{ reservation.guest_name.value }}</span>
         </div>
         <div class="hr-res-view__field">
-          <span class="hr-res-view__label">{{ 'Phone'|t }}</span>
+          <span class="hr-res-view__label">{{ 'Телефон'|t }}</span>
           <span class="hr-res-view__value">{{ reservation.guest_phone.value }}</span>
         </div>
         {% if reservation.guest_email.value %}
@@ -36,7 +36,7 @@
         </div>
         {% endif %}
         <div class="hr-res-view__field">
-          <span class="hr-res-view__label">{{ 'Guests'|t }}</span>
+          <span class="hr-res-view__label">{{ 'Гости'|t }}</span>
           <span class="hr-res-view__value">{{ reservation.guest_count.value }}</span>
         </div>
       </div>
@@ -44,21 +44,21 @@
 
     <div class="hr-res-view__col">
       <div class="hr-res-view__section">
-        <h3 class="hr-res-view__section-title">{{ 'Booking Details'|t }}</h3>
+        <h3 class="hr-res-view__section-title">{{ 'Детали бронирования'|t }}</h3>
         <div class="hr-res-view__field">
-          <span class="hr-res-view__label">{{ 'Room'|t }}</span>
+          <span class="hr-res-view__label">{{ 'Номер'|t }}</span>
           <span class="hr-res-view__value">{{ room.label }}</span>
         </div>
         <div class="hr-res-view__field">
-          <span class="hr-res-view__label">{{ 'Check-in'|t }}</span>
+          <span class="hr-res-view__label">{{ 'Заезд'|t }}</span>
           <span class="hr-res-view__value">{{ check_in_time }}</span>
         </div>
         <div class="hr-res-view__field">
-          <span class="hr-res-view__label">{{ 'Check-out'|t }}</span>
+          <span class="hr-res-view__label">{{ 'Выезд'|t }}</span>
           <span class="hr-res-view__value">{{ check_out_time }}</span>
         </div>
         <div class="hr-res-view__field">
-          <span class="hr-res-view__label">{{ 'Status'|t }}</span>
+          <span class="hr-res-view__label">{{ 'Статус'|t }}</span>
           <span class="hr-res-view__value hr-res-view__status hr-res-view__status--{{ reservation.status.value }}">{{ reservation.getStatusLabel() }}</span>
         </div>
       </div>
@@ -66,7 +66,7 @@
 
     <div class="hr-res-view__col hr-res-view__col--price">
       <div class="hr-res-view__price-box">
-        <div class="hr-res-view__price-label">{{ 'Total Amount'|t }}</div>
+        <div class="hr-res-view__price-label">{{ 'Итого'|t }}</div>
         <div class="hr-res-view__price-value">{{ reservation.total_price.value }} {{ currency }}</div>
       </div>
     </div>
@@ -74,13 +74,13 @@
 
   {% if reservation.notes.value %}
   <div class="hr-res-view__notes">
-    <h3 class="hr-res-view__section-title">{{ 'Guest Notes'|t }}</h3>
+    <h3 class="hr-res-view__section-title">{{ 'Заметки гостя'|t }}</h3>
     <p>{{ reservation.notes.value }}</p>
   </div>
   {% endif %}
 
   <div class="hr-res-view__footer">
-    <p>{{ 'Created: @date'|t({'@date': reservation.created.value|date('d.m.Y H:i') }) }}</p>
+    <p>{{ 'Создано: @date'|t({'@date': reservation.created.value|date('d.m.Y H:i') }) }}</p>
   </div>
 </div>
 

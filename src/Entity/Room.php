@@ -15,10 +15,10 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ContentEntityType(
  *   id = "hr_room",
- *   label = @Translation("Room"),
- *   label_collection = @Translation("Rooms"),
- *   label_singular = @Translation("room"),
- *   label_plural = @Translation("rooms"),
+ *   label = @Translation("Номер"),
+ *   label_collection = @Translation("Номера"),
+ *   label_singular = @Translation("номер"),
+ *   label_plural = @Translation("номера"),
  *   handlers = {
  *     "list_builder" = "Drupal\hotel_reservation\RoomListBuilder",
  *     "form" = {
@@ -228,8 +228,8 @@ class Room extends ContentEntityBase {
     $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Room Name'))
-      ->setDescription(t('The name of the room.'))
+      ->setLabel(t('Название номера'))
+      ->setDescription(t('Название номера.'))
       ->setSettings([
         'max_length' => 255,
         'text_processing' => 0,
@@ -249,8 +249,8 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Description'))
-      ->setDescription(t('A detailed description of the room.'))
+      ->setLabel(t('Описание'))
+      ->setDescription(t('Подробное описание номера.'))
       ->setDefaultValue('')
       ->setRequired(FALSE)
       ->setDisplayOptions('view', [
@@ -269,18 +269,18 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['room_type'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Room Type'))
-      ->setDescription(t('The category or type of the room.'))
+      ->setLabel(t('Тип номера'))
+      ->setDescription(t('Категория или тип номера.'))
       ->setSettings([
         'allowed_values' => [
-          'standard' => 'Standard',
-          'superior' => 'Superior',
-          'deluxe' => 'Deluxe',
-          'suite' => 'Suite',
-          'apartment' => 'Apartment',
-          'villa' => 'Villa',
-          'family' => 'Family',
-          'economy' => 'Economy',
+          'standard' => 'Стандарт',
+          'superior' => 'Супериор',
+          'deluxe' => 'Делюкс',
+          'suite' => 'Сьют',
+          'apartment' => 'Апартаменты',
+          'villa' => 'Вилла',
+          'family' => 'Семейный',
+          'economy' => 'Эконом',
         ],
         'allowed_values_function' => '',
       ])
@@ -298,8 +298,8 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['capacity'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Capacity'))
-      ->setDescription(t('The maximum number of guests the room can accommodate.'))
+      ->setLabel(t('Вместимость'))
+      ->setDescription(t('Максимальное количество гостей в номере.'))
       ->setSetting('min', 1)
       ->setSetting('unsigned', TRUE)
       ->setDefaultValue(2)
@@ -317,8 +317,8 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['base_price'] = BaseFieldDefinition::create('decimal')
-      ->setLabel(t('Base Price per Night'))
-      ->setDescription(t('The base price per night in the default currency.'))
+      ->setLabel(t('Базовая цена за ночь'))
+      ->setDescription(t('Базовая цена за ночь в основной валюте.'))
       ->setSettings([
         'precision' => 10,
         'scale' => 2,
@@ -342,8 +342,8 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['amenities'] = BaseFieldDefinition::create('string_long')
-      ->setLabel(t('Amenities'))
-      ->setDescription(t('A comma-separated list of amenity names (e.g. WiFi, TV, Minibar).'))
+      ->setLabel(t('Удобства'))
+      ->setDescription(t('Список удобств через запятую (напр. Wi-Fi, ТВ, Минибар).'))
       ->setDefaultValue('')
       ->setRequired(FALSE)
       ->setDisplayOptions('view', [
@@ -362,8 +362,8 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
-      ->setLabel(t('Published'))
-      ->setDescription(t('Whether the room is published and available for booking.'))
+      ->setLabel(t('Опубликован'))
+      ->setDescription(t('Опубликован ли номер и доступен для бронирования.'))
       ->setDefaultValue(TRUE)
       ->setRequired(TRUE)
       ->setDisplayOptions('form', [
@@ -376,8 +376,8 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['sort_weight'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Sort Weight'))
-      ->setDescription(t('The weight of this room for ordering in lists. Lower values appear first.'))
+      ->setLabel(t('Вес для сортировки'))
+      ->setDescription(t('Вес номера для сортировки в списках. Меньшие значения отображаются первыми.'))
       ->setDefaultValue(0)
       ->setSetting('unsigned', FALSE)
       ->setDisplayOptions('form', [
@@ -387,8 +387,8 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
-      ->setLabel(t('Created'))
-      ->setDescription(t('The time the room was created.'))
+      ->setLabel(t('Создано'))
+      ->setDescription(t('Время создания номера.'))
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'timestamp',
@@ -397,8 +397,8 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
-      ->setLabel(t('Changed'))
-      ->setDescription(t('The time the room was last edited.'))
+      ->setLabel(t('Изменено'))
+      ->setDescription(t('Время последнего редактирования номера.'))
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'timestamp',

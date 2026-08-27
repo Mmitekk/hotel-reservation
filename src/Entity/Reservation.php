@@ -14,10 +14,10 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ContentEntityType(
  *   id = "hr_reservation",
- *   label = @Translation("Reservation"),
- *   label_collection = @Translation("Reservations"),
- *   label_singular = @Translation("reservation"),
- *   label_plural = @Translation("reservations"),
+ *   label = @Translation("Бронирование"),
+ *   label_collection = @Translation("Бронирования"),
+ *   label_singular = @Translation("бронирование"),
+ *   label_plural = @Translation("бронирования"),
  *   handlers = {
  *     "list_builder" = "Drupal\hotel_reservation\ReservationListBuilder",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
@@ -98,12 +98,12 @@ class Reservation extends ContentEntityBase {
    */
   public static function getStatusOptions(): array {
     return [
-      self::STATUS_PENDING => t('Pending')->__toString(),
-      self::STATUS_CONFIRMED => t('Confirmed')->__toString(),
-      self::STATUS_CHECKED_IN => t('Checked in')->__toString(),
-      self::STATUS_CHECKED_OUT => t('Checked out')->__toString(),
-      self::STATUS_CANCELLED => t('Cancelled')->__toString(),
-      self::STATUS_EXPIRED => t('Expired')->__toString(),
+      self::STATUS_PENDING => t('Ожидает')->__toString(),
+      self::STATUS_CONFIRMED => t('Подтверждено')->__toString(),
+      self::STATUS_CHECKED_IN => t('Заселён')->__toString(),
+      self::STATUS_CHECKED_OUT => t('Выселён')->__toString(),
+      self::STATUS_CANCELLED => t('Отменено')->__toString(),
+      self::STATUS_EXPIRED => t('Истёк')->__toString(),
     ];
   }
 
@@ -113,7 +113,7 @@ class Reservation extends ContentEntityBase {
   public function label() {
     $name = $this->get('guest_name')->value;
     if ($name) {
-      return t('Reservation for @guest', ['@guest' => $name])->__toString();
+      return t('Бронирование для @guest', ['@guest' => $name])->__toString();
     }
     return parent::label();
   }
@@ -210,8 +210,8 @@ class Reservation extends ContentEntityBase {
     $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['room_id'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Room'))
-      ->setDescription(t('The room this reservation is for.'))
+      ->setLabel(t('Номер'))
+      ->setDescription(t('Номер, к которому относится бронирование.'))
       ->setSetting('target_type', 'hr_room')
       ->setRequired(TRUE)
       ->setDisplayOptions('view', [
@@ -232,8 +232,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['check_in'] = BaseFieldDefinition::create('datetime')
-      ->setLabel(t('Check-in Date'))
-      ->setDescription(t('The date the guest will check in.'))
+      ->setLabel(t('Дата заезда'))
+      ->setDescription(t('Дата заезда гостя.'))
       ->setRequired(TRUE)
       ->setSettings([
         'datetime_type' => 'date',
@@ -258,8 +258,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['check_out'] = BaseFieldDefinition::create('datetime')
-      ->setLabel(t('Check-out Date'))
-      ->setDescription(t('The date the guest will check out.'))
+      ->setLabel(t('Дата выезда'))
+      ->setDescription(t('Дата выезда гостя.'))
       ->setRequired(TRUE)
       ->setSettings([
         'datetime_type' => 'date',
@@ -284,8 +284,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['guest_name'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Guest Name'))
-      ->setDescription(t('The full name of the guest.'))
+      ->setLabel(t('Имя гостя'))
+      ->setDescription(t('Полное имя гостя.'))
       ->setSettings([
         'max_length' => 255,
         'text_processing' => 0,
@@ -305,8 +305,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['guest_phone'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Guest Phone'))
-      ->setDescription(t('The phone number of the guest.'))
+      ->setLabel(t('Телефон гостя'))
+      ->setDescription(t('Номер телефона гостя.'))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
@@ -326,8 +326,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['guest_email'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Guest Email'))
-      ->setDescription(t('The email address of the guest.'))
+      ->setLabel(t('Email гостя'))
+      ->setDescription(t('Адрес электронной почты гостя.'))
       ->setSettings([
         'max_length' => 255,
         'text_processing' => 0,
@@ -347,8 +347,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['guest_count'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Guest Count'))
-      ->setDescription(t('The number of guests.'))
+      ->setLabel(t('Количество гостей'))
+      ->setDescription(t('Количество гостей.'))
       ->setSetting('min', 1)
       ->setSetting('unsigned', TRUE)
       ->setDefaultValue(1)
@@ -365,17 +365,17 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['status'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Status'))
-      ->setDescription(t('The current status of the reservation.'))
+      ->setLabel(t('Статус'))
+      ->setDescription(t('Текущий статус бронирования.'))
       ->setSettings([
         'max_length' => 32,
         'allowed_values' => [
-          'pending' => 'Pending',
-          'confirmed' => 'Confirmed',
-          'checked_in' => 'Checked in',
-          'checked_out' => 'Checked out',
-          'cancelled' => 'Cancelled',
-          'expired' => 'Expired',
+          'pending' => 'Ожидает',
+          'confirmed' => 'Подтверждено',
+          'checked_in' => 'Заселён',
+          'checked_out' => 'Выселён',
+          'cancelled' => 'Отменено',
+          'expired' => 'Истёк',
         ],
         'allowed_values_function' => '',
       ])
@@ -394,8 +394,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['total_price'] = BaseFieldDefinition::create('decimal')
-      ->setLabel(t('Total Price'))
-      ->setDescription(t('The total price for the entire reservation.'))
+      ->setLabel(t('Итого'))
+      ->setDescription(t('Общая сумма бронирования.'))
       ->setSettings([
         'precision' => 10,
         'scale' => 2,
@@ -418,8 +418,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['notes'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Guest Notes'))
-      ->setDescription(t('Notes or comments from the guest.'))
+      ->setLabel(t('Заметки гостя'))
+      ->setDescription(t('Заметки или пожелания гостя.'))
       ->setDefaultValue('')
       ->setRequired(FALSE)
       ->setDisplayOptions('view', [
@@ -438,8 +438,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['admin_notes'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Admin Notes'))
-      ->setDescription(t('Internal notes visible only to administrators.'))
+      ->setLabel(t('Заметки администратора'))
+      ->setDescription(t('Внутренние заметки, видимые только администраторам.'))
       ->setDefaultValue('')
       ->setRequired(FALSE)
       ->setDisplayOptions('view', [
@@ -458,8 +458,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
-      ->setLabel(t('Created'))
-      ->setDescription(t('The time the reservation was created.'))
+      ->setLabel(t('Создано'))
+      ->setDescription(t('Время создания бронирования.'))
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'timestamp',
@@ -468,8 +468,8 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
-      ->setLabel(t('Changed'))
-      ->setDescription(t('The time the reservation was last edited.'))
+      ->setLabel(t('Изменено'))
+      ->setDescription(t('Время последнего редактирования бронирования.'))
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'timestamp',

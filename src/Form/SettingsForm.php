@@ -38,15 +38,15 @@ class SettingsForm extends ConfigFormBase {
     // ============================================================
     $form['hotel_info'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Hotel Information'),
+      '#title' => $this->t('Информация об отеле'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
     ];
 
     $form['hotel_info']['hotel_name'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Hotel Name'),
-      '#description' => $this->t('The hotel name used in emails and notifications. Leave blank to use the site name.'),
+      '#title' => $this->t('Название отеля'),
+      '#description' => $this->t('Название отеля для писем и уведомлений. Оставьте пустым, чтобы использовать имя сайта.'),
       '#default_value' => $config->get('hotel_name') ?: $site_name,
       '#required' => FALSE,
       '#maxlength' => 255,
@@ -54,8 +54,8 @@ class SettingsForm extends ConfigFormBase {
 
     $form['hotel_info']['currency_symbol'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Currency Symbol'),
-      '#description' => $this->t('The symbol displayed next to prices (e.g. ₽, $, €).'),
+      '#title' => $this->t('Символ валюты'),
+      '#description' => $this->t('Символ, отображаемый рядом с ценами (напр. ₽, $, €).'),
       '#default_value' => $config->get('currency_symbol') ?: '₽',
       '#required' => TRUE,
       '#maxlength' => 10,
@@ -64,8 +64,8 @@ class SettingsForm extends ConfigFormBase {
 
     $form['hotel_info']['currency_code'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Currency Code'),
-      '#description' => $this->t('ISO 4217 currency code (e.g. RUB, USD, EUR).'),
+      '#title' => $this->t('Код валюты'),
+      '#description' => $this->t('Код валюты ISO 4217 (напр. RUB, USD, EUR).'),
       '#default_value' => $config->get('currency_code') ?: 'RUB',
       '#required' => TRUE,
       '#maxlength' => 3,
@@ -77,15 +77,15 @@ class SettingsForm extends ConfigFormBase {
     // ============================================================
     $form['booking_rules'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Booking Rules'),
+      '#title' => $this->t('Правила бронирования'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
     ];
 
     $form['booking_rules']['min_stay_nights'] = [
       '#type' => 'number',
-      '#title' => $this->t('Minimum Stay (nights)'),
-      '#description' => $this->t('The minimum number of nights for a reservation.'),
+      '#title' => $this->t('Минимальное количество ночей'),
+      '#description' => $this->t('Минимальное количество ночей для бронирования.'),
       '#default_value' => $config->get('min_stay_nights') ?: 1,
       '#required' => TRUE,
       '#min' => 1,
@@ -94,8 +94,8 @@ class SettingsForm extends ConfigFormBase {
 
     $form['booking_rules']['max_stay_nights'] = [
       '#type' => 'number',
-      '#title' => $this->t('Maximum Stay (nights)'),
-      '#description' => $this->t('The maximum number of nights for a reservation.'),
+      '#title' => $this->t('Максимальное количество ночей'),
+      '#description' => $this->t('Максимальное количество ночей для бронирования.'),
       '#default_value' => $config->get('max_stay_nights') ?: 30,
       '#required' => TRUE,
       '#min' => 1,
@@ -104,30 +104,30 @@ class SettingsForm extends ConfigFormBase {
 
     $form['booking_rules']['check_in_time'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Standard Check-in Time'),
-      '#description' => $this->t('The standard check-in time displayed to guests (e.g. 14:00).'),
+      '#title' => $this->t('Время заезда'),
+      '#description' => $this->t('Стандартное время заезда (напр. 14:00).'),
       '#default_value' => $config->get('check_in_time') ?: '14:00',
       '#required' => TRUE,
       '#maxlength' => 5,
       '#size' => 10,
-      '#attributes' => ['placeholder' => 'HH:MM'],
+      '#attributes' => ['placeholder' => 'ЧЧ:ММ'],
     ];
 
     $form['booking_rules']['check_out_time'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Standard Check-out Time'),
-      '#description' => $this->t('The standard check-out time displayed to guests (e.g. 12:00).'),
+      '#title' => $this->t('Время выезда'),
+      '#description' => $this->t('Стандартное время выезда (напр. 12:00).'),
       '#default_value' => $config->get('check_out_time') ?: '12:00',
       '#required' => TRUE,
       '#maxlength' => 5,
       '#size' => 10,
-      '#attributes' => ['placeholder' => 'HH:MM'],
+      '#attributes' => ['placeholder' => 'ЧЧ:ММ'],
     ];
 
     $form['booking_rules']['booking_conditions'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Booking Conditions'),
-      '#description' => $this->t('The terms and conditions displayed on the booking form. Leave blank to use the default.'),
+      '#title' => $this->t('Условия бронирования'),
+      '#description' => $this->t('Условия бронирования, отображаемые в форме. Оставьте пустым для значений по умолчанию.'),
       '#default_value' => $config->get('booking_conditions') ?: $this->getDefaultBookingConditions(),
       '#required' => FALSE,
       '#rows' => 6,
@@ -138,22 +138,22 @@ class SettingsForm extends ConfigFormBase {
     // ============================================================
     $form['notifications'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Notifications'),
+      '#title' => $this->t('Уведомления'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
     ];
 
     $form['notifications']['enable_admin_notification'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable Admin Notification'),
-      '#description' => $this->t('Send an email to the administrator when a new reservation is created.'),
+      '#title' => $this->t('Уведомлять администратора'),
+      '#description' => $this->t('Отправлять письмо администратору при новом бронировании.'),
       '#default_value' => $config->get('enable_admin_notification') !== NULL ? (bool) $config->get('enable_admin_notification') : TRUE,
     ];
 
     $form['notifications']['admin_notification_email'] = [
       '#type' => 'email',
-      '#title' => $this->t('Admin Notification Email'),
-      '#description' => $this->t('The email address to receive new reservation notifications. Leave blank to disable admin notifications.'),
+      '#title' => $this->t('Email администратора'),
+      '#description' => $this->t('Адрес email для получения уведомлений. Оставьте пустым для отключения.'),
       '#default_value' => $config->get('admin_notification_email') ?: '',
       '#required' => FALSE,
       '#states' => [
@@ -165,8 +165,8 @@ class SettingsForm extends ConfigFormBase {
 
     $form['notifications']['enable_guest_confirmation'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable Guest Confirmation Email'),
-      '#description' => $this->t('Send a confirmation email to the guest when their reservation is confirmed.'),
+      '#title' => $this->t('Отправлять подтверждение гостю'),
+      '#description' => $this->t('Отправлять письмо с подтверждением гостю при подтверждении бронирования.'),
       '#default_value' => $config->get('enable_guest_confirmation') !== NULL ? (bool) $config->get('enable_guest_confirmation') : TRUE,
     ];
 
@@ -175,15 +175,15 @@ class SettingsForm extends ConfigFormBase {
     // ============================================================
     $form['automation'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Automation'),
+      '#title' => $this->t('Автоматизация'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
     ];
 
     $form['automation']['reservation_expiration_hours'] = [
       '#type' => 'number',
-      '#title' => $this->t('Reservation Expiration (hours)'),
-      '#description' => $this->t('Pending (unconfirmed) reservations will automatically be set to expired after this many hours. Checked during cron runs.'),
+      '#title' => $this->t('Срок действия заявки (часы)'),
+      '#description' => $this->t('Неподтверждённые заявки автоматически истекут через указанное количество часов. Проверяется при запуске cron.'),
       '#default_value' => $config->get('reservation_expiration_hours') ?: 24,
       '#required' => TRUE,
       '#min' => 1,
@@ -195,59 +195,59 @@ class SettingsForm extends ConfigFormBase {
     // ============================================================
     $form['form_design'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Booking Form Design'),
+      '#title' => $this->t('Дизайн формы бронирования'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     ];
 
     $form['form_design']['form_title'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Form Title'),
-      '#description' => $this->t('Leave blank to use hotel name.'),
+      '#title' => $this->t('Заголовок формы'),
+      '#description' => $this->t('Оставьте пустым для названия отеля.'),
       '#default_value' => $config->get('form_title') ?: '',
       '#maxlength' => 255,
     ];
 
     $form['form_design']['form_subtitle'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Form Subtitle'),
-      '#description' => $this->t('Text below the title. Leave blank for default (check-in/out times).'),
+      '#title' => $this->t('Подзаголовок формы'),
+      '#description' => $this->t('Текст под заголовком. Пусто = время заезда/выезда.'),
       '#default_value' => $config->get('form_subtitle') ?: '',
       '#maxlength' => 255,
     ];
 
     $form['form_design']['form_button_text'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Submit Button Text'),
-      '#default_value' => $config->get('form_button_text') ?: $this->t('Book Now'),
+      '#title' => $this->t('Текст на кнопке отправки'),
+      '#default_value' => $config->get('form_button_text') ?: $this->t('Забронировать'),
       '#maxlength' => 50,
     ];
 
     $form['form_design']['form_primary_color'] = [
       '#type' => 'color',
-      '#title' => $this->t('Primary Color'),
-      '#description' => $this->t('Main color for buttons and accents.'),
+      '#title' => $this->t('Основной цвет'),
+      '#description' => $this->t('Цвет кнопок и акцентов формы.'),
       '#default_value' => $config->get('form_primary_color') ?: '#d97706',
     ];
 
     $form['form_design']['form_background_color'] = [
       '#type' => 'color',
-      '#title' => $this->t('Background Color'),
-      '#description' => $this->t('Form background color.'),
+      '#title' => $this->t('Цвет фона формы'),
+      '#description' => $this->t('Фон формы бронирования.'),
       '#default_value' => $config->get('form_background_color') ?: '#ffffff',
     ];
 
     $form['form_design']['form_text_color'] = [
       '#type' => 'color',
-      '#title' => $this->t('Text Color'),
-      '#description' => $this->t('Main text color.'),
+      '#title' => $this->t('Цвет текста'),
+      '#description' => $this->t('Основной цвет текста.'),
       '#default_value' => $config->get('form_text_color') ?: '#1a1a2e',
     ];
 
     $form['form_design']['form_border_radius'] = [
       '#type' => 'number',
-      '#title' => $this->t('Border Radius (px)'),
-      '#description' => $this->t('Roundness of form elements.'),
+      '#title' => $this->t('Скругление углов (px)'),
+      '#description' => $this->t('Скругление полей и кнопок.'),
       '#default_value' => $config->get('form_border_radius') ?: 10,
       '#min' => 0,
       '#max' => 30,
@@ -255,16 +255,16 @@ class SettingsForm extends ConfigFormBase {
 
     $form['form_design']['form_success_title'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Success Message Title'),
-      '#default_value' => $config->get('form_success_title') ?: $this->t('Booking Submitted!'),
+      '#title' => $this->t('Заголовок успешной заявки'),
+      '#default_value' => $config->get('form_success_title') ?: $this->t('Заявка отправлена!'),
       '#maxlength' => 100,
     ];
 
     $form['form_design']['form_success_text'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Success Message Text'),
-      '#description' => $this->t('Use @id placeholder for reservation number.'),
-      '#default_value' => $config->get('form_success_text') ?: $this->t('Your reservation #@id is pending confirmation. We will contact you shortly.'),
+      '#title' => $this->t('Текст успешной заявки'),
+      '#description' => $this->t('Используйте @id как плейсхолдер номера бронирования.'),
+      '#default_value' => $config->get('form_success_text') ?: $this->t('Ваша заявка #@id ожидает подтверждения. Мы свяжемся с вами в ближайшее время.'),
       '#maxlength' => 255,
     ];
 
@@ -281,29 +281,29 @@ class SettingsForm extends ConfigFormBase {
     $max_stay = (int) $form_state->getValue('max_stay_nights');
 
     if ($max_stay < $min_stay) {
-      $form_state->setErrorByName('max_stay_nights', $this->t('Maximum stay cannot be less than minimum stay.'));
+      $form_state->setErrorByName('max_stay_nights', $this->t('Максимум ночей не может быть меньше минимума.'));
     }
 
     // Validate time format HH:MM.
     $check_in_time = $form_state->getValue('check_in_time');
     if (!preg_match('/^\d{1,2}:\d{2}$/', $check_in_time)) {
-      $form_state->setErrorByName('check_in_time', $this->t('Check-in time must be in HH:MM format.'));
+      $form_state->setErrorByName('check_in_time', $this->t('Время заезда должно быть в формате ЧЧ:ММ.'));
     }
     else {
       $parts = explode(':', $check_in_time);
       if ((int) $parts[0] > 23 || (int) $parts[1] > 59) {
-        $form_state->setErrorByName('check_in_time', $this->t('Check-in time is not valid.'));
+        $form_state->setErrorByName('check_in_time', $this->t('Время заезда указано неверно.'));
       }
     }
 
     $check_out_time = $form_state->getValue('check_out_time');
     if (!preg_match('/^\d{1,2}:\d{2}$/', $check_out_time)) {
-      $form_state->setErrorByName('check_out_time', $this->t('Check-out time must be in HH:MM format.'));
+      $form_state->setErrorByName('check_out_time', $this->t('Время выезда должно быть в формате ЧЧ:ММ.'));
     }
     else {
       $parts = explode(':', $check_out_time);
       if ((int) $parts[0] > 23 || (int) $parts[1] > 59) {
-        $form_state->setErrorByName('check_out_time', $this->t('Check-out time is not valid.'));
+        $form_state->setErrorByName('check_out_time', $this->t('Время выезда указано неверно.'));
       }
     }
 
@@ -311,7 +311,7 @@ class SettingsForm extends ConfigFormBase {
     $enable_admin = (bool) $form_state->getValue('enable_admin_notification');
     $admin_email = $form_state->getValue('admin_notification_email');
     if ($enable_admin && empty($admin_email)) {
-      $form_state->setErrorByName('admin_notification_email', $this->t('Admin notification email is required when admin notifications are enabled.'));
+      $form_state->setErrorByName('admin_notification_email', $this->t('Укажите email администратора, если уведомления включены.'));
     }
   }
 
@@ -354,12 +354,12 @@ class SettingsForm extends ConfigFormBase {
    */
   protected function getDefaultBookingConditions(): string {
     return $this->t(
-      "1. Check-in time starts at 14:00, check-out time ends at 12:00.
-2. Early check-in or late check-out is subject to availability and may incur additional charges.
-3. Cancellation must be made at least 24 hours before check-in to avoid penalties.
-4. The hotel is not responsible for the loss or damage of personal belongings.
-5. All guests must present a valid ID upon check-in.
-6. Pets are not allowed unless prior arrangements have been made."
+      "1. Заезд начинается в 14:00, выезд — до 12:00.\n" .
+      "2. Ранний заезд или поздний выезд возможен при наличии свободных мест и может требовать дополнительной оплаты.\n" .
+      "3. Отмена бронирования должна быть произведена не менее чем за 24 часа до заезда.\n" .
+      "4. Отель не несёт ответственности за потерю или повреждение личных вещей.\n" .
+      "5. Все гости должны предъявить документ, удостоверяющий личность, при заезде.\n" .
+      "6. Домашние животные не допускаются без предварительной договорённости."
     );
   }
 

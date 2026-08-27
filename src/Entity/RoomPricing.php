@@ -13,10 +13,10 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ContentEntityType(
  *   id = "hr_room_pricing",
- *   label = @Translation("Room Pricing"),
- *   label_collection = @Translation("Room Pricings"),
- *   label_singular = @Translation("room pricing"),
- *   label_plural = @Translation("room pricings"),
+ *   label = @Translation("Цена номера"),
+ *   label_collection = @Translation("Цены номеров"),
+ *   label_singular = @Translation("цена номера"),
+ *   label_plural = @Translation("цены номеров"),
  *   handlers = {
  *     "form" = {
  *       "default" = "Drupal\Core\Entity\EntityForm",
@@ -103,8 +103,8 @@ class RoomPricing extends ContentEntityBase {
       ->setReadOnly(TRUE);
 
     $fields['room_id'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Room'))
-      ->setDescription(t('The room this pricing applies to.'))
+      ->setLabel(t('Номер'))
+      ->setDescription(t('Номер, к которому применяется цена.'))
       ->setSetting('target_type', 'hr_room')
       ->setRequired(TRUE)
       ->setDisplayOptions('view', [
@@ -125,8 +125,8 @@ class RoomPricing extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['date'] = BaseFieldDefinition::create('datetime')
-      ->setLabel(t('Date'))
-      ->setDescription(t('The date this pricing applies to.'))
+      ->setLabel(t('Дата'))
+      ->setDescription(t('Дата, к которой применяется цена.'))
       ->setRequired(TRUE)
       ->setSettings([
         'datetime_type' => 'date',
@@ -151,8 +151,8 @@ class RoomPricing extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['price'] = BaseFieldDefinition::create('decimal')
-      ->setLabel(t('Price per Night'))
-      ->setDescription(t('The custom price for this room on this date.'))
+      ->setLabel(t('Цена за ночь'))
+      ->setDescription(t('Индивидуальная цена для этого номера на эту дату.'))
       ->setSettings([
         'precision' => 10,
         'scale' => 2,
@@ -176,8 +176,8 @@ class RoomPricing extends ContentEntityBase {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
-      ->setLabel(t('Created'))
-      ->setDescription(t('The time the pricing entry was created.'))
+      ->setLabel(t('Создано'))
+      ->setDescription(t('Время создания записи цены.'))
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'timestamp',

@@ -14,8 +14,8 @@ use Drupal\Core\Datetime\DrupalDateTime;
 class ReservationForm extends ContentEntityForm {
 
   /**
- * {@inheritdoc}
- */
+   * {@inheritdoc}
+   */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
@@ -24,7 +24,7 @@ class ReservationForm extends ContentEntityForm {
     // --- Make total_price read-only (computed field). ---
     if (isset($form['total_price']['widget'][0]['value'])) {
       $form['total_price']['widget'][0]['value']['#disabled'] = TRUE;
-      $form['total_price']['widget'][0]['value']['#description'] = $this->t('This value is auto-calculated from the room, check-in, and check-out dates.');
+      $form['total_price']['widget'][0]['value']['#description'] = $this->t('Это значение рассчитывается автоматически на основе номера, дат заезда и выезда.');
     }
 
     // --- Add AJAX triggers on room_id, check_in, check_out. ---
@@ -42,7 +42,7 @@ class ReservationForm extends ContentEntityForm {
         'callback' => '::recalculatePrice',
         'wrapper' => $ajax_wrapper,
         'event' => 'change',
-        'progress' => ['type' => 'throbber', 'message' => $this->t('Calculating price...')],
+        'progress' => ['type' => 'throbber', 'message' => $this->t('Расчёт цены...')],
       ];
     }
 
@@ -52,7 +52,7 @@ class ReservationForm extends ContentEntityForm {
         'callback' => '::recalculatePrice',
         'wrapper' => $ajax_wrapper,
         'event' => 'change',
-        'progress' => ['type' => 'throbber', 'message' => $this->t('Calculating price...')],
+        'progress' => ['type' => 'throbber', 'message' => $this->t('Расчёт цены...')],
       ];
     }
 
@@ -62,7 +62,7 @@ class ReservationForm extends ContentEntityForm {
         'callback' => '::recalculatePrice',
         'wrapper' => $ajax_wrapper,
         'event' => 'change',
-        'progress' => ['type' => 'throbber', 'message' => $this->t('Calculating price...')],
+        'progress' => ['type' => 'throbber', 'message' => $this->t('Расчёт цены...')],
       ];
     }
 
@@ -136,14 +136,14 @@ class ReservationForm extends ContentEntityForm {
 
     if (empty($room_id) || empty($check_in) || empty($check_out)) {
       $build['info'] = [
-        '#markup' => '<p class="price-info">' . $this->t('Select a room, check-in, and check-out date to see the price breakdown.') . '</p>',
+        '#markup' => '<p class="price-info">' . $this->t('Выберите номер, дату заезда и выезда для расчёта цены.') . '</p>',
       ];
       return $build;
     }
 
     if ($check_out <= $check_in) {
       $build['info'] = [
-        '#markup' => '<p class="price-info">' . $this->t('Check-out date must be after check-in date.') . '</p>',
+        '#markup' => '<p class="price-info">' . $this->t('Дата выезда должна быть позже даты заезда.') . '</p>',
       ];
       return $build;
     }
@@ -152,7 +152,7 @@ class ReservationForm extends ContentEntityForm {
 
     if ($pricing['nights'] <= 0) {
       $build['info'] = [
-        '#markup' => '<p class="price-info">' . $this->t('No valid nights found for the selected period.') . '</p>',
+        '#markup' => '<p class="price-info">' . $this->t('Не найдено ни одной ночи для выбранного периода.') . '</p>',
       ];
       return $build;
     }
@@ -165,11 +165,11 @@ class ReservationForm extends ContentEntityForm {
     $build['table'] = [
       '#type' => 'table',
       '#header' => [
-        $this->t('Date'),
-        $this->t('Price (@currency)', ['@currency' => $currency]),
-        $this->t('Difference'),
+        $this->t('Дата'),
+        $this->t('Цена (@currency)', ['@currency' => $currency]),
+        $this->t('Разница'),
       ],
-      '#caption' => $this->t('Price Breakdown (@nights nights)', ['@nights' => $pricing['nights']]),
+      '#caption' => $this->t('Подробности цены (@nights ночей)', ['@nights' => $pricing['nights']]),
       '#attributes' => ['class' => ['price-breakdown-table']],
     ];
 
@@ -205,7 +205,7 @@ class ReservationForm extends ContentEntityForm {
 
     // Total row.
     $build['total'] = [
-      '#markup' => '<div class="price-total"><strong>' . $this->t('Total: @total @currency', [
+      '#markup' => '<div class="price-total"><strong>' . $this->t('Итого: @total @currency', [
         '@total' => number_format($pricing['total'], 2),
         '@currency' => $currency,
       ]) . '</strong></div>',
@@ -257,7 +257,7 @@ class ReservationForm extends ContentEntityForm {
     }
 
     if ($check_in && $check_out && $check_out <= $check_in) {
-      $form_state->setErrorByName('check_out', $this->t('Check-out date must be after check-in date.'));
+      $form_state->setErrorByName('check_out', $this->t('Дата выезда должна быть позже даты заезда.'));
     }
 
     // Validate minimum/maximum stay from config.
@@ -268,10 +268,10 @@ class ReservationForm extends ContentEntityForm {
       $nights = (new \DateTime($check_out))->diff(new \DateTime($check_in))->days;
 
       if ($nights < $min_stay) {
-        $form_state->setErrorByName('check_out', $this->t('Minimum stay is @min nights.', ['@min' => $min_stay]));
+        $form_state->setErrorByName('check_out', $this->t('Минимальное количество ночей: @min.', ['@min' => $min_stay]));
       }
       if ($nights > $max_stay) {
-        $form_state->setErrorByName('check_out', $this->t('Maximum stay is @max nights.', ['@max' => $max_stay]));
+        $form_state->setErrorByName('check_out', $this->t('Максимальное количество ночей: @max.', ['@max' => $max_stay]));
       }
     }
   }
@@ -298,7 +298,7 @@ class ReservationForm extends ContentEntityForm {
 
     $guest_name = $entity->get('guest_name')->value;
     $room = $entity->getRoom();
-    $room_name = $room ? $room->label() : $this->t('Unknown');
+    $room_name = $room ? $room->label() : $this->t('Неизвестно');
     $check_in = $entity->getCheckInDate() ? $entity->getCheckInDate()->format('d.m.Y') : '';
     $check_out = $entity->getCheckOutDate() ? $entity->getCheckOutDate()->format('d.m.Y') : '';
     $total = $entity->getTotalPrice();
@@ -307,10 +307,10 @@ class ReservationForm extends ContentEntityForm {
     $hotel_name = $config->get('hotel_name') ?: \Drupal::config('system.site')->get('name');
 
     if ($is_new) {
-      $this->messenger()->addStatus($this->t('Reservation for %guest has been created.', ['%guest' => $guest_name]));
+      $this->messenger()->addStatus($this->t('Бронирование для %guest создано.', ['%guest' => $guest_name]));
     }
     else {
-      $this->messenger()->addStatus($this->t('Reservation for %guest has been saved.', ['%guest' => $guest_name]));
+      $this->messenger()->addStatus($this->t('Бронирование для %guest сохранено.', ['%guest' => $guest_name]));
     }
 
     // --- Send confirmation email if status is confirmed. ---
@@ -337,7 +337,7 @@ class ReservationForm extends ContentEntityForm {
 
     $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
     $params['message'] = $this->t(
-      "Dear @guest,\n\nYour reservation at @hotel has been confirmed.\n\nRoom: @room\nCheck-in: @check_in\nCheck-out: @check_out\nTotal: @total @currency\n\nWe look forward to your stay!\n\nBest regards,\n@hotel",
+      "Уважаемый(ая) @guest,\n\nВаше бронирование в отеле @hotel подтверждено.\n\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nИтого: @total @currency\n\nЖдём вас!\n\nС уважением,\n@hotel",
       [
         '@guest' => $entity->get('guest_name')->value,
         '@hotel' => $hotel_name,
@@ -370,10 +370,10 @@ class ReservationForm extends ContentEntityForm {
     $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
     $params['guest_name'] = $entity->get('guest_name')->value;
     $params['message'] = $this->t(
-      "A new reservation has been created:\n\nGuest: @guest\nEmail: @email\nPhone: @phone\nRoom: @room\nCheck-in: @check_in\nCheck-out: @check_out\nGuests: @count\nTotal: @total @currency\n\nStatus: @status",
+      "Создано новое бронирование:\n\nГость: @guest\nEmail: @email\nТелефон: @phone\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nГости: @count\nИтого: @total @currency\n\nСтатус: @status",
       [
         '@guest' => $entity->get('guest_name')->value,
-        '@email' => $entity->get('guest_email')->value ?: 'N/A',
+        '@email' => $entity->get('guest_email')->value ?: '—',
         '@phone' => $entity->get('guest_phone')->value,
         '@room' => $room_name,
         '@check_in' => $check_in,

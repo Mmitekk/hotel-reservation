@@ -65,7 +65,6 @@
   color: var(--hr-text);
   animation: hr-fadeIn 0.4s ease;
   position: relative;
-  overflow: hidden;
 }
 
 /* Decorative top bar */
@@ -155,7 +154,7 @@
 .hr-booking-form select:focus,
 .hr-booking-form textarea:focus {
   border-color: var(--hr-border-focus);
-  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+  box-shadow: 0 0 0 3px var(--hr-primary-bg);
   background: var(--hr-bg);
 }
 
@@ -213,13 +212,14 @@
 
 .hr-btn--primary {
   background: linear-gradient(135deg, var(--hr-primary), var(--hr-primary-dark));
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+  color: var(--hr-btn-text, #ffffff);
+  box-shadow: 0 2px 8px var(--hr-primary-bg);
 }
 
 .hr-btn--primary:hover {
   background: linear-gradient(135deg, var(--hr-primary-dark), #92400e);
-  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+  filter: brightness(0.9);
+  box-shadow: 0 4px 12px var(--hr-primary-border);
   transform: translateY(-1px);
 }
 
@@ -701,6 +701,25 @@
 .hr-booking-form *:focus-visible {
   outline: 2px solid var(--hr-primary);
   outline-offset: 2px;
+}
+
+.hr-room-selected-name {
+  padding: 10px 14px;
+  background: var(--hr-bg-alt);
+  border-radius: 10px;
+  border: 1.5px solid var(--hr-border);
+  font-weight: 600;
+  color: var(--hr-text);
+}
+
+.hr-room-selected-price {
+  padding: 10px 14px;
+  background: var(--hr-primary-bg);
+  border-radius: 10px;
+  border: 1.5px solid var(--hr-primary-border);
+  font-weight: 700;
+  color: var(--hr-primary);
+  font-size: 18px;
 }
 
 /* ---------- Responsive ---------- */

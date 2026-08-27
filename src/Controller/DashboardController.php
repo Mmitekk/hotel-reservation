@@ -101,7 +101,7 @@ class DashboardController extends ControllerBase {
       $pending_entities = $reservation_storage->loadMultiple($pending_ids);
       foreach ($pending_entities as $reservation) {
         $room_entity = $reservation->get('room_id')->entity;
-        $room_name = $room_entity ? $room_entity->label() : $this->t('N/A');
+        $room_name = $room_entity ? $room_entity->label() : $this->t('—');
         $check_in_value = $reservation->get('check_in')->value;
         $check_in_formatted = '';
         if ($check_in_value) {
@@ -158,7 +158,7 @@ class DashboardController extends ControllerBase {
       $upcoming_entities = $reservation_storage->loadMultiple($upcoming_ids);
       foreach ($upcoming_entities as $up_res) {
         $up_room = $up_res->get('room_id')->entity;
-        $up_room_name = $up_room ? $up_room->label() : $this->t('N/A');
+        $up_room_name = $up_room ? $up_room->label() : $this->t('—');
         $up_check_in_value = $up_res->get('check_in')->value;
         $up_check_in_formatted = '';
         if ($up_check_in_value) {

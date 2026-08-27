@@ -1,37 +1,37 @@
 hotel_reservation.dashboard:
-  title: 'Dashboard'
-  description: 'View reservation statistics and quick actions.'
+  title: 'Панель управления'
+  description: 'Статистика бронирований и быстрые действия.'
   route_name: hotel_reservation.dashboard
   parent: hotel_reservation.admin
   weight: -20
 
 hotel_reservation.admin:
-  title: 'Hotel Reservation'
-  description: 'Manage hotel rooms, reservations, and pricing.'
+  title: 'Бронирование отеля'
+  description: 'Управление номерами, бронированиями и ценами.'
   route_name: hotel_reservation.dashboard
   parent: system.admin
   weight: -10
 
 hotel_reservation.rooms:
-  title: 'Rooms'
-  description: 'Manage hotel rooms.'
+  title: 'Номера'
+  description: 'Управление номерами отеля.'
   route_name: entity.hr_room.collection
   parent: hotel_reservation.admin
 
 hotel_reservation.reservations:
-  title: 'Reservations'
-  description: 'Manage reservations.'
+  title: 'Бронирования'
+  description: 'Управление бронированиями.'
   route_name: entity.hr_reservation.collection
   parent: hotel_reservation.admin
 
 hotel_reservation.calendar:
-  title: 'Calendar'
-  description: 'View reservation calendar.'
+  title: 'Календарь'
+  description: 'Календарь бронирований.'
   route_name: hotel_reservation.calendar
   parent: hotel_reservation.admin
 
 hotel_reservation.settings_menu:
-  title: 'Settings'
-  description: 'Configure booking settings.'
+  title: 'Настройки'
+  description: 'Настройка параметров бронирования.'
   route_name: hotel_reservation.settings
   parent: hotel_reservation.admin

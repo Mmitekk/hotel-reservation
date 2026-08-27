@@ -112,7 +112,7 @@ class HotelReservationController extends ControllerBase {
     }
 
     // Build the days array for the template header.
-    $weekday_names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    $weekday_names = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     $days = [];
     for ($day = 1; $day <= $days_in_month; $day++) {
       $date_str = sprintf('%04d-%02d-%02d', $year, $month, $day);
@@ -265,12 +265,12 @@ class HotelReservationController extends ControllerBase {
     $save_url = Url::fromRoute('hotel_reservation.room_pricing_save', ['hr_room' => $hr_room->id()]);
 
     // Build a render array using #markup for the form (POST to a separate route).
-    $html = '<h2>' . $this->t('Pricing for @room — @month', [
+    $html = '<h2>' . $this->t('Цены @room — @month', [
       '@room' => $hr_room->label(),
       '@month' => $month_label,
     ]) . '</h2>';
 
-    $html .= '<p>' . $this->t('Base price: @price @currency per night.', [
+    $html .= '<p>' . $this->t('Базовая цена: @price @currency за ночь.', [
       '@price' => number_format($base_price, 2),
       '@currency' => $currency,
     ]) . '</p>';
@@ -278,12 +278,12 @@ class HotelReservationController extends ControllerBase {
     // Month navigation.
     $html .= '<div class="pricing-nav">';
     $html .= Link::fromTextAndUrl(
-      $this->t('‹ Previous Month'),
+      $this->t('‹ Предыдущий месяц'),
       Url::fromRoute('hotel_reservation.room_pricing', ['hr_room' => $hr_room->id(), 'month' => $prev_month, 'year' => $prev_year])
     )->toString();
     $html .= ' | ';
     $html .= Link::fromTextAndUrl(
-      $this->t('Next Month ›'),
+      $this->t('Следующий месяц ›'),
       Url::fromRoute('hotel_reservation.room_pricing', ['hr_room' => $hr_room->id(), 'month' => $next_month, 'year' => $next_year])
     )->toString();
     $html .= '</div>';
@@ -294,9 +294,9 @@ class HotelReservationController extends ControllerBase {
 
     // Build table.
     $html .= '<table class="room-pricing-table">';
-    $html .= '<thead><tr><th>' . $this->t('Date') . '</th><th>' . $this->t('Day') . '</th>';
-    $html .= '<th>' . $this->t('Price (@currency)', ['@currency' => $currency]) . '</th>';
-    $html .= '<th>' . $this->t('Difference') . '</th></tr></thead><tbody>';
+    $html .= '<thead><tr><th>' . $this->t('Дата') . '</th><th>' . $this->t('День') . '</th>';
+    $html .= '<th>' . $this->t('Цена (@currency)', ['@currency' => $currency]) . '</th>';
+    $html .= '<th>' . $this->t('Разница') . '</th></tr></thead><tbody>';
 
     for ($day = 1; $day <= $days_in_month; $day++) {
       $date_str = sprintf('%04d-%02d-%02d', $year, $month, $day);
@@ -331,12 +331,12 @@ class HotelReservationController extends ControllerBase {
     }
 
     $html .= '</tbody></table>';
-    $html .= '<div class="form-actions"><button type="submit" class="button button--primary">' . $this->t('Save Prices') . '</button></div>';
+    $html .= '<div class="form-actions"><button type="submit" class="button button--primary">' . $this->t('Сохранить цены') . '</button></div>';
     $html .= '</form>';
 
     // Back link.
     $html .= '<div class="back-link">' . Link::fromTextAndUrl(
-      $this->t('← Back to rooms'),
+      $this->t('← Назад к номерам'),
       Url::fromRoute('entity.hr_room.collection')
     )->toString() . '</div>';
 
@@ -371,7 +371,7 @@ class HotelReservationController extends ControllerBase {
     $base_price = (float) $hr_room->get('base_price')->value;
 
     if (empty($prices)) {
-      $this->messenger()->addWarning($this->t('No prices submitted.'));
+      $this->messenger()->addWarning($this->t('Цены не указаны.'));
     }
     else {
       $pricing_storage = $this->entityTypeManager->getStorage('hr_room_pricing');
@@ -435,13 +435,13 @@ class HotelReservationController extends ControllerBase {
       }
 
       if ($saved_count > 0) {
-        $this->messenger()->addStatus($this->t('Saved @count custom price(s).', ['@count' => $saved_count]));
+        $this->messenger()->addStatus($this->t('Сохранено @count индивидуальных цен(ы).', ['@count' => $saved_count]));
       }
       if ($deleted_count > 0) {
-        $this->messenger()->addStatus($this->t('Removed @count custom price(s) (reverted to base price).', ['@count' => $deleted_count]));
+        $this->messenger()->addStatus($this->t('Удалено @count индивидуальных цен(ы) (возврат к базовой цене).', ['@count' => $deleted_count]));
       }
       if ($saved_count === 0 && $deleted_count === 0) {
-        $this->messenger()->addStatus($this->t('No changes detected. All prices match the base price.'));
+        $this->messenger()->addStatus($this->t('Изменений нет. Все цены совпадают с базовой.'));
       }
     }
 
@@ -484,7 +484,7 @@ class HotelReservationController extends ControllerBase {
 
     if (!in_array($status, $allowed)) {
       $this->messenger()->addError($this->t(
-        'Cannot change reservation status from %from to %to.',
+        'Нельзя изменить статус бронирования с %from на %to.',
         [
           '%from' => $hr_reservation->getStatusLabel(),
           '%to' => $status,
@@ -496,7 +496,7 @@ class HotelReservationController extends ControllerBase {
       $hr_reservation->save();
 
       $this->messenger()->addStatus($this->t(
-        'Reservation status changed to %status.',
+        'Статус бронирования изменён на %status.',
         ['%status' => $hr_reservation->getStatusLabel()]
       ));
 
@@ -530,7 +530,7 @@ class HotelReservationController extends ControllerBase {
     $currency = $config->get('currency_symbol') ?: '₽';
 
     $room = $reservation->getRoom();
-    $room_name = $room ? $room->label() : $this->t('Unknown');
+    $room_name = $room ? $room->label() : $this->t('Неизвестно');
     $check_in = $reservation->getCheckInDate() ? $reservation->getCheckInDate()->format('d.m.Y') : '';
     $check_out = $reservation->getCheckOutDate() ? $reservation->getCheckOutDate()->format('d.m.Y') : '';
     $total = number_format((float) $reservation->getTotalPrice(), 2);
@@ -539,7 +539,7 @@ class HotelReservationController extends ControllerBase {
 
     if ($new_status === 'confirmed' && !empty($guest_email) && (bool) $config->get('enable_guest_confirmation')) {
       $params['message'] = $this->t(
-        "Dear @guest,\n\nYour reservation at @hotel has been confirmed!\n\nRoom: @room\nCheck-in: @check_in\nCheck-out: @check_out\nTotal: @total @currency\n\nWe look forward to your stay!\n\nBest regards,\n@hotel",
+        "Уважаемый(ая) @guest,\n\nВаше бронирование в отеле @hotel подтверждено!\n\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nИтого: @total @currency\n\nЖдём вас!\n\nС уважением,\n@hotel",
         [
           '@guest' => $reservation->get('guest_name')->value,
           '@hotel' => $hotel_name,
@@ -565,7 +565,7 @@ class HotelReservationController extends ControllerBase {
       if (!empty($admin_email) && (bool) $config->get('enable_admin_notification')) {
         $params['guest_name'] = $reservation->get('guest_name')->value;
         $params['message'] = $this->t(
-          "A reservation has been cancelled:\n\nGuest: @guest\nRoom: @room\nCheck-in: @check_in\nCheck-out: @check_out\n\nStatus: Cancelled",
+          "Бронирование отменено:\n\nГость: @guest\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\n\nСтатус: Отменено",
           [
             '@guest' => $reservation->get('guest_name')->value,
             '@room' => $room_name,

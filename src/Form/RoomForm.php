@@ -22,13 +22,13 @@ class RoomForm extends ContentEntityForm {
     if (isset($form['capacity']['widget'][0]['value'])) {
       $form['capacity']['widget'][0]['value']['#min'] = 1;
       $form['capacity']['widget'][0]['value']['#max'] = 20;
-      $form['capacity']['widget'][0]['value']['#description'] = $this->t('Number of guests the room can accommodate (1–20).');
+      $form['capacity']['widget'][0]['value']['#description'] = $this->t('Количество гостей в номере (1–20).');
     }
 
     // Add help text to the amenities field.
     if (isset($form['amenities']['widget'][0]['value'])) {
       $form['amenities']['widget'][0]['value']['#description'] = $this->t(
-        'Enter a comma-separated list of amenities. For example: Spa, Wi-Fi, TV, Parking, Minibar, Safe, Air Conditioning'
+        'Введите список удобств через запятую. Например: Спа, Wi-Fi, ТВ, Парковка, Минибар, Сейф, Кондиционер'
       );
     }
 
@@ -62,10 +62,10 @@ class RoomForm extends ContentEntityForm {
     $name = $entity->label();
 
     if ($status === SAVED_NEW) {
-      $this->messenger()->addStatus($this->t('Room %name has been created.', ['%name' => $name]));
+      $this->messenger()->addStatus($this->t('Номер «%name» создан.', ['%name' => $name]));
     }
     else {
-      $this->messenger()->addStatus($this->t('Room %name has been saved.', ['%name' => $name]));
+      $this->messenger()->addStatus($this->t('Номер «%name» сохранён.', ['%name' => $name]));
     }
 
     $form_state->setRedirect('entity.hr_room.collection');

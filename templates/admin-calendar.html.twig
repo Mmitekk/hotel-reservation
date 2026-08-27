@@ -15,7 +15,7 @@
       {% if prev_url %}
         <a href="{{ prev_url }}" class="hr-calendar-nav__link">&#8592;</a>
       {% endif %}
-      <a href="{{ current_url }}" class="hr-calendar-nav__link" title="{{ 'Today'|t }}">●</a>
+      <a href="{{ current_url }}" class="hr-calendar-nav__link" title="{{ 'Сегодня'|t }}">●</a>
       {% if next_url %}
         <a href="{{ next_url }}" class="hr-calendar-nav__link">&#8594;</a>
       {% endif %}
@@ -25,24 +25,24 @@
   {# Legend #}
   <div class="hr-calendar-legend">
     <div class="hr-calendar-legend__item">
-      <span class="hr-calendar-legend__badge hr-calendar-reservation--pending">P</span>
-      {{ 'Pending'|t }}
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--pending">П</span>
+      {{ 'Ожидает'|t }}
     </div>
     <div class="hr-calendar-legend__item">
-      <span class="hr-calendar-legend__badge hr-calendar-reservation--confirmed">C</span>
-      {{ 'Confirmed'|t }}
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--confirmed">Пд</span>
+      {{ 'Подтверждено'|t }}
     </div>
     <div class="hr-calendar-legend__item">
-      <span class="hr-calendar-legend__badge hr-calendar-reservation--checked_in">I</span>
-      {{ 'Checked in'|t }}
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--checked_in">З</span>
+      {{ 'Заселён'|t }}
     </div>
     <div class="hr-calendar-legend__item">
-      <span class="hr-calendar-legend__badge hr-calendar-reservation--checked_out">O</span>
-      {{ 'Checked out'|t }}
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--checked_out">В</span>
+      {{ 'Выселён'|t }}
     </div>
     <div class="hr-calendar-legend__item">
-      <span class="hr-calendar-legend__badge hr-calendar-reservation--cancelled" style="text-decoration:line-through;">X</span>
-      {{ 'Cancelled'|t }}
+      <span class="hr-calendar-legend__badge hr-calendar-reservation--cancelled" style="text-decoration:line-through;">Х</span>
+      {{ 'Отменено'|t }}
     </div>
   </div>
 
@@ -50,7 +50,7 @@
   <table class="hr-calendar-table">
     <thead>
       <tr>
-        <th class="hr-calendar-room-name">{{ 'Room'|t }}</th>
+        <th class="hr-calendar-room-name">{{ 'Номер'|t }}</th>
         {% for day in days %}
           <th>
             <div class="hr-calendar-day-name">{{ day.weekday }}</div>
@@ -64,7 +64,7 @@
         <tr>
           <td class="hr-calendar-room-name">
             {{ room.label }}
-            <br><small style="color:#9ca3af">{{ room.capacity }} {{ 'guests'|t }}</small>
+            <br><small style="color:#9ca3af">{{ room.capacity }} {{ 'гостей'|t }}</small>
           </td>
           {% for day in days %}
             {% set cell_class = 'hr-calendar-day' %}

@@ -1,29 +1,29 @@
 hotel_reservation.dashboard_tab:
   route_name: hotel_reservation.dashboard
-  title: Dashboard
+  title: Панель
   base_route: entity.hr_reservation.collection
   weight: 0
 
 hotel_reservation.rooms_tab:
   route_name: entity.hr_room.collection
-  title: Rooms
+  title: Номера
   base_route: entity.hr_room.collection
   weight: 1
 
 hotel_reservation.reservations_tab:
   route_name: entity.hr_reservation.collection
-  title: Reservations
+  title: Бронирования
   base_route: entity.hr_reservation.collection
   weight: 2
 
 hotel_reservation.calendar_tab:
   route_name: hotel_reservation.calendar
-  title: Calendar
+  title: Календарь
   base_route: entity.hr_reservation.collection
   weight: 3
 
 hotel_reservation.settings_tab:
   route_name: hotel_reservation.settings
-  title: Settings
+  title: Настройки
   base_route: hotel_reservation.settings
   weight: 4

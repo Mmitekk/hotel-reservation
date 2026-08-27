@@ -5,6 +5,36 @@
 (function ($, Drupal, drupalSettings) {
   'use strict';
 
+  // ---- Color Utility Functions ----
+  function hexToRgb(hex) {
+    if (!hex || hex.charAt(0) !== '#') return { r: 0, g: 0, b: 0 };
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    const num = parseInt(hex, 16);
+    return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+  }
+
+  function hexToRgba(hex, alpha) {
+    const c = hexToRgb(hex);
+    return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha + ')';
+  }
+
+  function darkenColor(hex, amount) {
+    const c = hexToRgb(hex);
+    const r = Math.max(0, c.r - amount);
+    const g = Math.max(0, c.g - amount);
+    const b = Math.max(0, c.b - amount);
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  function lightenColor(hex, amount) {
+    const c = hexToRgb(hex);
+    const r = Math.min(255, c.r + amount);
+    const g = Math.min(255, c.g + amount);
+    const b = Math.min(255, c.b + amount);
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
   Drupal.behaviors.hotelReservationBookingForm = {
     attach: function (context, settings) {
       const $form = $('.hr-booking-form', context);
@@ -19,6 +49,23 @@
       const checkInTime = config.checkInTime || '14:00';
       const checkOutTime = config.checkOutTime || '12:00';
       const bookingConditions = config.bookingConditions || '';
+
+      // ---- Apply color settings from config ----
+      const primaryColor = config.formPrimaryColor || '#d97706';
+      const bgColor = config.formBackgroundColor || '#ffffff';
+      const textColor = config.formTextColor || '#1a1a2e';
+      const borderRadius = config.formBorderRadius || 10;
+
+      $form.css({
+        '--hr-primary': primaryColor,
+        '--hr-primary-dark': darkenColor(primaryColor, 30),
+        '--hr-primary-light': lightenColor(primaryColor, 50),
+        '--hr-primary-bg': hexToRgba(primaryColor, 0.08),
+        '--hr-primary-border': hexToRgba(primaryColor, 0.25),
+        '--hr-text': textColor,
+        '--hr-bg': bgColor,
+        '--hr-btn-text': '#ffffff',
+      });
 
       // Set min datetime-local to now.
       const now = new Date();
@@ -77,15 +124,15 @@
         const checkOut = extractDate($checkOut.val());
         const errors = [];
 
-        if (!checkIn) errors.push(Drupal.t('Select check-in date'));
-        if (!checkOut) errors.push(Drupal.t('Select check-out date'));
+        if (!checkIn) errors.push(Drupal.t('Выберите дату заезда'));
+        if (!checkOut) errors.push(Drupal.t('Выберите дату выезда'));
         if (checkIn && checkOut) {
           const d1 = new Date(checkIn);
           const d2 = new Date(checkOut);
           const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
-          if (nights <= 0) errors.push(Drupal.t('Check-out must be after check-in'));
-          else if (nights < minStay) errors.push(Drupal.t('Minimum stay is @n nights', {'@n': minStay}));
-          else if (nights > maxStay) errors.push(Drupal.t('Maximum stay is @n nights', {'@n': maxStay}));
+          if (nights <= 0) errors.push(Drupal.t('Дата выезда должна быть позже даты заезда'));
+          else if (nights < minStay) errors.push(Drupal.t('Минимальное количество ночей: @n', {'@n': minStay}));
+          else if (nights > maxStay) errors.push(Drupal.t('Максимальное количество ночей: @n', {'@n': maxStay}));
         }
         return errors;
       }
@@ -106,7 +153,7 @@
 
         const $btn = $form.find('.hr-search-btn');
         const originalText = $btn.html();
-        $btn.prop('disabled', true).html('<span class="hr-spinner"></span>' + Drupal.t('Searching...'));
+        $btn.prop('disabled', true).html('<span class="hr-spinner"></span>' + Drupal.t('Поиск...'));
 
         const guestCount = parseInt($form.find('.hr-field-guests').val()) || 1;
 
@@ -126,7 +173,7 @@
             showStep('select');
           },
           error: function (xhr) {
-            let msg = Drupal.t('An error occurred. Please try again.');
+            let msg = Drupal.t('Произошла ошибка. Попробуйте ещё раз.');
             try {
               const data = JSON.parse(xhr.responseText);
               if (data.message) msg = data.message;
@@ -148,7 +195,7 @@
           $container.html(
             '<div class="hr-no-results">' +
             '<div class="hr-no-results__icon">🏨</div>' +
-            '<p class="hr-no-results__text">' + Drupal.t('No rooms available for selected dates') + '</p>' +
+            '<p class="hr-no-results__text">' + Drupal.t('Нет свободных номеров на выбранные даты') + '</p>' +
             '</div>'
           );
           return;
@@ -161,8 +208,8 @@
         const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
 
         let html = '<div class="hr-results__title">' +
-          Drupal.t('Found @n room(s)', {'@n': rooms.length}) +
-          ' · ' + nights + ' ' + Drupal.formatPlural(nights, 'night', 'nights') +
+          Drupal.t('Найдено @n номер(ов)', {'@n': rooms.length}) +
+          ' · ' + nights + ' ' + Drupal.formatPlural(nights, 'ночь', 'ночи', 'ночей') +
           '</div>';
 
         rooms.forEach(function (room) {
@@ -173,14 +220,14 @@
             '<div class="hr-room-card" data-room-id="' + room.id + '">' +
             '<div class="hr-room-card__name">' + Drupal.checkPlain(room.name) + '</div>' +
             '<div class="hr-room-card__meta">' +
-            Drupal.t('Up to @n guests', {'@n': room.capacity}) +
+            Drupal.t('До @n гостей', {'@n': room.capacity}) +
             '</div>' +
             (amenitiesHtml ? '<div class="hr-room-card__amenities">' + amenitiesHtml + '</div>' : '') +
             '<div class="hr-room-card__price">' +
             '<div><span class="hr-room-card__price-value">' + currencySymbol + parseFloat(room.total_price).toLocaleString('ru-RU') + '</span>' +
-            '<span class="hr-room-card__price-unit"> / ' + Drupal.formatPlural(nights, 'night', 'nights') + '</span></div>' +
+            '<span class="hr-room-card__price-unit"> / ' + Drupal.formatPlural(nights, 'ночь', 'ночи', 'ночей') + '</span></div>' +
             (room.base_price !== room.total_price / nights ?
-              '<div class="hr-room-card__total">' + Drupal.t('from') + ' ' + currencySymbol + parseFloat(room.base_price).toLocaleString('ru-RU') + '/' + Drupal.t('night') + '</div>' : '') +
+              '<div class="hr-room-card__total">' + Drupal.t('от') + ' ' + currencySymbol + parseFloat(room.base_price).toLocaleString('ru-RU') + '/' + Drupal.t('ночь') + '</div>' : '') +
             '</div></div>';
         });
 
@@ -217,7 +264,7 @@
         const basePrice = parseFloat(room.base_price);
         let hasCustom = false;
 
-        let html = '<table><thead><tr><th>' + Drupal.t('Date') + '</th><th>' + Drupal.t('Price') + '</th></tr></thead><tbody>';
+        let html = '<table><thead><tr><th>' + Drupal.t('Дата') + '</th><th>' + Drupal.t('Цена') + '</th></tr></thead><tbody>';
 
         days.forEach(function (date) {
           const price = parseFloat(room.daily_prices[date]);
@@ -227,7 +274,7 @@
         });
 
         html += '</tbody>';
-        html += '<tfoot><tr class="hr-price-breakdown__total"><td>' + Drupal.t('Total') + '</td>' +
+        html += '<tfoot><tr class="hr-price-breakdown__total"><td>' + Drupal.t('Итого') + '</td>' +
           '<td>' + currencySymbol + parseFloat(room.total_price).toLocaleString('ru-RU') + '</td></tr></tfoot>';
         html += '</table>';
 
@@ -248,10 +295,10 @@
         const guestCount = parseInt($form.find('.hr-field-guests').val()) || 1;
         const notes = $form.find('.hr-field-notes').val().trim();
 
-        if (!guestName) errors.push(Drupal.t('Enter your name'));
-        if (!guestPhone || guestPhone.replace(/[^\d]/g, '').length < 11) errors.push(Drupal.t('Enter a valid phone number'));
+        if (!guestName) errors.push(Drupal.t('Введите ваше имя'));
+        if (!guestPhone || guestPhone.replace(/[^\d]/g, '').length < 11) errors.push(Drupal.t('Введите корректный номер телефона'));
         if (guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
-          errors.push(Drupal.t('Enter a valid email address'));
+          errors.push(Drupal.t('Введите корректный email'));
         }
 
         showErrors('.hr-book-errors', errors);
@@ -259,7 +306,7 @@
 
         const $btn = $form.find('.hr-book-btn');
         const originalText = $btn.html();
-        const loadingText = config.buttonText ? (Drupal.t('Booking...')) : Drupal.t('Booking...');
+        const loadingText = Drupal.t('Бронирование...');
         $btn.prop('disabled', true).html('<span class="hr-spinner"></span>' + loadingText);
 
         $.ajax({
@@ -289,7 +336,7 @@
             }
           },
           error: function (xhr) {
-            let msg = Drupal.t('Booking failed. Please try again.');
+            let msg = Drupal.t('Ошибка бронирования. Попробуйте ещё раз.');
             try {
               const data = JSON.parse(xhr.responseText);
               if (data.message) msg = data.message;
@@ -312,41 +359,6 @@
         };
         const parts = dateStr.split('-');
         return parseInt(parts[2]) + ' ' + months[parts[1]];
-      }
-
-      // ---- Phone Mask +7 ----
-      function applyPhoneMask(input) {
-        let value = input.replace(/[^\d+]/g, '');
-        if (value.length === 0) return '';
-
-        // If starts with 8, replace with +7
-        if (value[0] === '8') value = '7' + value.substring(1);
-        // If starts with 7 without +, add +
-        if (value[0] === '7' && input.indexOf('+7') !== 0) value = '+' + value;
-        // If just digits starting with 9, assume +79xx
-        if (/^9\d{9}$/.test(value)) value = '+7' + value;
-
-        let digits = value.replace(/[^\d]/g, '');
-        if (digits.length === 0) return '';
-
-        // Ensure starts with 7
-        if (digits[0] !== '7') digits = '7' + digits;
-
-        let formatted = '+7';
-        if (digits.length > 1) {
-          formatted += ' (' + digits.substring(1, Math.min(4, digits.length));
-        }
-        if (digits.length >= 4) {
-          formatted += ') ' + digits.substring(4, Math.min(7, digits.length));
-        }
-        if (digits.length >= 7) {
-          formatted += '-' + digits.substring(7, Math.min(9, digits.length));
-        }
-        if (digits.length >= 9) {
-          formatted += '-' + digits.substring(9, Math.min(11, digits.length));
-        }
-
-        return formatted;
       }
 
       // ---- Event Listeners ----
@@ -410,15 +422,25 @@
         }
       });
 
-      // Phone mask on input
+      // ---- Phone Mask +7 ----
       $form.on('input', '.hr-field-guest-phone', function () {
-        const pos = this.selectionStart;
-        const oldLen = this.value.length;
-        this.value = applyPhoneMask(this.value);
-        // Adjust cursor position after formatting.
-        const newLen = this.value.length;
-        const diff = newLen - oldLen;
-        this.setSelectionRange(pos + diff, pos + diff);
+        let val = $(this).val().replace(/[^0-9+]/g, '');
+        if (val.length > 0 && val[0] !== '+') {
+          if (val[0] === '8') val = '7' + val.substring(1);
+          if (val[0] === '7') val = '+' + val;
+          else val = '+7' + val;
+        }
+        if (val.startsWith('+7')) {
+          const digits = val.substring(2);
+          let formatted = '+7';
+          if (digits.length > 0) formatted += ' (' + digits.substring(0, 3);
+          if (digits.length >= 3) formatted += ') ' + digits.substring(3, 6);
+          if (digits.length >= 6) formatted += '-' + digits.substring(6, 8);
+          if (digits.length >= 8) formatted += '-' + digits.substring(8, 10);
+          $(this).val(formatted);
+        } else {
+          $(this).val(val);
+        }
       });
 
       // Focus formats phone field

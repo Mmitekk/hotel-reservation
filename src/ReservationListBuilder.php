@@ -71,10 +71,10 @@ class ReservationListBuilder extends EntityListBuilder {
     $date_to = $this->request->query->get('date_to', '');
     $room = $this->request->query->get('room', '');
 
-    $status_options = ['' => $this->t('- All statuses -')] + \Drupal\hotel_reservation\Entity\Reservation::getStatusOptions();
+    $status_options = ['' => $this->t('— Все статусы —')] + \Drupal\hotel_reservation\Entity\Reservation::getStatusOptions();
 
     $room_entities = \Drupal::entityTypeManager()->getStorage('hr_room')->loadMultiple();
-    $room_options = ['' => $this->t('- All rooms -')];
+    $room_options = ['' => $this->t('— Все номера —')];
     foreach ($room_entities as $room_entity) {
       $room_options[$room_entity->id()] = $room_entity->label();
     }
@@ -89,7 +89,7 @@ class ReservationListBuilder extends EntityListBuilder {
 
     $form['status'] = [
       '#type' => 'select',
-      '#title' => $this->t('Status'),
+      '#title' => $this->t('Статус'),
       '#options' => $status_options,
       '#default_value' => $status,
       '#attributes' => ['name' => 'status'],
@@ -97,21 +97,21 @@ class ReservationListBuilder extends EntityListBuilder {
 
     $form['date_from'] = [
       '#type' => 'date',
-      '#title' => $this->t('Date from'),
+      '#title' => $this->t('Дата с'),
       '#default_value' => $date_from,
       '#attributes' => ['name' => 'date_from'],
     ];
 
     $form['date_to'] = [
       '#type' => 'date',
-      '#title' => $this->t('Date to'),
+      '#title' => $this->t('Дата по'),
       '#default_value' => $date_to,
       '#attributes' => ['name' => 'date_to'],
     ];
 
     $form['room'] = [
       '#type' => 'select',
-      '#title' => $this->t('Room'),
+      '#title' => $this->t('Номер'),
       '#options' => $room_options,
       '#default_value' => $room,
       '#attributes' => ['name' => 'room'],
@@ -120,7 +120,7 @@ class ReservationListBuilder extends EntityListBuilder {
     $form['submit'] = [
       '#type' => 'html_tag',
       '#tag' => 'button',
-      '#value' => $this->t('Filter'),
+      '#value' => $this->t('Фильтр'),
       '#attributes' => [
         'type' => 'submit',
         'class' => ['button', 'button--primary'],
@@ -129,7 +129,7 @@ class ReservationListBuilder extends EntityListBuilder {
 
     $form['reset'] = [
       '#type' => 'link',
-      '#title' => $this->t('Reset'),
+      '#title' => $this->t('Сброс'),
       '#url' => Url::fromRoute('entity.hr_reservation.collection'),
       '#attributes' => [
         'class' => ['button'],
@@ -178,43 +178,43 @@ class ReservationListBuilder extends EntityListBuilder {
    */
   public function buildHeader() {
     $header['guest_name'] = [
-      'data' => $this->t('Guest'),
+      'data' => $this->t('Гость'),
       'field' => 'guest_name',
       'spec' => [
         'column' => 'guest_name',
       ],
       'sort' => 'asc',
     ];
-    $header['room'] = $this->t('Room');
+    $header['room'] = $this->t('Номер');
     $header['check_in'] = [
-      'data' => $this->t('Check-in'),
+      'data' => $this->t('Заезд'),
       'field' => 'check_in',
       'spec' => [
         'column' => 'check_in',
       ],
     ];
     $header['check_out'] = [
-      'data' => $this->t('Check-out'),
+      'data' => $this->t('Выезд'),
       'field' => 'check_out',
       'spec' => [
         'column' => 'check_out',
       ],
     ];
     $header['status'] = [
-      'data' => $this->t('Status'),
+      'data' => $this->t('Статус'),
       'field' => 'status',
       'spec' => [
         'column' => 'status',
       ],
     ];
     $header['total_price'] = [
-      'data' => $this->t('Total'),
+      'data' => $this->t('Итого'),
       'field' => 'total_price',
       'spec' => [
         'column' => 'total_price',
       ],
     ];
-    $header['operations'] = $this->t('Operations');
+    $header['operations'] = $this->t('Действия');
     return $header + parent::buildHeader();
   }
 
@@ -239,7 +239,7 @@ class ReservationListBuilder extends EntityListBuilder {
       ];
     }
     else {
-      $row['room'] = $this->t('N/A');
+      $row['room'] = $this->t('—');
     }
 
     // Check-in date formatted d.m.Y.
@@ -277,11 +277,11 @@ class ReservationListBuilder extends EntityListBuilder {
     // Operations: edit, delete, and status change links.
     $operations = [];
     $operations['edit'] = [
-      'title' => $this->t('Edit'),
+      'title' => $this->t('Изменить'),
       'url' => $entity->toUrl('edit-form'),
     ];
     $operations['delete'] = [
-      'title' => $this->t('Delete'),
+      'title' => $this->t('Удалить'),
       'url' => $entity->toUrl('delete-form'),
     ];
 
@@ -317,15 +317,15 @@ class ReservationListBuilder extends EntityListBuilder {
   protected function getStatusTransitions(string $current_status): array {
     $transitions = [
       'pending' => [
-        'confirmed' => $this->t('Confirm'),
-        'cancelled' => $this->t('Cancel'),
+        'confirmed' => $this->t('Подтвердить'),
+        'cancelled' => $this->t('Отменить'),
       ],
       'confirmed' => [
-        'checked_in' => $this->t('Check in'),
-        'cancelled' => $this->t('Cancel'),
+        'checked_in' => $this->t('Заселить'),
+        'cancelled' => $this->t('Отменить'),
       ],
       'checked_in' => [
-        'checked_out' => $this->t('Check out'),
+        'checked_out' => $this->t('Выселить'),
       ],
       'checked_out' => [],
       'cancelled' => [],
@@ -346,7 +346,7 @@ class ReservationListBuilder extends EntityListBuilder {
       '#attributes' => ['style' => 'margin-bottom: 12px; display: flex; align-items: center; gap: 8px;'],
       'link' => [
         '#type' => 'link',
-        '#title' => $this->t('Export CSV ↓'),
+        '#title' => $this->t('Экспорт CSV ↓'),
         '#url' => Url::fromRoute('hotel_reservation.export_csv'),
         '#attributes' => ['class' => ['button', 'hr-dashboard-btn', 'hr-dashboard-btn--export']],
       ],
@@ -356,7 +356,7 @@ class ReservationListBuilder extends EntityListBuilder {
       '#type' => 'table',
       '#header' => $this->buildHeader(),
       '#rows' => [],
-      '#empty' => $this->t('No reservations found.'),
+      '#empty' => $this->t('Бронирований не найдено.'),
       '#attributes' => [
         'class' => ['table-responsive'],
       ],

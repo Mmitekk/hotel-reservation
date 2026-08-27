@@ -1,14 +1,14 @@
 administer hotel reservation:
-  title: 'Administer hotel reservation'
-  description: 'Full access to manage rooms, reservations, and settings.'
+  title: 'Управление бронированием отеля'
+  description: 'Полный доступ к управлению номерами, бронированиями и настройками.'
   restrict access: true
 
 view hotel reservation:
-  title: 'View hotel reservation'
-  description: 'View room availability and make reservations.'
+  title: 'Просмотр бронирования отеля'
+  description: 'Просмотр наличия номеров и создание бронирований.'
   restrict access: false
 
 create hotel reservation:
-  title: 'Create hotel reservation'
-  description: 'Create room reservations.'
+  title: 'Создание бронирования отеля'
+  description: 'Создание бронирований номеров.'
   restrict access: false

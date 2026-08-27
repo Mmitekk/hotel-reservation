@@ -7,7 +7,7 @@ hotel_reservation.dashboard:
   path: '/admin/hotel-reservation/dashboard'
   defaults:
     _controller: '\Drupal\hotel_reservation\Controller\DashboardController::dashboard'
-    _title: 'Dashboard'
+    _title: 'Панель управления'
   requirements:
     _permission: 'administer hotel reservation'
 
@@ -15,7 +15,7 @@ hotel_reservation.settings:
   path: '/admin/config/hotel-reservation/settings'
   defaults:
     _form: '\Drupal\hotel_reservation\Form\SettingsForm'
-    _title: 'Hotel Reservation Settings'
+    _title: 'Настройки бронирования'
   requirements:
     _permission: 'administer hotel reservation'
 
@@ -23,7 +23,7 @@ hotel_reservation.room_pricing:
   path: '/admin/hotel-reservation/rooms/{hr_room}/pricing/{month}/{year}'
   defaults:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::roomPricing'
-    _title: 'Room Pricing Calendar'
+    _title: 'Календарь цен номера'
     month: NULL
     year: NULL
   requirements:
@@ -33,7 +33,7 @@ hotel_reservation.room_pricing_save:
   path: '/admin/hotel-reservation/rooms/{hr_room}/pricing/save'
   defaults:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::roomPricingSave'
-    _title: 'Save Room Pricing'
+    _title: 'Сохранение цен'
   requirements:
     _permission: 'administer hotel reservation'
 
@@ -41,7 +41,7 @@ hotel_reservation.reservation_status:
   path: '/admin/hotel-reservation/reservations/{hr_reservation}/status/{status}'
   defaults:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::changeReservationStatus'
-    _title: 'Change Reservation Status'
+    _title: 'Изменение статуса бронирования'
   requirements:
     _permission: 'administer hotel reservation'
     _csrf_token: 'TRUE'
@@ -50,7 +50,7 @@ hotel_reservation.calendar:
   path: '/admin/hotel-reservation/calendar/{month}/{year}'
   defaults:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::calendar'
-    _title: 'Reservation Calendar'
+    _title: 'Календарь бронирований'
     month: NULL
     year: NULL
   requirements:
