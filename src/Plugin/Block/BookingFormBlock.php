@@ -86,11 +86,14 @@ class BookingFormBlock extends BlockBase {
     // Attach CSS/JS library.
     $build['#attached']['library'][] = 'hotel_reservation/booking-form';
 
+    // Derive a slightly darker shade for input backgrounds.
+    $bg_alt_color = $bg_color === '#ffffff' ? '#fafafa' : $bg_color;
+
     // CSS custom properties for theming.
     $build['#attached']['html_head'][] = [
       [
         '#tag' => 'style',
-        '#value' => '.hr-booking-form{--hr-primary:' . $primary_color . ';--hr-bg:' . $bg_color . ';--hr-text:' . $text_color . ';--hr-radius:' . $border_radius . 'px;}',
+        '#value' => '.hr-booking-form{--hr-primary:' . $primary_color . ';--hr-bg:' . $bg_color . ';--hr-bg-alt:' . $bg_alt_color . ';--hr-text:' . $text_color . ';--hr-radius:' . $border_radius . 'px;}',
       ],
       'hr-form-design',
     ];
