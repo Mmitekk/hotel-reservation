@@ -177,7 +177,10 @@
             try {
               const data = JSON.parse(xhr.responseText);
               if (data.message) msg = data.message;
-            } catch (e) {}
+              else if (data.error) msg = data.error;
+            } catch (e) {
+              if (xhr.status === 500) msg = Drupal.t('Внутренняя ошибка сервера.');
+            }
             showErrors('.hr-search-errors', [msg]);
           },
           complete: function () {
@@ -340,8 +343,16 @@
             try {
               const data = JSON.parse(xhr.responseText);
               if (data.message) msg = data.message;
+              else if (data.error) msg = data.error;
               if (data.errors && data.errors.length) msg = data.errors.join(' ');
-            } catch (e) {}
+            } catch (e) {
+              // Response is not JSON (e.g. HTML error page).
+              if (xhr.status === 0) msg = Drupal.t('Нет связи с сервером. Проверьте интернет.');
+              else if (xhr.status === 403) msg = Drupal.t('Доступ запрещён.');
+              else if (xhr.status === 404) msg = Drupal.t('Серверная ошибка: маршрут не найден.');
+              else if (xhr.status === 500) msg = Drupal.t('Внутренняя ошибка сервера (@code).', {'@code': xhr.status});
+              else msg = Drupal.t('Ошибка сервера (@code).', {'@code': xhr.status});
+            }
             showErrors('.hr-book-errors', [msg]);
           },
           complete: function () {

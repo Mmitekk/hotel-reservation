@@ -47,7 +47,7 @@ class ApiController extends ControllerBase {
     if (empty($data)) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Неверные данные JSON.',
+        'message' => 'Неверные данные JSON.',
       ], 400);
     }
 
@@ -59,21 +59,21 @@ class ApiController extends ControllerBase {
     if (empty($check_in) || empty($check_out)) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Укажите check_in и check_out.',
+        'message' => 'Укажите check_in и check_out.',
       ], 400);
     }
 
     if (!$this->validateDate($check_in) || !$this->validateDate($check_out)) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Неверный формат даты. Используйте Г-М-Д.',
+        'message' => 'Неверный формат даты. Используйте Г-М-Д.',
       ], 400);
     }
 
     if ($check_out <= $check_in) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Дата выезда должна быть позже даты заезда.',
+        'message' => 'Дата выезда должна быть позже даты заезда.',
       ], 400);
     }
 
@@ -90,7 +90,7 @@ class ApiController extends ControllerBase {
     if ($nights < $min_stay) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Минимальное количество ночей: ' . $min_stay . '.',
+        'message' => 'Минимальное количество ночей: ' . $min_stay . '.',
         'min_stay' => $min_stay,
       ], 400);
     }
@@ -98,7 +98,7 @@ class ApiController extends ControllerBase {
     if ($nights > $max_stay) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Максимальное количество ночей: ' . $max_stay . '.',
+        'message' => 'Максимальное количество ночей: ' . $max_stay . '.',
         'max_stay' => $max_stay,
       ], 400);
     }
@@ -152,7 +152,7 @@ class ApiController extends ControllerBase {
     if (empty($data)) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Неверные данные JSON.',
+        'message' => 'Неверные данные JSON.',
       ], 400);
     }
 
@@ -218,19 +218,19 @@ class ApiController extends ControllerBase {
     if (!$room) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Номер не найден.',
+        'message' => 'Номер не найден.',
       ], 404);
     }
     if (!$room->isPublished()) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Номер недоступен для бронирования.',
+        'message' => 'Номер недоступен для бронирования.',
       ], 400);
     }
     if ($room->getCapacity() < $guest_count) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Вместимость номера — ' . $room->getCapacity() . ' гостей, запрошено — ' . $guest_count . '.',
+        'message' => 'Вместимость номера — ' . $room->getCapacity() . ' гостей, запрошено — ' . $guest_count . '.',
       ], 400);
     }
 
@@ -239,7 +239,7 @@ class ApiController extends ControllerBase {
     if (!isset($available_rooms[$room_id])) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Номер занят на выбранные даты.',
+        'message' => 'Номер занят на выбранные даты.',
       ], 409);
     }
 
@@ -250,7 +250,7 @@ class ApiController extends ControllerBase {
     // Create the reservation entity.
     try {
       $reservation = $this->entityTypeManager->getStorage('hr_reservation')->create([
-        'room_id' => $room_id,
+        'room_id' => ['target_id' => $room_id],
         'check_in' => $check_in,
         'check_out' => $check_out,
         'guest_name' => $guest_name,
@@ -258,18 +258,20 @@ class ApiController extends ControllerBase {
         'guest_email' => $guest_email,
         'guest_count' => $guest_count,
         'total_price' => $total_price,
-        'notes' => $notes,
+        'notes' => ['value' => $notes, 'format' => 'plain_text'],
         'status' => 'pending',
       ]);
       $reservation->save();
     }
     catch (\Exception $e) {
-      $this->getLogger('hotel_reservation')->error('Failed to create reservation: @message', [
+      $this->getLogger('hotel_reservation')->error('Failed to create reservation: @message | File: @file Line: @line', [
         '@message' => $e->getMessage(),
+        '@file' => $e->getFile(),
+        '@line' => $e->getLine(),
       ]);
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Не удалось создать бронирование. Попробуйте ещё раз.',
+        'message' => 'Не удалось создать бронирование. Попробуйте ещё раз.',
       ], 500);
     }
 
@@ -360,21 +362,21 @@ class ApiController extends ControllerBase {
     if (empty($room_id) || empty($check_in) || empty($check_out)) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Укажите параметры room_id, check_in и check_out.',
+        'message' => 'Укажите параметры room_id, check_in и check_out.',
       ], 400);
     }
 
     if (!$this->validateDate($check_in) || !$this->validateDate($check_out)) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Неверный формат даты. Используйте Г-М-Д.',
+        'message' => 'Неверный формат даты. Используйте Г-М-Д.',
       ], 400);
     }
 
     if ($check_out <= $check_in) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Дата выезда должна быть позже даты заезда.',
+        'message' => 'Дата выезда должна быть позже даты заезда.',
       ], 400);
     }
 
@@ -383,7 +385,7 @@ class ApiController extends ControllerBase {
     if (!$room) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'error' => 'Номер не найден.',
+        'message' => 'Номер не найден.',
       ], 404);
     }
 
