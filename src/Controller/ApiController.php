@@ -301,7 +301,7 @@ class ApiController extends ControllerBase {
           ]
         );
 
-        $this->mailManager()->mail(
+        \Drupal::service('plugin.manager.mail')->mail(
           'hotel_reservation',
           'reservation_admin_notification',
           $admin_email,
@@ -328,7 +328,7 @@ class ApiController extends ControllerBase {
         ]
       );
 
-      $this->mailManager()->mail(
+      \Drupal::service('plugin.manager.mail')->mail(
         'hotel_reservation',
         'reservation_confirmation',
         $guest_email,
