@@ -1,0 +1,172 @@
+{# Analytics admin page for Hotel Reservation module. #}
+<div class="hr-analytics-wrapper">
+
+  {# === KPI ROW === #}
+  <div class="hr-analytics-kpi-grid">
+    <div class="hr-analytics-kpi-card hr-analytics-kpi-card--total">
+      <div class="hr-analytics-kpi-card__icon">📋</div>
+      <div class="hr-analytics-kpi-card__body">
+        <div class="hr-analytics-kpi-card__label">Всего бронирований</div>
+        <div class="hr-analytics-kpi-card__value">{{ stats.total_reservations|number_format(0, '.', ' ') }}</div>
+      </div>
+    </div>
+
+    <div class="hr-analytics-kpi-card hr-analytics-kpi-card--conversion">
+      <div class="hr-analytics-kpi-card__icon">📈</div>
+      <div class="hr-analytics-kpi-card__body">
+        <div class="hr-analytics-kpi-card__label">Конверсия</div>
+        <div class="hr-analytics-kpi-card__value">{{ conversion_rate }}%</div>
+      </div>
+    </div>
+
+    <div class="hr-analytics-kpi-card hr-analytics-kpi-card--avg-value">
+      <div class="hr-analytics-kpi-card__icon">💳</div>
+      <div class="hr-analytics-kpi-card__body">
+        <div class="hr-analytics-kpi-card__label">Средний чек</div>
+        <div class="hr-analytics-kpi-card__value">{{ stats.avg_booking_value }}</div>
+      </div>
+    </div>
+
+    <div class="hr-analytics-kpi-card hr-analytics-kpi-card--stay">
+      <div class="hr-analytics-kpi-card__icon">🌙</div>
+      <div class="hr-analytics-kpi-card__body">
+        <div class="hr-analytics-kpi-card__label">Средняя длительность</div>
+        <div class="hr-analytics-kpi-card__value">{{ avg_stay }} <span class="hr-analytics-kpi-card__unit">ночей</span></div>
+      </div>
+    </div>
+  </div>
+
+  {# === STATUS DISTRIBUTION === #}
+  <div class="hr-analytics-section">
+    <h2 class="hr-analytics-section__title">Распределение по статусам</h2>
+    <div class="hr-analytics-bars">
+      {% for item in status_distribution %}
+        <div class="hr-analytics-bar-row">
+          <div class="hr-analytics-bar-label">
+            <span class="hr-analytics-bar-dot" style="background-color: {{ item.color }};"></span>
+            <span class="hr-analytics-bar-label-text">{{ item.label }}</span>
+          </div>
+          <div class="hr-analytics-bar-track">
+            <div class="hr-analytics-bar-fill" style="width: {{ item.width_pct }}%; background-color: {{ item.color }};"></div>
+          </div>
+          <div class="hr-analytics-bar-count">{{ item.count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# === ROOM REVENUE RANKING + TOP ROOM === #}
+  <div class="hr-analytics-row-2col">
+    {# Room revenue ranking #}
+    <div class="hr-analytics-section hr-analytics-section--wide">
+      <h2 class="hr-analytics-section__title">Рейтинг номеров по выручке</h2>
+      {% if room_revenue is not empty %}
+        <div class="hr-analytics-bars">
+          {% for room in room_revenue %}
+            <div class="hr-analytics-bar-row">
+              <div class="hr-analytics-bar-label">
+                <span class="hr-analytics-bar-label-text hr-analytics-bar-label-text--room">{{ room.name }}</span>
+                <span class="hr-analytics-bar-label-type">{{ room.room_type }}</span>
+              </div>
+              <div class="hr-analytics-bar-track">
+                <div class="hr-analytics-bar-fill hr-analytics-bar-fill--revenue" style="width: {{ room.width_pct }}%;"></div>
+              </div>
+              <div class="hr-analytics-bar-meta">
+                <span class="hr-analytics-bar-revenue">{{ room.formatted_revenue }}</span>
+                <span class="hr-analytics-bar-bookings">{{ room.bookings }} {{ 'брон.'|t }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="hr-analytics-empty">Нет данных о выручке.</div>
+      {% endif %}
+    </div>
+
+    {# Top room card #}
+    <div class="hr-analytics-section hr-analytics-section--narrow">
+      <h2 class="hr-analytics-section__title">Лучший номер</h2>
+      {% if top_room is not null %}
+        <div class="hr-analytics-top-room">
+          <div class="hr-analytics-top-room__trophy">🏆</div>
+          <div class="hr-analytics-top-room__name">{{ top_room.name }}</div>
+          <div class="hr-analytics-top-room__type">{{ top_room.room_type }}</div>
+          <div class="hr-analytics-top-room__stats">
+            <div class="hr-analytics-top-room__stat">
+              <div class="hr-analytics-top-room__stat-value">{{ top_room.revenue }}</div>
+              <div class="hr-analytics-top-room__stat-label">Выручка</div>
+            </div>
+            <div class="hr-analytics-top-room__stat">
+              <div class="hr-analytics-top-room__stat-value">{{ top_room.bookings }}</div>
+              <div class="hr-analytics-top-room__stat-label">{{ 'Бронирований'|t }}</div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="hr-analytics-empty">Нет данных.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# === WEEKLY REVENUE + BOOKINGS === #}
+  <div class="hr-analytics-section">
+    <h2 class="hr-analytics-section__title">Выручка и бронирования за неделю</h2>
+    <div class="hr-analytics-legend">
+      <span class="hr-analytics-legend__item">
+        <span class="hr-analytics-legend__dot" style="background-color: #f59e0b;"></span>
+        Выручка
+      </span>
+      <span class="hr-analytics-legend__item">
+        <span class="hr-analytics-legend__dot hr-analytics-legend__dot--ring" style="border-color: #0ea5e9; background-color: #0ea5e9;"></span>
+        Бронирования
+      </span>
+    </div>
+    <div class="hr-analytics-weekly-chart">
+      <div class="hr-analytics-weekly-chart__area">
+        <div class="hr-analytics-weekly-chart__bars">
+          {% for day in weekly_data %}
+            <div class="hr-analytics-weekly-chart__col">
+              <div class="hr-analytics-weekly-chart__bar-wrapper">
+                <div class="hr-analytics-weekly-chart__bar" style="height: {{ day.revenue_height }}%;" data-amount="{{ day.formatted_revenue }}"></div>
+                <div class="hr-analytics-weekly-chart__dot" style="bottom: {{ day.bookings_height }}%;" title="{{ day.bookings }} {{ 'брон.'|t }}">{{ day.bookings }}</div>
+              </div>
+              <div class="hr-analytics-weekly-chart__day{% if day.is_today %} hr-analytics-weekly-chart__day--today{% endif %}">
+                {{ day.day_short }}
+              </div>
+              <div class="hr-analytics-weekly-chart__date">{{ day.date }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# === MONTHLY TREND TABLE === #}
+  <div class="hr-analytics-section">
+    <h2 class="hr-analytics-section__title">Помесячная динамика</h2>
+    <div class="hr-analytics-table-wrap">
+      <table class="hr-analytics-table">
+        <thead>
+          <tr>
+            <th>Месяц</th>
+            <th>Выручка</th>
+            <th>Бронирования</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for month in monthly_data %}
+            <tr class="hr-analytics-table__row">
+              <td class="hr-analytics-table__cell hr-analytics-table__cell--month">
+                <span class="hr-analytics-table__month-name">{{ month.month_name }}</span>
+                <span class="hr-analytics-table__year">{{ month.year_month|split('-')|first }}</span>
+              </td>
+              <td class="hr-analytics-table__cell hr-analytics-table__cell--revenue">{{ month.formatted_revenue }}</td>
+              <td class="hr-analytics-table__cell hr-analytics-table__cell--bookings">{{ month.bookings }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

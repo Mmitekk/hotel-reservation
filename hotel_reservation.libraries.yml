@@ -24,3 +24,28 @@ dashboard:
   css:
     theme:
       css/dashboard.css: {}
+
+analytics:
+  version: 1.6.0
+  css:
+    theme:
+      css/analytics.css: {}
+
+rooms-block:
+  version: 1.6.0
+  css:
+    theme:
+      css/rooms-block.css: {}
+
+room-comparison:
+  version: 1.0.0
+  css:
+    theme:
+      css/room-comparison.css: {}
+  js:
+    js/room-comparison.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
+    - core/once

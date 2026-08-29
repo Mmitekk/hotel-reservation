@@ -341,14 +341,38 @@ class ReservationListBuilder extends EntityListBuilder {
   public function render() {
     $build['filter'] = $this->buildFilterForm();
 
+    // Build export URL with current filter params preserved.
+    $export_params = [];
+    $status = $this->request->query->get('status', '');
+    if ($status !== '') {
+      $export_params['status'] = $status;
+    }
+    $date_from = $this->request->query->get('date_from', '');
+    if ($date_from !== '') {
+      $export_params['date_from'] = $date_from;
+    }
+    $date_to = $this->request->query->get('date_to', '');
+    if ($date_to !== '') {
+      $export_params['date_to'] = $date_to;
+    }
+    $room = $this->request->query->get('room', '');
+    if ($room !== '') {
+      $export_params['room'] = $room;
+    }
+
+    $export_url = Url::fromRoute('hotel_reservation.export_csv');
+    if (!empty($export_params)) {
+      $export_url->setOption('query', $export_params);
+    }
+
     $build['filter']['actions'] = [
       '#type' => 'container',
       '#attributes' => ['style' => 'margin-bottom: 12px; display: flex; align-items: center; gap: 8px;'],
       'link' => [
         '#type' => 'link',
-        '#title' => $this->t('Экспорт CSV ↓'),
-        '#url' => Url::fromRoute('hotel_reservation.export_csv'),
-        '#attributes' => ['class' => ['button', 'hr-dashboard-btn', 'hr-dashboard-btn--export']],
+        '#title' => $this->t('📥 Экспорт CSV'),
+        '#url' => $export_url,
+        '#attributes' => ['class' => ['button', 'button--primary']],
       ],
     ];
 

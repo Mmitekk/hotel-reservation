@@ -76,6 +76,21 @@ function hotel_reservation_theme($existing, $type, $theme, $path) {
       ],
       'template' => 'dashboard',
     ],
+    'hotel_reservation_analytics' => [
+      'variables' => [
+        'stats' => [],
+        'status_distribution' => [],
+        'room_revenue' => [],
+        'top_room' => NULL,
+        'avg_stay' => '0.0',
+        'weekly_data' => [],
+        'monthly_data' => [],
+        'currency' => '₽',
+        'conversion_rate' => 0,
+        'avg_booking_value' => 0,
+      ],
+      'template' => 'analytics',
+    ],
     'hotel_reservation_view' => [
       'variables' => [
         'reservation' => NULL,

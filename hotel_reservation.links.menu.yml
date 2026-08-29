@@ -12,6 +12,13 @@ hotel_reservation.admin:
   parent: system.admin
   weight: -10
 
+hotel_reservation.analytics_menu:
+  title: 'Аналитика'
+  description: 'Аналитика бронирований и статистика.'
+  route_name: hotel_reservation.analytics
+  parent: hotel_reservation.admin
+  weight: -15
+
 hotel_reservation.rooms:
   title: 'Номера'
   description: 'Управление номерами отеля.'

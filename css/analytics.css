@@ -1,0 +1,669 @@
+/*
+ * Analytics page styles for Hotel Reservation module v1.6
+ * Card-based, responsive layout with pure CSS charts.
+ */
+
+/* === CSS Variables === */
+:root {
+  --hr-analytics-primary: #d97706;
+  --hr-analytics-primary-dark: #b45309;
+  --hr-analytics-primary-bg: #fffbeb;
+  --hr-analytics-primary-border: #fde68a;
+  --hr-analytics-text: #111827;
+  --hr-analytics-text-secondary: #6b7280;
+  --hr-analytics-text-muted: #9ca3af;
+  --hr-analytics-bg: #ffffff;
+  --hr-analytics-bg-alt: #f9fafb;
+  --hr-analytics-bg-hover: #f3f4f6;
+  --hr-analytics-border: #e5e7eb;
+  --hr-analytics-border-light: #f3f4f6;
+  --hr-analytics-radius: 12px;
+  --hr-analytics-radius-sm: 8px;
+  --hr-analytics-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --hr-analytics-shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --hr-analytics-shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
+  --hr-analytics-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --hr-analytics-success: #059669;
+  --hr-analytics-success-bg: #ecfdf5;
+  --hr-analytics-blue: #0ea5e9;
+  --hr-analytics-blue-bg: #eff6ff;
+  --hr-analytics-purple: #7c3aed;
+  --hr-analytics-purple-bg: #f5f3ff;
+  --hr-analytics-amber: #f59e0b;
+  --hr-analytics-amber-bg: #fffbeb;
+}
+
+/* === WRAPPER === */
+
+.hr-analytics-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--hr-analytics-text);
+}
+
+/* === KPI GRID === */
+
+.hr-analytics-kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+@media (min-width: 600px) {
+  .hr-analytics-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .hr-analytics-kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* === KPI CARDS === */
+
+.hr-analytics-kpi-card {
+  background: var(--hr-analytics-bg);
+  border-radius: var(--hr-analytics-radius);
+  box-shadow: var(--hr-analytics-shadow);
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: transform var(--hr-analytics-transition), box-shadow var(--hr-analytics-transition);
+  animation: hr-analytics-fade-in 0.4s ease-out both;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--hr-analytics-border-light);
+}
+
+.hr-analytics-kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: var(--hr-analytics-radius) 0 0 var(--hr-analytics-radius);
+}
+
+.hr-analytics-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hr-analytics-shadow-lg);
+  border-color: var(--hr-analytics-border);
+}
+
+.hr-analytics-kpi-card:nth-child(1) { animation-delay: 0s; }
+.hr-analytics-kpi-card:nth-child(2) { animation-delay: 0.06s; }
+.hr-analytics-kpi-card:nth-child(3) { animation-delay: 0.12s; }
+.hr-analytics-kpi-card:nth-child(4) { animation-delay: 0.18s; }
+
+@keyframes hr-analytics-fade-in {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI Card - Color Variants */
+
+.hr-analytics-kpi-card--total::before { background: var(--hr-analytics-blue); }
+.hr-analytics-kpi-card--total .hr-analytics-kpi-card__icon {
+  background: var(--hr-analytics-blue-bg);
+}
+
+.hr-analytics-kpi-card--conversion::before { background: var(--hr-analytics-success); }
+.hr-analytics-kpi-card--conversion .hr-analytics-kpi-card__icon {
+  background: var(--hr-analytics-success-bg);
+}
+.hr-analytics-kpi-card--conversion .hr-analytics-kpi-card__value {
+  color: var(--hr-analytics-success);
+}
+
+.hr-analytics-kpi-card--avg-value::before { background: var(--hr-analytics-primary); }
+.hr-analytics-kpi-card--avg-value .hr-analytics-kpi-card__icon {
+  background: var(--hr-analytics-primary-bg);
+}
+.hr-analytics-kpi-card--avg-value .hr-analytics-kpi-card__value {
+  color: var(--hr-analytics-primary-dark);
+}
+
+.hr-analytics-kpi-card--stay::before { background: var(--hr-analytics-purple); }
+.hr-analytics-kpi-card--stay .hr-analytics-kpi-card__icon {
+  background: var(--hr-analytics-purple-bg);
+}
+.hr-analytics-kpi-card--stay .hr-analytics-kpi-card__value {
+  color: var(--hr-analytics-purple);
+}
+
+/* KPI Card - Elements */
+
+.hr-analytics-kpi-card__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.hr-analytics-kpi-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.hr-analytics-kpi-card__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--hr-analytics-text-secondary);
+  margin-bottom: 4px;
+}
+
+.hr-analytics-kpi-card__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--hr-analytics-text);
+  line-height: 1.2;
+}
+
+.hr-analytics-kpi-card__unit {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--hr-analytics-text-secondary);
+}
+
+/* === SECTIONS === */
+
+.hr-analytics-section {
+  background: var(--hr-analytics-bg);
+  border-radius: var(--hr-analytics-radius);
+  box-shadow: var(--hr-analytics-shadow);
+  padding: 24px;
+  margin-bottom: 24px;
+  animation: hr-analytics-fade-in 0.5s ease-out both;
+  animation-delay: 0.25s;
+  border: 1px solid var(--hr-analytics-border-light);
+  transition: box-shadow var(--hr-analytics-transition);
+}
+
+.hr-analytics-section:hover {
+  box-shadow: var(--hr-analytics-shadow-md);
+}
+
+.hr-analytics-section__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--hr-analytics-text);
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--hr-analytics-border-light);
+}
+
+/* === 2-COLUMN ROW === */
+
+.hr-analytics-row-2col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .hr-analytics-row-2col {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* === HORIZONTAL BAR CHARTS === */
+
+.hr-analytics-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hr-analytics-bar-row {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+}
+
+@media (max-width: 768px) {
+  .hr-analytics-bar-row {
+    grid-template-columns: 100px 1fr auto;
+    gap: 8px;
+  }
+}
+
+.hr-analytics-bar-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.hr-analytics-bar-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hr-analytics-bar-label-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--hr-analytics-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hr-analytics-bar-label-text--room {
+  font-size: 0.85rem;
+}
+
+.hr-analytics-bar-label-type {
+  font-size: 0.72rem;
+  color: var(--hr-analytics-text-muted);
+  white-space: nowrap;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hr-analytics-bar-label-type {
+    display: inline;
+  }
+}
+
+.hr-analytics-bar-track {
+  height: 24px;
+  background: var(--hr-analytics-bg-alt);
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.hr-analytics-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 4px;
+}
+
+.hr-analytics-bar-fill--revenue {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+}
+
+.hr-analytics-bar-count {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--hr-analytics-text);
+  min-width: 32px;
+  text-align: right;
+}
+
+.hr-analytics-bar-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 80px;
+}
+
+.hr-analytics-bar-revenue {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--hr-analytics-success);
+  white-space: nowrap;
+}
+
+.hr-analytics-bar-bookings {
+  font-size: 0.72rem;
+  color: var(--hr-analytics-text-muted);
+  white-space: nowrap;
+}
+
+/* === TOP ROOM CARD === */
+
+.hr-analytics-top-room {
+  text-align: center;
+  padding: 24px 16px;
+  background: var(--hr-analytics-primary-bg);
+  border: 1px solid var(--hr-analytics-primary-border);
+  border-radius: var(--hr-analytics-radius-sm);
+}
+
+.hr-analytics-top-room__trophy {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.hr-analytics-top-room__name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--hr-analytics-text);
+  margin-bottom: 4px;
+}
+
+.hr-analytics-top-room__type {
+  font-size: 0.82rem;
+  color: var(--hr-analytics-text-secondary);
+  margin-bottom: 16px;
+}
+
+.hr-analytics-top-room__stats {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+
+.hr-analytics-top-room__stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--hr-analytics-primary-dark);
+}
+
+.hr-analytics-top-room__stat-label {
+  font-size: 0.75rem;
+  color: var(--hr-analytics-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 2px;
+}
+
+/* === WEEKLY CHART === */
+
+.hr-analytics-legend {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.hr-analytics-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--hr-analytics-text-secondary);
+  font-weight: 500;
+}
+
+.hr-analytics-legend__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hr-analytics-weekly-chart {
+  margin-top: 4px;
+}
+
+.hr-analytics-weekly-chart__area {
+  padding: 0;
+}
+
+.hr-analytics-weekly-chart__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 200px;
+  padding: 16px 0 0;
+  border-bottom: 2px solid var(--hr-analytics-border);
+  position: relative;
+}
+
+.hr-analytics-weekly-chart__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  gap: 6px;
+}
+
+.hr-analytics-weekly-chart__bar-wrapper {
+  flex: 1;
+  width: 100%;
+  max-width: 48px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+
+.hr-analytics-weekly-chart__bar {
+  width: 100%;
+  min-height: 4px;
+  background: linear-gradient(to top, #d97706, #fbbf24);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.hr-analytics-weekly-chart__bar::after {
+  content: attr(data-amount);
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--hr-analytics-text-secondary);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.hr-analytics-weekly-chart__bar:hover::after {
+  opacity: 1;
+}
+
+.hr-analytics-weekly-chart__dot {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: 20px;
+  height: 20px;
+  background: var(--hr-analytics-blue);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  font-size: 8px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(14, 165, 233, 0.3);
+  transition: transform 0.3s ease, bottom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 2;
+}
+
+.hr-analytics-weekly-chart__dot:hover {
+  transform: translate(-50%, 50%) scale(1.3);
+}
+
+.hr-analytics-weekly-chart__day {
+  font-size: 11px;
+  color: var(--hr-analytics-text-muted);
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+.hr-analytics-weekly-chart__day--today {
+  color: var(--hr-analytics-primary);
+  font-weight: 700;
+}
+
+.hr-analytics-weekly-chart__date {
+  font-size: 10px;
+  color: var(--hr-analytics-text-muted);
+  opacity: 0.7;
+}
+
+/* === MONTHLY TABLE === */
+
+.hr-analytics-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hr-analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.hr-analytics-table thead th {
+  background: var(--hr-analytics-bg-alt);
+  color: var(--hr-analytics-text-secondary);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--hr-analytics-border);
+  white-space: nowrap;
+}
+
+.hr-analytics-table__row {
+  transition: background-color 0.15s ease;
+}
+
+.hr-analytics-table__row:hover {
+  background-color: var(--hr-analytics-primary-bg);
+}
+
+.hr-analytics-table__row:nth-child(even) {
+  background-color: var(--hr-analytics-bg-alt);
+}
+
+.hr-analytics-table__row:nth-child(even):hover {
+  background-color: var(--hr-analytics-primary-bg);
+}
+
+.hr-analytics-table__cell {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--hr-analytics-border-light);
+  vertical-align: middle;
+}
+
+.hr-analytics-table__cell--month {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.hr-analytics-table__month-name {
+  font-weight: 600;
+  color: var(--hr-analytics-text);
+}
+
+.hr-analytics-table__year {
+  font-size: 0.8rem;
+  color: var(--hr-analytics-text-muted);
+}
+
+.hr-analytics-table__cell--revenue {
+  font-weight: 700;
+  color: var(--hr-analytics-success);
+  white-space: nowrap;
+}
+
+.hr-analytics-table__cell--bookings {
+  text-align: center;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* === EMPTY STATE === */
+
+.hr-analytics-empty {
+  text-align: center;
+  color: var(--hr-analytics-text-muted);
+  padding: 28px 16px;
+  font-size: 0.95rem;
+}
+
+/* === RESPONSIVE === */
+
+@media (max-width: 768px) {
+  .hr-analytics-kpi-card__value {
+    font-size: 1.3rem;
+  }
+
+  .hr-analytics-weekly-chart__bars {
+    height: 150px;
+    gap: 4px;
+  }
+
+  .hr-analytics-weekly-chart__bar {
+    max-width: 28px;
+  }
+
+  .hr-analytics-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .hr-analytics-bar-meta {
+    min-width: 60px;
+  }
+
+  .hr-analytics-bar-revenue {
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hr-analytics-wrapper {
+    padding: 12px 8px;
+  }
+
+  .hr-analytics-kpi-card {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .hr-analytics-kpi-card__icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+  }
+
+  .hr-analytics-bar-row {
+    grid-template-columns: 80px 1fr auto;
+    gap: 6px;
+  }
+
+  .hr-analytics-bar-label-text {
+    font-size: 0.78rem;
+  }
+}
+
+/* === PRINT === */
+@media print {
+  .hr-analytics-wrapper {
+    padding: 0;
+  }
+
+  .hr-analytics-kpi-card,
+  .hr-analytics-section {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .hr-analytics-weekly-chart {
+    display: none;
+  }
+}

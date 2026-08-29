@@ -11,6 +11,14 @@ hotel_reservation.dashboard:
   requirements:
     _permission: 'administer hotel reservation'
 
+hotel_reservation.analytics:
+  path: '/admin/hotel-reservation/analytics'
+  defaults:
+    _controller: '\Drupal\hotel_reservation\Controller\AnalyticsController::analytics'
+    _title: 'Аналитика бронирований'
+  requirements:
+    _permission: 'administer hotel reservation'
+
 hotel_reservation.settings:
   path: '/admin/config/hotel-reservation/settings'
   defaults:

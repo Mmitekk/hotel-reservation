@@ -1,0 +1,274 @@
+.hr-room-comparison {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1f2937;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* ── Selector Header ─────────────────────────────────────── */
+
+.hr-comparison-selector__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.hr-comparison-selector__count {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.hr-comparison-selector__reset {
+  font-size: 13px;
+  color: #ef4444;
+  background: none;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.hr-comparison-selector__reset:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* ── Selector Grid ───────────────────────────────────────── */
+
+.hr-comparison-selector__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .hr-comparison-selector__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .hr-comparison-selector__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Room Button ─────────────────────────────────────────── */
+
+.hr-comparison-room-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, opacity 0.2s;
+  text-align: left;
+  width: 100%;
+}
+
+.hr-comparison-room-btn:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.hr-comparison-room-btn.is-selected {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.hr-comparison-room-btn.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Check Circle ────────────────────────────────────────── */
+
+.hr-comparison-room-btn__check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.hr-comparison-room-btn__check svg {
+  width: 14px;
+  height: 14px;
+  color: transparent;
+  transition: color 0.2s;
+}
+
+.hr-comparison-room-btn.is-selected .hr-comparison-room-btn__check {
+  border-color: #f59e0b;
+  background: #f59e0b;
+}
+
+.hr-comparison-room-btn.is-selected .hr-comparison-room-btn__check svg {
+  color: #fff;
+}
+
+/* ── Button Info ─────────────────────────────────────────── */
+
+.hr-comparison-room-btn__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hr-comparison-room-btn__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hr-comparison-room-btn__type {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ── Empty State ─────────────────────────────────────────── */
+
+.hr-comparison-empty {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  margin-top: 24px;
+}
+
+.hr-comparison-empty__icon {
+  font-size: 40px;
+  color: #d1d5db;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.hr-comparison-empty__text {
+  margin: 0;
+  font-size: 15px;
+  color: #9ca3af;
+}
+
+/* ── Table Wrapper ───────────────────────────────────────── */
+
+.hr-comparison-table-wrapper {
+  margin-top: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Comparison Table ────────────────────────────────────── */
+
+.hr-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 480px;
+}
+
+.hr-comparison-table thead tr {
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.hr-comparison-table th {
+  padding: 10px 14px;
+  font-weight: 600;
+  color: #374151;
+  text-align: left;
+  white-space: nowrap;
+  background: #f9fafb;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.hr-comparison-table__label-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f9fafb;
+  min-width: 130px;
+}
+
+.hr-comparison-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+.hr-comparison-table td.hr-comparison-table__label {
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #fff;
+}
+
+/* ── Alternating rows ────────────────────────────────────── */
+
+.hr-comparison-table__row:nth-child(even) td {
+  background: #f9fafb;
+}
+
+.hr-comparison-table__row:nth-child(even) td.hr-comparison-table__label {
+  background: #f9fafb;
+}
+
+/* ── Diff highlight ──────────────────────────────────────── */
+
+.hr-comparison-table__row--diff td.hr-comparison-table__label {
+  background: #fef3c7;
+}
+
+.hr-comparison-table__row--diff td {
+  background: #fffbeb;
+}
+
+.hr-comparison-table__row--diff:nth-child(even) td {
+  background: #fffbeb;
+}
+
+.hr-comparison-table__row--diff:nth-child(even) td.hr-comparison-table__label {
+  background: #fef3c7;
+}
+
+/* ── Responsive table header label-col bg fix ────────────── */
+
+.hr-comparison-table thead th.hr-comparison-table__label-col {
+  background: #f9fafb;
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .hr-comparison-table {
+    font-size: 13px;
+  }
+
+  .hr-comparison-table th,
+  .hr-comparison-table td {
+    padding: 8px 10px;
+  }
+
+  .hr-comparison-empty {
+    padding: 32px 16px;
+  }
+}

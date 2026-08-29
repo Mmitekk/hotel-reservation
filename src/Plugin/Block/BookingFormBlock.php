@@ -10,7 +10,8 @@ use Drupal\Component\Utility\Html;
 /**
  * Provides a 'Hotel Reservation Booking Form' block.
  *
- * Renders a preview card that opens the full booking form in a modal.
+ * Can render as a modal (preview card + overlay) or inline (form directly on page).
+ * Configurable via block settings.
  *
  * @Block(
  *   id = "hotel_reservation_booking_form",
@@ -26,6 +27,7 @@ class BookingFormBlock extends BlockBase {
   public function defaultConfiguration() {
     return [
       'show_conditions' => TRUE,
+      'display_mode' => 'modal',
     ];
   }
 
@@ -34,6 +36,17 @@ class BookingFormBlock extends BlockBase {
    */
   public function blockForm($form, FormStateInterface $form_state) {
     $config = $this->getConfiguration();
+
+    $form['display_mode'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Режим отображения'),
+      '#description' => $this->t('Модальное окно — превью-карточка с кнопкой, открывающей форму. Встроенный — форма отображается прямо на странице.'),
+      '#options' => [
+        'modal' => $this->t('Модальное окно'),
+        'inline' => $this->t('Встроенный (inline)'),
+      ],
+      '#default_value' => $config['display_mode'] ?? 'modal',
+    ];
 
     $form['show_conditions'] = [
       '#type' => 'checkbox',
@@ -49,6 +62,7 @@ class BookingFormBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
+    $this->configuration['display_mode'] = $form_state->getValue('display_mode');
     $this->configuration['show_conditions'] = (bool) $form_state->getValue('show_conditions');
   }
 
@@ -58,6 +72,7 @@ class BookingFormBlock extends BlockBase {
   public function build() {
     $config = \Drupal::config('hotel_reservation.settings');
     $block_config = $this->getConfiguration();
+    $display_mode = $block_config['display_mode'] ?? 'modal';
     $currency = $config->get('currency_symbol') ?: '₽';
     $min_stay = (int) $config->get('min_stay_nights') ?: 1;
     $max_stay = (int) $config->get('max_stay_nights') ?: 30;
@@ -95,7 +110,7 @@ class BookingFormBlock extends BlockBase {
     $build['#attached']['html_head'][] = [
       [
         '#tag' => 'style',
-        '#value' => '.hr-booking-preview,.hr-booking-modal .hr-booking-form{--hr-primary:' . $primary_color . ';--hr-bg:' . $bg_color . ';--hr-bg-alt:' . $bg_alt_color . ';--hr-text:' . $text_color . ';--hr-radius:' . $border_radius . 'px;}',
+        '#value' => '.hr-booking-preview,.hr-booking-modal .hr-booking-form,.hr-booking-inline-wrapper .hr-booking-form{--hr-primary:' . $primary_color . ';--hr-bg:' . $bg_color . ';--hr-bg-alt:' . $bg_alt_color . ';--hr-text:' . $text_color . ';--hr-radius:' . $border_radius . 'px;}',
       ],
       'hr-form-design',
     ];
@@ -117,26 +132,33 @@ class BookingFormBlock extends BlockBase {
       'formBackgroundColor' => $bg_color,
       'formTextColor' => $text_color,
       'formBorderRadius' => $border_radius,
+      'displayMode' => $display_mode,
     ];
 
-    // ========== PREVIEW CARD ==========
-    $html = '<div class="hr-booking-preview-wrapper">';
-    $html .= '<div class="hr-booking-preview">';
-    $html .= '<h3 class="hr-booking-preview__title">' . Html::escape($display_title) . '</h3>';
-    $html .= '<p class="hr-booking-preview__desc">' . Html::escape($display_subtitle) . '</p>';
-    $html .= '<button type="button" class="hr-btn hr-btn--primary hr-booking-preview__btn">' . Html::escape($button_text) . '</button>';
-    $html .= '</div>';
-    $html .= '</div>';
+    if ($display_mode === 'modal') {
+      // ========== PREVIEW CARD (modal mode) ==========
+      $html = '<div class="hr-booking-preview-wrapper">';
+      $html .= '<div class="hr-booking-preview">';
+      $html .= '<h3 class="hr-booking-preview__title">' . Html::escape($display_title) . '</h3>';
+      $html .= '<p class="hr-booking-preview__desc">' . Html::escape($display_subtitle) . '</p>';
+      $html .= '<button type="button" class="hr-btn hr-btn--primary hr-booking-preview__btn">' . Html::escape($button_text) . '</button>';
+      $html .= '</div>';
+      $html .= '</div>';
 
-    // ========== MODAL OVERLAY ==========
-    $html .= '<div class="hr-booking-modal-overlay" style="display:none">';
-    $html .= '<div class="hr-booking-modal">';
+      // ========== MODAL OVERLAY ==========
+      $html .= '<div class="hr-booking-modal-overlay" style="display:none">';
+      $html .= '<div class="hr-booking-modal">';
 
-    // Close button.
-    $html .= '<button type="button" class="hr-booking-modal__close">✕</button>';
+      // Close button.
+      $html .= '<button type="button" class="hr-booking-modal__close">✕</button>';
 
-    // The actual booking form inside the modal.
-    $html .= '<div class="hr-booking-form">';
+      // The actual booking form inside the modal.
+      $html .= '<div class="hr-booking-form">';
+    } else {
+      // ========== INLINE MODE ==========
+      $html = '<div class="hr-booking-inline-wrapper">';
+      $html .= '<div class="hr-booking-form hr-booking-form--inline">';
+    }
 
     // Title.
     $html .= '<h2 class="hr-booking-form__title">' . Html::escape($display_title) . '</h2>';
@@ -255,8 +277,13 @@ class BookingFormBlock extends BlockBase {
     $html .= '</div>';
 
     $html .= '</div>'; // .hr-booking-form
-    $html .= '</div>'; // .hr-booking-modal
-    $html .= '</div>'; // .hr-booking-modal-overlay
+
+    if ($display_mode === 'modal') {
+      $html .= '</div>'; // .hr-booking-modal
+      $html .= '</div>'; // .hr-booking-modal-overlay
+    } else {
+      $html .= '</div>'; // .hr-booking-inline-wrapper
+    }
 
     $build['content'] = [
       '#type' => 'markup',

@@ -1,0 +1,219 @@
+/**
+ * @file
+ * Styles for the "Наши номера" (Our Rooms) block.
+ */
+
+/* ==========================================================================
+   Grid layout
+   ========================================================================== */
+
+.hr-rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Carousel placeholder — currently renders as a single-row scrollable grid. */
+.hr-rooms-grid--carousel {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+/* ==========================================================================
+   Room card
+   ========================================================================== */
+
+.hr-room-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: hr-rooms-fade-in 0.4s ease both;
+}
+
+.hr-room-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Staggered animation delay for visual polish. */
+.hr-rooms-grid > .hr-room-card:nth-child(1) { animation-delay: 0.00s; }
+.hr-rooms-grid > .hr-room-card:nth-child(2) { animation-delay: 0.06s; }
+.hr-rooms-grid > .hr-room-card:nth-child(3) { animation-delay: 0.12s; }
+.hr-rooms-grid > .hr-room-card:nth-child(4) { animation-delay: 0.18s; }
+.hr-rooms-grid > .hr-room-card:nth-child(5) { animation-delay: 0.24s; }
+.hr-rooms-grid > .hr-room-card:nth-child(6) { animation-delay: 0.30s; }
+.hr-rooms-grid > .hr-room-card:nth-child(7) { animation-delay: 0.36s; }
+.hr-rooms-grid > .hr-room-card:nth-child(8) { animation-delay: 0.42s; }
+
+@keyframes hr-rooms-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Card header: type badge + price
+   ========================================================================== */
+
+.hr-room-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 8px;
+}
+
+.hr-room-card__type-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.hr-room-card__price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #92400e;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.hr-room-card__price-unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: #78716c;
+  margin-left: 2px;
+}
+
+/* ==========================================================================
+   Card body: name, description
+   ========================================================================== */
+
+.hr-room-card__name {
+  margin: 0;
+  padding: 0 18px 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.hr-room-card__desc {
+  margin: 0;
+  padding: 0 18px 10px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Amenities
+   ========================================================================== */
+
+.hr-room-card__amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 18px 12px;
+}
+
+.hr-room-card__amenity {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #374151;
+  background: #f3f4f6;
+  padding: 3px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Card footer: capacity
+   ========================================================================== */
+
+.hr-room-card__footer {
+  margin-top: auto;
+  padding: 10px 18px 14px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.hr-room-card__capacity {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ==========================================================================
+   Empty state
+   ========================================================================== */
+
+.hr-rooms-empty {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* ==========================================================================
+   Responsive: tablet (<= 768px)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .hr-rooms-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* ==========================================================================
+   Responsive: mobile (<= 480px)
+   ========================================================================== */
+
+@media (max-width: 480px) {
+  .hr-rooms-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .hr-room-card__header {
+    padding: 14px 14px 6px;
+  }
+
+  .hr-room-card__name {
+    padding: 0 14px 4px;
+  }
+
+  .hr-room-card__desc {
+    padding: 0 14px 8px;
+  }
+
+  .hr-room-card__amenities {
+    padding: 0 14px 10px;
+  }
+
+  .hr-room-card__footer {
+    padding: 8px 14px 12px;
+  }
+}

@@ -813,6 +813,17 @@
   font-size: 18px;
 }
 
+/* ---------- Inline Mode ---------- */
+.hr-booking-inline-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.hr-booking-form--inline {
+  max-width: 560px;
+  width: 100%;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 520px) {
   .hr-booking-preview {
