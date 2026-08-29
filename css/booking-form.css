@@ -259,6 +259,9 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: color var(--hr-transition);
+ padding: 4px 8px;
+  border-radius: 6px;
+  cursor: default;
 }
 
 .hr-step.active {
@@ -267,6 +270,15 @@
 
 .hr-step.completed {
   color: var(--hr-success);
+  cursor: pointer;
+}
+
+.hr-step.completed:hover {
+  opacity: 0.8;
+}
+
+.hr-step.completed:active {
+  opacity: 0.6;
 }
 
 .hr-step-number {
@@ -298,10 +310,10 @@
 }
 
 .hr-step-connector {
-  width: 32px;
+  width: 20px;
   height: 2px;
   background: var(--hr-border);
-  margin: 0 6px;
+  margin: 0 4px;
   border-radius: 1px;
   transition: background var(--hr-transition);
 }

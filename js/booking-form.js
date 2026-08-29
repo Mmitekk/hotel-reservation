@@ -401,6 +401,20 @@
         else if (currentStep === 'select') showStep('search');
       });
 
+      // Step indicator click — navigate to completed steps
+      $form.on('click', '.hr-step', function (e) {
+        const targetStep = $(this).data('step');
+        if (!targetStep) return;
+        // Only allow going back to completed steps, not forward.
+        const stepOrder = ['search', 'select', 'book'];
+        const currentIdx = stepOrder.indexOf(currentStep);
+        const targetIdx = stepOrder.indexOf(targetStep);
+        if (targetIdx < currentIdx) {
+          e.preventDefault();
+          showStep(targetStep);
+        }
+      });
+
       // Book button
       $form.on('click', '.hr-book-btn', function (e) {
         e.preventDefault();
