@@ -10,5 +10,5 @@ dependencies:
   - drupal:field
   - drupal:user
   - drupal:system
-version: '1.5.7'
+version: '1.5.8'
 project: 'hotel_reservation'

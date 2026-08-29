@@ -678,10 +678,6 @@
   transition: color var(--hr-transition);
 }
 
-.hr-back-btn:hover {
-  color: var(--hr-primary);
-}
-
 /* ---------- Focus visible (keyboard nav) ---------- */
 .hr-booking-form *:focus-visible {
   outline: 2px solid var(--hr-primary);

@@ -234,7 +234,7 @@ class BookingFormBlock extends BlockBase {
     $html .= '<div class="hr-success__icon">✓</div>';
     $html .= '<h3 class="hr-success__title">' . Html::escape($success_title) . '</h3>';
     $html .= '<p class="hr-success__text" data-template="' . Html::escape($success_text) . '">' . Html::escape($success_text) . '</p>';
-    $html .= '<button type="button" class="hr-btn hr-btn--secondary hr-new-search-btn" style="margin-top:16px;">' . $this->t('Новое бронирование') . '</button>';
+    $html .= '</div>';
     $html .= '</div>';
     $html .= '</div>';
 

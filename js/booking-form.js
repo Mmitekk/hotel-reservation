@@ -99,6 +99,7 @@
       let currentStep = 'search';
       let selectedRoom = null;
       let searchResults = [];
+      let maxReachedStep = 'search'; // Track furthest step reached.
 
       // ---- Extract date (Y-m-d) from datetime-local value ----
       function extractDate(dtLocalVal) {
@@ -106,22 +107,46 @@
         return dtLocalVal.split('T')[0];
       }
 
+      const stepOrder = ['search', 'select', 'book'];
+
+      function stepIndex(step) {
+        return stepOrder.indexOf(step);
+      }
+
+      // Update maxReachedStep if the new step is further.
+      function advanceMaxStep(step) {
+        if (stepIndex(step) > stepIndex(maxReachedStep)) {
+          maxReachedStep = step;
+        }
+      }
+
       // ---- Step Navigation ----
       function showStep(step) {
+        // Update furthest reached step.
+        if (step !== 'success') {
+          advanceMaxStep(step);
+        }
+
         $form.find('.hr-step').removeClass('active');
-        if (step === 'search') {
-          $form.find('.hr-step[data-step="search"]').addClass('active completed');
-        } else if (step === 'select') {
-          $form.find('.hr-step[data-step="search"]').addClass('completed');
-          $form.find('.hr-step[data-step="select"]').addClass('active');
-        } else if (step === 'book') {
-          $form.find('.hr-step[data-step="search"]').addClass('completed');
-          $form.find('.hr-step[data-step="select"]').addClass('completed');
-          $form.find('.hr-step[data-step="book"]').addClass('active');
-        } else if (step === 'success') {
-          $form.find('.hr-step[data-step="search"]').addClass('completed');
-          $form.find('.hr-step[data-step="select"]').addClass('completed');
-          $form.find('.hr-step[data-step="book"]').addClass('completed');
+        // Mark steps up to maxReachedStep as completed.
+        const maxIdx = stepIndex(maxReachedStep);
+        for (let i = 0; i < stepOrder.length; i++) {
+          const $s = $form.find('.hr-step[data-step="' + stepOrder[i] + '"]');
+          if (i < maxIdx) {
+            $s.addClass('completed').removeClass('active');
+          } else if (i === maxIdx && step !== stepOrder[i]) {
+            $s.addClass('completed').removeClass('active');
+          } else if (step === stepOrder[i]) {
+            $s.addClass('active');
+            // Also mark as completed if it was reached before.
+            if (i <= maxIdx) {
+              $s.addClass('completed');
+            }
+          }
+        }
+        // Success — all completed.
+        if (step === 'success') {
+          $form.find('.hr-step').addClass('completed').removeClass('active');
         }
         $form.find('.hr-section').hide();
         $form.find('.hr-section--' + step).show();
@@ -401,15 +426,14 @@
         else if (currentStep === 'select') showStep('search');
       });
 
-      // Step indicator click — navigate to completed steps
+      // Step indicator click — navigate to any reached step.
       $form.on('click', '.hr-step', function (e) {
         const targetStep = $(this).data('step');
         if (!targetStep) return;
-        // Only allow going back to completed steps, not forward.
-        const stepOrder = ['search', 'select', 'book'];
-        const currentIdx = stepOrder.indexOf(currentStep);
-        const targetIdx = stepOrder.indexOf(targetStep);
-        if (targetIdx < currentIdx) {
+        // Allow navigation to any step up to maxReachedStep (but not forward past it).
+        const targetIdx = stepIndex(targetStep);
+        const maxIdx = stepIndex(maxReachedStep);
+        if (targetIdx <= maxIdx) {
           e.preventDefault();
           showStep(targetStep);
         }
@@ -419,15 +443,6 @@
       $form.on('click', '.hr-book-btn', function (e) {
         e.preventDefault();
         submitReservation();
-      });
-
-      // New search button
-      $form.on('click', '.hr-new-search-btn', function (e) {
-        e.preventDefault();
-        selectedRoom = null;
-        searchResults = [];
-        $form.find('.hr-room-card').removeClass('selected');
-        showStep('search');
       });
 
       // Guest counter
