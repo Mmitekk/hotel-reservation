@@ -593,6 +593,17 @@
   gap: 0;
 }
 
+/* Hide default number input spinners (Chrome/Safari/Edge/Firefox). */
+.hr-guest-counter__value::-webkit-outer-spin-button,
+.hr-guest-counter__value::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.hr-guest-counter__value {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .hr-guest-counter__btn {
   width: 36px;
   height: 36px;
