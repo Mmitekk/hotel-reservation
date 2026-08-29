@@ -35,6 +35,16 @@
     return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 
+  // ---- Russian plural helper (does not depend on Drupal translations) ----
+  function pluralRu(n, one, few, many) {
+    const abs = Math.abs(n) % 100;
+    const n1 = abs % 10;
+    if (abs > 10 && abs < 20) return many;
+    if (n1 > 1 && n1 < 5) return few;
+    if (n1 === 1) return one;
+    return many;
+  }
+
   Drupal.behaviors.hotelReservationBookingForm = {
     attach: function (context, settings) {
       const $form = $('.hr-booking-form', context);
@@ -212,7 +222,7 @@
 
         let html = '<div class="hr-results__title">' +
           Drupal.t('Найдено @n номер(ов)', {'@n': rooms.length}) +
-          ' · ' + nights + ' ' + Drupal.formatPlural(nights, 'ночь', 'ночи', 'ночей') +
+          ' · ' + nights + ' ' + pluralRu(nights, 'ночь', 'ночи', 'ночей') +
           '</div>';
 
         rooms.forEach(function (room) {
@@ -228,7 +238,7 @@
             (amenitiesHtml ? '<div class="hr-room-card__amenities">' + amenitiesHtml + '</div>' : '') +
             '<div class="hr-room-card__price">' +
             '<div><span class="hr-room-card__price-value">' + currencySymbol + parseFloat(room.total_price).toLocaleString('ru-RU') + '</span>' +
-            '<span class="hr-room-card__price-unit"> / ' + Drupal.formatPlural(nights, 'ночь', 'ночи', 'ночей') + '</span></div>' +
+            '<span class="hr-room-card__price-unit"> / ' + pluralRu(nights, 'ночь', 'ночи', 'ночей') + '</span></div>' +
             (room.base_price !== room.total_price / nights ?
               '<div class="hr-room-card__total">' + Drupal.t('от') + ' ' + currencySymbol + parseFloat(room.base_price).toLocaleString('ru-RU') + '/' + Drupal.t('ночь') + '</div>' : '') +
             '</div></div>';
