@@ -238,7 +238,7 @@
             (amenitiesHtml ? '<div class="hr-room-card__amenities">' + amenitiesHtml + '</div>' : '') +
             '<div class="hr-room-card__price">' +
             '<div><span class="hr-room-card__price-value">' + currencySymbol + parseFloat(room.total_price).toLocaleString('ru-RU') + '</span>' +
-            '<span class="hr-room-card__price-unit"> / ' + pluralRu(nights, 'ночь', 'ночи', 'ночей') + '</span></div>' +
+            '<span class="hr-room-card__price-unit"> / ' + nights + ' ' + pluralRu(nights, 'ночь', 'ночи', 'ночей') + '</span></div>' +
             (room.base_price !== room.total_price / nights ?
               '<div class="hr-room-card__total">' + Drupal.t('от') + ' ' + currencySymbol + parseFloat(room.base_price).toLocaleString('ru-RU') + '/' + Drupal.t('ночь') + '</div>' : '') +
             '</div></div>';
