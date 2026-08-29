@@ -593,15 +593,17 @@
   gap: 0;
 }
 
-/* Hide default number input spinners (Chrome/Safari/Edge/Firefox). */
+/* Hide default number input spinners (Chrome/Safari/Edge/Firefox) — !important to override Drupal/theme CSS. */
 .hr-guest-counter__value::-webkit-outer-spin-button,
 .hr-guest-counter__value::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  margin: 0 !important;
+  display: none !important;
 }
 .hr-guest-counter__value {
-  -moz-appearance: textfield;
-  appearance: textfield;
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
 }
 
 .hr-guest-counter__btn {

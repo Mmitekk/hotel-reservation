@@ -154,7 +154,7 @@ class BookingFormBlock extends BlockBase {
     $html .= '<label>' . $this->t('Гости') . '</label>';
     $html .= '<div class="hr-guest-counter">';
     $html .= '<button type="button" class="hr-guest-counter__btn hr-guest-counter__btn--minus">−</button>';
-    $html .= '<input type="number" class="hr-field-guests hr-guest-counter__value" value="1" min="1" max="20" readonly>';
+    $html .= '<input type="text" inputmode="numeric" class="hr-field-guests hr-guest-counter__value" value="1" min="1" max="20" readonly>';
     $html .= '<button type="button" class="hr-guest-counter__btn hr-guest-counter__btn--plus">+</button>';
     $html .= '</div>';
     $html .= '</div>';
