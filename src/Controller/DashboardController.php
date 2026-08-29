@@ -121,11 +121,11 @@ class DashboardController extends ControllerBase {
         $confirm_url = Url::fromRoute('hotel_reservation.reservation_status', [
           'hr_reservation' => $reservation->id(),
           'status' => 'confirmed',
-        ]);
+        ])->setOption('query', ['destination' => '/admin/hotel-reservation/dashboard']);
         $cancel_url = Url::fromRoute('hotel_reservation.reservation_status', [
           'hr_reservation' => $reservation->id(),
           'status' => 'cancelled',
-        ]);
+        ])->setOption('query', ['destination' => '/admin/hotel-reservation/dashboard']);
 
         $pending_reservations_list[] = [
           'id' => $reservation->id(),

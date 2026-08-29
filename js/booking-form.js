@@ -508,6 +508,40 @@
         }
       });
 
+      // ---- Modal open/close ----
+      const $overlay = $form.closest('.hr-booking-modal-overlay');
+      const $wrapper = $('.hr-booking-preview-wrapper');
+
+      // Open modal from preview button.
+      $wrapper.on('click', '.hr-booking-preview__btn', function (e) {
+        e.preventDefault();
+        $overlay.show();
+        $('body').css('overflow', 'hidden');
+      });
+
+      // Close modal — close button.
+      $overlay.on('click', '.hr-booking-modal__close', function (e) {
+        e.preventDefault();
+        $overlay.hide();
+        $('body').css('overflow', '');
+      });
+
+      // Close modal — click on overlay background.
+      $overlay.on('click', function (e) {
+        if (e.target === this) {
+          $overlay.hide();
+          $('body').css('overflow', '');
+        }
+      });
+
+      // Close modal — Escape key.
+      $(document).on('keydown', function (e) {
+        if (e.key === 'Escape' && $overlay.is(':visible')) {
+          $overlay.hide();
+          $('body').css('overflow', '');
+        }
+      });
+
       // Init
       showStep('search');
     }

@@ -182,6 +182,23 @@ class HotelReservationController extends ControllerBase {
     $current_url = Url::fromRoute('hotel_reservation.calendar', ['month' => (int) $now->format('n'), 'year' => (int) $now->format('Y')])->toString();
     $next_url = Url::fromRoute('hotel_reservation.calendar', ['month' => $next_month, 'year' => $next_year])->toString();
 
+    // Build month selector options (current year ±1, 24 months total).
+    $month_selector = [];
+    $start_dt = (clone $now)->modify('first day of this month')->modify('-12 months');
+    for ($i = 0; $i < 24; $i++) {
+      $opt_dt = (clone $start_dt)->modify('+' . $i . ' months');
+      $opt_month = (int) $opt_dt->format('n');
+      $opt_year = (int) $opt_dt->format('Y');
+      $opt_label = $this->dateFormatter->format($opt_dt->getTimestamp(), 'custom', 'F Y');
+      $month_selector[] = [
+        'label' => $opt_label,
+        'month' => $opt_month,
+        'year' => $opt_year,
+        'url' => Url::fromRoute('hotel_reservation.calendar', ['month' => $opt_month, 'year' => $opt_year])->toString(),
+        'is_current' => ($opt_month === $month && $opt_year === $year),
+      ];
+    }
+
     return [
       '#theme' => 'hotel_reservation_admin_calendar',
       '#rooms' => $calendar_rooms,
@@ -191,6 +208,7 @@ class HotelReservationController extends ControllerBase {
       '#prev_url' => $prev_url,
       '#current_url' => $current_url,
       '#next_url' => $next_url,
+      '#month_selector' => $month_selector,
       '#cache' => [
         'tags' => ['hr_reservation_list', 'hr_room_list'],
         'contexts' => [],
@@ -456,6 +474,8 @@ class HotelReservationController extends ControllerBase {
   /**
    * Changes the status of a reservation.
    *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The current request (for destination query parameter).
    * @param \Drupal\Core\Entity\EntityInterface $hr_reservation
    *   The reservation entity.
    * @param string $status
@@ -467,7 +487,7 @@ class HotelReservationController extends ControllerBase {
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    *   If the status transition is invalid.
    */
-  public function changeReservationStatus(EntityInterface $hr_reservation, $status) {
+  public function changeReservationStatus(Request $request, EntityInterface $hr_reservation, $status) {
     $current_status = $hr_reservation->get('status')->value;
 
     // Define valid transitions.
@@ -511,8 +531,14 @@ class HotelReservationController extends ControllerBase {
       }
     }
 
-    $url = Url::fromRoute('entity.hr_reservation.collection');
-    return new RedirectResponse($url->toString());
+    $destination = $request->query->get('destination');
+    if ($destination) {
+      $redirect_url = $destination;
+    }
+    else {
+      $redirect_url = Url::fromRoute('entity.hr_reservation.collection')->toString();
+    }
+    return new RedirectResponse($redirect_url);
   }
 
   /**

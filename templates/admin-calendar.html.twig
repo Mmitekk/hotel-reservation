@@ -12,6 +12,11 @@
       {{ month_name }} {{ year }}
     </div>
     <div class="hr-calendar-nav__links">
+      <select class="hr-calendar-month-select" onchange="if(this.value) window.location.href=this.value">
+        {% for opt in month_selector %}
+          <option value="{{ opt.url }}"{% if opt.is_current %} selected{% endif %}>{{ opt.label }}</option>
+        {% endfor %}
+      </select>
       {% if prev_url %}
         <a href="{{ prev_url }}" class="hr-calendar-nav__link">&#8592;</a>
       {% endif %}

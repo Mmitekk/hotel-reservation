@@ -10,6 +10,8 @@ use Drupal\Component\Utility\Html;
 /**
  * Provides a 'Hotel Reservation Booking Form' block.
  *
+ * Renders a preview card that opens the full booking form in a modal.
+ *
  * @Block(
  *   id = "hotel_reservation_booking_form",
  *   admin_label = @Translation("Форма бронирования отеля"),
@@ -89,16 +91,16 @@ class BookingFormBlock extends BlockBase {
     // Derive a slightly darker shade for input backgrounds.
     $bg_alt_color = $bg_color === '#ffffff' ? '#fafafa' : $bg_color;
 
-    // CSS custom properties for theming.
+    // CSS custom properties for theming (applied to both preview and modal).
     $build['#attached']['html_head'][] = [
       [
         '#tag' => 'style',
-        '#value' => '.hr-booking-form{--hr-primary:' . $primary_color . ';--hr-bg:' . $bg_color . ';--hr-bg-alt:' . $bg_alt_color . ';--hr-text:' . $text_color . ';--hr-radius:' . $border_radius . 'px;}',
+        '#value' => '.hr-booking-preview,.hr-booking-modal .hr-booking-form{--hr-primary:' . $primary_color . ';--hr-bg:' . $bg_color . ';--hr-bg-alt:' . $bg_alt_color . ';--hr-text:' . $text_color . ';--hr-radius:' . $border_radius . 'px;}',
       ],
       'hr-form-design',
     ];
 
-    // Pass settings to JS — ALL config keys including design settings.
+    // Pass settings to JS.
     $build['#attached']['drupalSettings']['hotelReservation'] = [
       'currencySymbol' => $currency,
       'minStay' => $min_stay,
@@ -108,17 +110,33 @@ class BookingFormBlock extends BlockBase {
       'bookingConditions' => $booking_conditions,
       'apiCheckUrl' => Url::fromRoute('hotel_reservation.api_check_availability')->toString(),
       'apiSubmitUrl' => Url::fromRoute('hotel_reservation.api_submit_reservation')->toString(),
-      'buttonText' => $button_text,
-      'successTitle' => $success_title,
-      'successText' => $success_text,
+      'buttonText' => (string) $button_text,
+      'successTitle' => (string) $success_title,
+      'successText' => (string) $success_text,
       'formPrimaryColor' => $primary_color,
       'formBackgroundColor' => $bg_color,
       'formTextColor' => $text_color,
       'formBorderRadius' => $border_radius,
     ];
 
-    // Build HTML.
-    $html = '<div class="hr-booking-form">';
+    // ========== PREVIEW CARD ==========
+    $html = '<div class="hr-booking-preview-wrapper">';
+    $html .= '<div class="hr-booking-preview">';
+    $html .= '<h3 class="hr-booking-preview__title">' . Html::escape($display_title) . '</h3>';
+    $html .= '<p class="hr-booking-preview__desc">' . Html::escape($display_subtitle) . '</p>';
+    $html .= '<button type="button" class="hr-btn hr-btn--primary hr-booking-preview__btn">' . Html::escape($button_text) . '</button>';
+    $html .= '</div>';
+    $html .= '</div>';
+
+    // ========== MODAL OVERLAY ==========
+    $html .= '<div class="hr-booking-modal-overlay" style="display:none">';
+    $html .= '<div class="hr-booking-modal">';
+
+    // Close button.
+    $html .= '<button type="button" class="hr-booking-modal__close">✕</button>';
+
+    // The actual booking form inside the modal.
+    $html .= '<div class="hr-booking-form">';
 
     // Title.
     $html .= '<h2 class="hr-booking-form__title">' . Html::escape($display_title) . '</h2>';
@@ -140,7 +158,6 @@ class BookingFormBlock extends BlockBase {
     $html .= '<div class="hr-section hr-section--search">';
     $html .= '<div class="hr-search-errors"></div>';
 
-    // Date fields — TWO SEPARATE .hr-form-group divs (no flex row wrapper)
     $html .= '<div class="hr-form-group">';
     $html .= '<label for="hr-check-in">' . $this->t('Дата заезда') . '</label>';
     $html .= '<input type="datetime-local" id="hr-check-in" class="hr-field-check-in" required>';
@@ -236,9 +253,10 @@ class BookingFormBlock extends BlockBase {
     $html .= '<p class="hr-success__text" data-template="' . Html::escape($success_text) . '">' . Html::escape($success_text) . '</p>';
     $html .= '</div>';
     $html .= '</div>';
-    $html .= '</div>';
 
-    $html .= '</div>';
+    $html .= '</div>'; // .hr-booking-form
+    $html .= '</div>'; // .hr-booking-modal
+    $html .= '</div>'; // .hr-booking-modal-overlay
 
     $build['content'] = [
       '#type' => 'markup',
@@ -246,7 +264,7 @@ class BookingFormBlock extends BlockBase {
       '#allowed_tags' => [
         'div', 'h2', 'h3', 'h4', 'p', 'label', 'input', 'button', 'textarea',
         'span', 'small', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
-        'br', 'a', 'strong', 'em', 'pre', 'style',
+        'br', 'a', 'strong', 'em', 'pre', 'style', 'option', 'select',
       ],
     ];
 

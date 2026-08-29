@@ -122,6 +122,19 @@
 .hr-calendar-nav__links {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.hr-calendar-month-select {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  max-width: 200px;
 }
 
 .hr-calendar-nav__link {
