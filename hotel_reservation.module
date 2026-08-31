@@ -235,6 +235,9 @@ function hotel_reservation_preprocess_block(&$variables) {
   if (!empty($configuration['use_page_content_section'])) {
     $variables['attributes']['class'][] = 'page-content-section';
   }
+  if (!empty($configuration['use_block_spacing'])) {
+    $variables['attributes']['class'][] = 'hr-block-spacing';
+  }
 }
 
 /**

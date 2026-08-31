@@ -61,6 +61,7 @@ class RoomsBlock extends BlockBase {
       'show_amenities' => TRUE,
       'layout' => 'grid',
       'use_page_content_section' => FALSE,
+      'use_block_spacing' => FALSE,
     ];
   }
 
@@ -121,6 +122,13 @@ class RoomsBlock extends BlockBase {
       '#default_value' => $config['use_page_content_section'] ?? FALSE,
     ];
 
+    $form['use_block_spacing'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Отступы блока (margin-top/bottom: 5rem)'),
+      '#description' => $this->t('Добавить вертикальные отступы 5rem сверху и снизу блока.'),
+      '#default_value' => $config['use_block_spacing'] ?? FALSE,
+    ];
+
     return $form;
   }
 
@@ -135,6 +143,7 @@ class RoomsBlock extends BlockBase {
     $this->configuration['show_amenities'] = (bool) $form_state->getValue('show_amenities');
     $this->configuration['layout'] = $form_state->getValue('layout');
     $this->configuration['use_page_content_section'] = (bool) $form_state->getValue('use_page_content_section');
+    $this->configuration['use_block_spacing'] = (bool) $form_state->getValue('use_block_spacing');
   }
 
   /**

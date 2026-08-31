@@ -4,6 +4,12 @@
    Light theme with admin-configurable colors, micro-animations, responsive
    ============================================ */
 
+/* Shared block spacing class (also defined in rooms-block.css, room-comparison.css). */
+.hr-block-spacing {
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+}
+
 /* ---------- Preview Card ---------- */
 .hr-booking-preview-wrapper {
   display: flex;
@@ -16,7 +22,7 @@
   border-radius: 16px;
   padding: 28px 32px;
   text-align: center;
-  max-width: 420px;
+  max-width: 500px;
   width: 100%;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   animation: hr-fadeIn 0.4s ease;

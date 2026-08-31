@@ -29,6 +29,8 @@ class BookingFormBlock extends BlockBase {
       'show_conditions' => TRUE,
       'display_mode' => 'modal',
       'use_page_content_section' => FALSE,
+      'use_block_spacing' => FALSE,
+      'preview_align' => 'center',
     ];
   }
 
@@ -63,6 +65,25 @@ class BookingFormBlock extends BlockBase {
       '#default_value' => $config['use_page_content_section'] ?? FALSE,
     ];
 
+    $form['use_block_spacing'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Отступы блока (margin-top/bottom: 5rem)'),
+      '#description' => $this->t('Добавить вертикальные отступы 5rem сверху и снизу блока.'),
+      '#default_value' => $config['use_block_spacing'] ?? FALSE,
+    ];
+
+    $form['preview_align'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Выравнивание превью-карточки'),
+      '#description' => $this->t('Горизонтальное выравнивание превью-карточки (только в модальном режиме).'),
+      '#options' => [
+        'left' => $this->t('По левому краю'),
+        'center' => $this->t('По центру'),
+        'right' => $this->t('По правому краю'),
+      ],
+      '#default_value' => $config['preview_align'] ?? 'center',
+    ];
+
     return $form;
   }
 
@@ -73,6 +94,8 @@ class BookingFormBlock extends BlockBase {
     $this->configuration['display_mode'] = $form_state->getValue('display_mode');
     $this->configuration['show_conditions'] = (bool) $form_state->getValue('show_conditions');
     $this->configuration['use_page_content_section'] = (bool) $form_state->getValue('use_page_content_section');
+    $this->configuration['use_block_spacing'] = (bool) $form_state->getValue('use_block_spacing');
+    $this->configuration['preview_align'] = $form_state->getValue('preview_align');
   }
 
   /**
@@ -144,9 +167,17 @@ class BookingFormBlock extends BlockBase {
       'displayMode' => $display_mode,
     ];
 
+    $preview_align = $block_config['preview_align'] ?? 'center';
+    $justify_map = [
+      'left' => 'flex-start',
+      'center' => 'center',
+      'right' => 'flex-end',
+    ];
+    $justify_value = $justify_map[$preview_align] ?? 'center';
+
     if ($display_mode === 'modal') {
       // ========== PREVIEW CARD (modal mode) ==========
-      $html = '<div class="hr-booking-preview-wrapper">';
+      $html = '<div class="hr-booking-preview-wrapper" style="justify-content:' . Html::escape($justify_value) . '">';
       $html .= '<div class="hr-booking-preview">';
       $html .= '<h3 class="hr-booking-preview__title">' . Html::escape($display_title) . '</h3>';
       $html .= '<p class="hr-booking-preview__desc">' . Html::escape($display_subtitle) . '</p>';

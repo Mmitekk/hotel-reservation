@@ -3,6 +3,12 @@
  * Styles for the "Наши номера" (Our Rooms) block.
  */
 
+/* Shared block spacing class. */
+.hr-block-spacing {
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+}
+
 /* ==========================================================================
    Grid layout
    ========================================================================== */
