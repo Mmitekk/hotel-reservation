@@ -52,6 +52,14 @@ composer require mmitekk/hotel-reservation:^1.4.0 --no-interaction --ignore-plat
  drush cr
 ```
 
+### Установка вопреки update_status
+
+Если Composer жалуется на несовместимость с `drupal/upgrade_status`, используйте:
+
+```bash
+composer82 require mmitekk/hotel-reservation --no-interaction --ignore-platform-reqs
+```
+
 ### Импорт русского перевода
 
 После включения модуля:
@@ -108,11 +116,25 @@ drush locale:import ru --type=po modules/contrib/hotel-reservation/translations/
 | Dashboard | `/admin/hotel-reservation/dashboard` | Статистика, графики выручки, последние бронирования |
 | Номера | `/admin/hotel-reservation/rooms` | CRUD номеров с типами и удобствами |
 | Бронирования | `/admin/hotel-reservation/reservations` | Список с фильтрами, быстрая смена статуса |
+| Аналитика | `/admin/hotel-reservation/analytics` | KPI, графики трендов, распределение статусов |
 | Календарь | `/admin/hotel-reservation/calendar` | Календарь занятости по всем номерам |
 | Цены | `/admin/hotel-reservation/rooms/{id}/pricing` | Индивидуальные цены по датам |
 | Настройки | `/admin/config/hotel-reservation/settings` | Все настройки модуля |
 
 ## 🔄 Версии
+
+### v1.6.1
+- 🐛 Исправлено: модальное окно формы открывалось автоматически при загрузке страницы
+- 📊 Добавлена вкладка «Аналитика» в навигацию админ-панели
+- 🔲 Добавлена галочка «Обёртка .page-content-section» в настройках всех блоков
+- 📄 Добавлена команда установки вопреки update_status в README
+
+### v1.6.0
+- ✨ Блок «Наши номера» — вывод номеров сеткой или каруселью
+- ✨ Блок «Сравнение номеров» — интерактивное сравнение 2–3 номеров
+- ✨ Страница аналитики — KPI, тренды, распределение статусов, топ номеров
+- ✨ Форма бронирования: режим модального окна с превью-карточкой
+- 🎨 Обновлённый дизайн всех компонентов
 
 ### v1.4.0
 - 🔧 Исправлен CSRF-токен при отправке формы бронирования
@@ -167,6 +189,14 @@ rm -rf modules/custom/hotel_reservation modules/contrib/hotel-reservation vendor
 composer clear-cache
 composer require mmitekk/hotel-reservation:^1.4.0 --no-interaction --ignore-platform-reqs
 drush en hotel_reservation -y && drush updatedb -y && drush cr
+```
+
+### Install bypassing update_status
+
+If Composer complains about `drupal/upgrade_status` incompatibility:
+
+```bash
+composer82 require mmitekk/hotel-reservation --no-interaction --ignore-platform-reqs
 ```
 
 ## 📄 License

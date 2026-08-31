@@ -28,6 +28,7 @@ class BookingFormBlock extends BlockBase {
     return [
       'show_conditions' => TRUE,
       'display_mode' => 'modal',
+      'use_page_content_section' => FALSE,
     ];
   }
 
@@ -55,6 +56,13 @@ class BookingFormBlock extends BlockBase {
       '#default_value' => $config['show_conditions'] ?? TRUE,
     ];
 
+    $form['use_page_content_section'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Обёртка .page-content-section'),
+      '#description' => $this->t('Обернуть содержимое блока в div с классом .page-content-section (добавляет отступы слева и справа).'),
+      '#default_value' => $config['use_page_content_section'] ?? FALSE,
+    ];
+
     return $form;
   }
 
@@ -64,6 +72,7 @@ class BookingFormBlock extends BlockBase {
   public function blockSubmit($form, FormStateInterface $form_state) {
     $this->configuration['display_mode'] = $form_state->getValue('display_mode');
     $this->configuration['show_conditions'] = (bool) $form_state->getValue('show_conditions');
+    $this->configuration['use_page_content_section'] = (bool) $form_state->getValue('use_page_content_section');
   }
 
   /**
@@ -135,9 +144,13 @@ class BookingFormBlock extends BlockBase {
       'displayMode' => $display_mode,
     ];
 
+    $useSection = !empty($block_config['use_page_content_section']);
+    $sectionOpen = $useSection ? '<div class="page-content-section">' : '';
+    $sectionClose = $useSection ? '</div>' : '';
+
     if ($display_mode === 'modal') {
       // ========== PREVIEW CARD (modal mode) ==========
-      $html = '<div class="hr-booking-preview-wrapper">';
+      $html = $sectionOpen . '<div class="hr-booking-preview-wrapper">';
       $html .= '<div class="hr-booking-preview">';
       $html .= '<h3 class="hr-booking-preview__title">' . Html::escape($display_title) . '</h3>';
       $html .= '<p class="hr-booking-preview__desc">' . Html::escape($display_subtitle) . '</p>';
@@ -146,7 +159,7 @@ class BookingFormBlock extends BlockBase {
       $html .= '</div>';
 
       // ========== MODAL OVERLAY ==========
-      $html .= '<div class="hr-booking-modal-overlay" style="display:none">';
+      $html .= '<div class="hr-booking-modal-overlay">';
       $html .= '<div class="hr-booking-modal">';
 
       // Close button.
@@ -281,8 +294,11 @@ class BookingFormBlock extends BlockBase {
     if ($display_mode === 'modal') {
       $html .= '</div>'; // .hr-booking-modal
       $html .= '</div>'; // .hr-booking-modal-overlay
+      $html .= $sectionClose;
     } else {
+      $html = $sectionOpen . $html;
       $html .= '</div>'; // .hr-booking-inline-wrapper
+      $html .= $sectionClose;
     }
 
     $build['content'] = [

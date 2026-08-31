@@ -60,6 +60,7 @@ class RoomsBlock extends BlockBase {
       'show_price' => TRUE,
       'show_amenities' => TRUE,
       'layout' => 'grid',
+      'use_page_content_section' => FALSE,
     ];
   }
 
@@ -113,6 +114,13 @@ class RoomsBlock extends BlockBase {
       '#default_value' => $config['layout'] ?? 'grid',
     ];
 
+    $form['use_page_content_section'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Обёртка .page-content-section'),
+      '#description' => $this->t('Обернуть содержимое блока в div с классом .page-content-section (добавляет отступы слева и справа).'),
+      '#default_value' => $config['use_page_content_section'] ?? FALSE,
+    ];
+
     return $form;
   }
 
@@ -126,6 +134,7 @@ class RoomsBlock extends BlockBase {
     $this->configuration['show_price'] = (bool) $form_state->getValue('show_price');
     $this->configuration['show_amenities'] = (bool) $form_state->getValue('show_amenities');
     $this->configuration['layout'] = $form_state->getValue('layout');
+    $this->configuration['use_page_content_section'] = (bool) $form_state->getValue('use_page_content_section');
   }
 
   /**
@@ -164,7 +173,11 @@ class RoomsBlock extends BlockBase {
 
     $rooms = \Drupal::entityTypeManager()->getStorage('hr_room')->loadMultiple($ids);
 
-    $html = '<div class="hr-rooms-grid hr-rooms-grid--' . Html::escape($layout) . '">';
+    $useSection = !empty($config['use_page_content_section']);
+    $sectionOpen = $useSection ? '<div class="page-content-section">' : '';
+    $sectionClose = $useSection ? '</div>' : '';
+
+    $html = $sectionOpen . '<div class="hr-rooms-grid hr-rooms-grid--' . Html::escape($layout) . '">';
 
     foreach ($rooms as $room) {
       $roomType = $room->get('room_type')->value ?? 'standard';
@@ -242,6 +255,7 @@ class RoomsBlock extends BlockBase {
     }
 
     $html .= '</div>';
+    $html .= $sectionClose;
 
     return [
       '#markup' => $html,

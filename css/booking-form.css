@@ -48,12 +48,16 @@
   inset: 0;
   z-index: 99999;
   background: rgba(0, 0, 0, 0.5);
-  display: flex;
+  display: none !important;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  animation: hr-fadeInOverlay 0.2s ease;
   overflow-y: auto;
+}
+
+.hr-booking-modal-overlay.hr-modal-visible {
+  display: flex !important;
+  animation: hr-fadeInOverlay 0.2s ease;
 }
 
 @keyframes hr-fadeInOverlay {

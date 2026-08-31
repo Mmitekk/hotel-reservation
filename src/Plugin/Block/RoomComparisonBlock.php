@@ -3,6 +3,7 @@
 namespace Drupal\hotel_reservation\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Utility\Html;
 
 /**
@@ -31,6 +32,38 @@ class RoomComparisonBlock extends BlockBase {
     'family' => 'Семейный',
     'economy' => 'Эконом',
   ];
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    return [
+      'use_page_content_section' => FALSE,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockForm($form, FormStateInterface $form_state) {
+    $config = $this->getConfiguration();
+
+    $form['use_page_content_section'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Обёртка .page-content-section'),
+      '#description' => $this->t('Обернуть содержимое блока в div с классом .page-content-section (добавляет отступы слева и справа).'),
+      '#default_value' => $config['use_page_content_section'] ?? FALSE,
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockSubmit($form, FormStateInterface $form_state) {
+    $this->configuration['use_page_content_section'] = (bool) $form_state->getValue('use_page_content_section');
+  }
 
   /**
    * {@inheritdoc}
@@ -82,8 +115,13 @@ class RoomComparisonBlock extends BlockBase {
       }
     }
 
+    $blockConfig = $this->getConfiguration();
+    $useSection = !empty($blockConfig['use_page_content_section']);
+    $sectionOpen = $useSection ? '<div class="page-content-section">' : '';
+    $sectionClose = $useSection ? '</div>' : '';
+
     // Build the selector HTML.
-    $html = '<div class="hr-room-comparison">';
+    $html = $sectionOpen . '<div class="hr-room-comparison">';
     $html .= '<div class="hr-comparison-selector">';
     $html .= '<div class="hr-comparison-selector__header">';
     $html .= '<span class="hr-comparison-selector__count">Выберите номера (0/3)</span>';
@@ -121,6 +159,7 @@ class RoomComparisonBlock extends BlockBase {
     $html .= '</div>';
 
     $html .= '</div>';
+    $html .= $sectionClose;
 
     return [
       '#markup' => $html,

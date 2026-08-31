@@ -16,11 +16,17 @@ hotel_reservation.reservations_tab:
   base_route: entity.hr_reservation.collection
   weight: 2
 
+hotel_reservation.analytics_tab:
+  route_name: hotel_reservation.analytics
+  title: Аналитика
+  base_route: entity.hr_reservation.collection
+  weight: 3
+
 hotel_reservation.calendar_tab:
   route_name: hotel_reservation.calendar
   title: Календарь
   base_route: entity.hr_reservation.collection
-  weight: 3
+  weight: 4
 
 hotel_reservation.settings_tab:
   route_name: hotel_reservation.settings

@@ -517,29 +517,29 @@
         // Open modal from preview button.
         $wrapper.on('click', '.hr-booking-preview__btn', function (e) {
           e.preventDefault();
-          $overlay.show();
+          $overlay.addClass('hr-modal-visible');
           $('body').css('overflow', 'hidden');
         });
 
         // Close modal — close button.
         $overlay.on('click', '.hr-booking-modal__close', function (e) {
           e.preventDefault();
-          $overlay.hide();
+          $overlay.removeClass('hr-modal-visible');
           $('body').css('overflow', '');
         });
 
         // Close modal — click on overlay background.
         $overlay.on('click', function (e) {
           if (e.target === this) {
-            $overlay.hide();
+            $overlay.removeClass('hr-modal-visible');
             $('body').css('overflow', '');
           }
         });
 
         // Close modal — Escape key.
         $(document).on('keydown', function (e) {
-          if (e.key === 'Escape' && $overlay.is(':visible')) {
-            $overlay.hide();
+          if (e.key === 'Escape' && $overlay.hasClass('hr-modal-visible')) {
+            $overlay.removeClass('hr-modal-visible');
             $('body').css('overflow', '');
           }
         });
