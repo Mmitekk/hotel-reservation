@@ -115,13 +115,8 @@ class RoomComparisonBlock extends BlockBase {
       }
     }
 
-    $blockConfig = $this->getConfiguration();
-    $useSection = !empty($blockConfig['use_page_content_section']);
-    $sectionOpen = $useSection ? '<div class="page-content-section">' : '';
-    $sectionClose = $useSection ? '</div>' : '';
-
     // Build the selector HTML.
-    $html = $sectionOpen . '<div class="hr-room-comparison">';
+    $html = '<div class="hr-room-comparison">';
     $html .= '<div class="hr-comparison-selector">';
     $html .= '<div class="hr-comparison-selector__header">';
     $html .= '<span class="hr-comparison-selector__count">Выберите номера (0/3)</span>';
@@ -159,7 +154,6 @@ class RoomComparisonBlock extends BlockBase {
     $html .= '</div>';
 
     $html .= '</div>';
-    $html .= $sectionClose;
 
     return [
       '#markup' => $html,

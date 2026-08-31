@@ -77,6 +77,22 @@
         '--hr-btn-text': '#ffffff',
       });
 
+      // Also apply color variables to the preview card (outside the form).
+      var previewMode = config.displayMode || 'modal';
+      if (previewMode === 'modal') {
+        var $preview = $('.hr-booking-preview', context);
+        if ($preview.length) {
+          $preview.css({
+            '--hr-primary': primaryColor,
+            '--hr-primary-dark': darkenColor(primaryColor, 30),
+            '--hr-primary-light': lightenColor(primaryColor, 50),
+            '--hr-primary-bg': hexToRgba(primaryColor, 0.08),
+            '--hr-primary-border': hexToRgba(primaryColor, 0.25),
+            '--hr-btn-text': '#ffffff',
+          });
+        }
+      }
+
       // Set min datetime-local to now.
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');

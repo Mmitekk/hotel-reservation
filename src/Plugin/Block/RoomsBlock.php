@@ -173,11 +173,7 @@ class RoomsBlock extends BlockBase {
 
     $rooms = \Drupal::entityTypeManager()->getStorage('hr_room')->loadMultiple($ids);
 
-    $useSection = !empty($config['use_page_content_section']);
-    $sectionOpen = $useSection ? '<div class="page-content-section">' : '';
-    $sectionClose = $useSection ? '</div>' : '';
-
-    $html = $sectionOpen . '<div class="hr-rooms-grid hr-rooms-grid--' . Html::escape($layout) . '">';
+    $html = '<div class="hr-rooms-grid hr-rooms-grid--' . Html::escape($layout) . '">';
 
     foreach ($rooms as $room) {
       $roomType = $room->get('room_type')->value ?? 'standard';
@@ -255,7 +251,6 @@ class RoomsBlock extends BlockBase {
     }
 
     $html .= '</div>';
-    $html .= $sectionClose;
 
     return [
       '#markup' => $html,

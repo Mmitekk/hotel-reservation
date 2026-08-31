@@ -213,6 +213,31 @@ function hotel_reservation_get_available_rooms($check_in, $check_out, $guests_co
 }
 
 /**
+ * Implements hook_preprocess_block().
+ *
+ * Adds .page-content-section class to the block wrapper when the block's
+ * 'use_page_content_section' configuration is enabled. This ensures the
+ * class wraps BOTH the block title and content (not just the content).
+ */
+function hotel_reservation_preprocess_block(&$variables) {
+  $plugin_id = $variables['elements']['#plugin_id'] ?? '';
+  $our_blocks = [
+    'hotel_reservation_booking_form',
+    'hotel_reservation_rooms',
+    'hotel_reservation_room_comparison',
+  ];
+
+  if (!in_array($plugin_id, $our_blocks)) {
+    return;
+  }
+
+  $configuration = $variables['elements']['#configuration'] ?? [];
+  if (!empty($configuration['use_page_content_section'])) {
+    $variables['attributes']['class'][] = 'page-content-section';
+  }
+}
+
+/**
  * Calculate total price for a room for given dates.
  *
  * @param int $room_id

@@ -144,13 +144,9 @@ class BookingFormBlock extends BlockBase {
       'displayMode' => $display_mode,
     ];
 
-    $useSection = !empty($block_config['use_page_content_section']);
-    $sectionOpen = $useSection ? '<div class="page-content-section">' : '';
-    $sectionClose = $useSection ? '</div>' : '';
-
     if ($display_mode === 'modal') {
       // ========== PREVIEW CARD (modal mode) ==========
-      $html = $sectionOpen . '<div class="hr-booking-preview-wrapper">';
+      $html = '<div class="hr-booking-preview-wrapper">';
       $html .= '<div class="hr-booking-preview">';
       $html .= '<h3 class="hr-booking-preview__title">' . Html::escape($display_title) . '</h3>';
       $html .= '<p class="hr-booking-preview__desc">' . Html::escape($display_subtitle) . '</p>';
@@ -294,11 +290,8 @@ class BookingFormBlock extends BlockBase {
     if ($display_mode === 'modal') {
       $html .= '</div>'; // .hr-booking-modal
       $html .= '</div>'; // .hr-booking-modal-overlay
-      $html .= $sectionClose;
     } else {
-      $html = $sectionOpen . $html;
       $html .= '</div>'; // .hr-booking-inline-wrapper
-      $html .= $sectionClose;
     }
 
     $build['content'] = [
