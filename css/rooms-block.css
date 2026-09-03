@@ -70,6 +70,26 @@
   }
 }
 
+.hr-room-card__image-wrap {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: #f3f4f6;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.hr-room-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.hr-room-card:hover .hr-room-card__image {
+  transform: scale(1.03);
+}
+
 /* ==========================================================================
    Card header: type badge + price
    ========================================================================== */

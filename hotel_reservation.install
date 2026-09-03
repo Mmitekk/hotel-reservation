@@ -32,6 +32,31 @@ function hotel_reservation_install(bool $is_syncing) {
 }
 
 /**
+ * Add image field to hr_room.
+ */
+function hotel_reservation_update_10001() {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $definition_update_manager->getEntityType('hr_room');
+  $field_storage_definition = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('hr_room')['image'] ?? NULL;
+  if (!$field_storage_definition) {
+    $field_storage_definition = \Drupal\Core\Field\BaseFieldDefinition::create('image')
+      ->setLabel(t('Изображение (превью)'))
+      ->setCardinality(1)
+      ->setSettings([
+        'file_directory' => 'hotel-rooms',
+        'alt_field' => TRUE,
+        'alt_field_required' => FALSE,
+        'title_field' => FALSE,
+        'max_filesize' => '2 MB',
+        'file_extensions' => 'png jpg jpeg webp',
+        'max_resolution' => '2000x2000',
+        'min_resolution' => '200x150',
+      ]);
+  }
+  $definition_update_manager->installFieldStorageDefinition('image', 'hr_room', 'hotel_reservation', $field_storage_definition);
+}
+
+/**
  * Implements hook_uninstall().
  */
 function hotel_reservation_uninstall(bool $is_syncing) {

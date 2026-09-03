@@ -35,6 +35,7 @@ class RoomForm extends ContentEntityForm {
     // Group fields into logical fieldsets for a better UX.
     $field_order = [
       'name' => -5,
+      'image' => -4.5,
       'description' => -4,
       'capacity' => -3,
       'base_price' => -2,

@@ -209,6 +209,37 @@ class Room extends ContentEntityBase {
   }
 
   /**
+   * Gets the room image file.
+   *
+   * @return \Drupal\file\FileInterface|null
+   */
+  public function getImage(): ?\Drupal\file\FileInterface {
+    $item = $this->get('image')->first();
+    if (!$item || empty($item->target_id)) {
+      return NULL;
+    }
+    return \Drupal::entityTypeManager()->getStorage('file')->load($item->target_id);
+  }
+
+  /**
+   * Gets the image URL or NULL.
+   *
+   * @return string|null
+   */
+  public function getImageUrl(): ?string {
+    $file = $this->getImage();
+    if (!$file) {
+      return NULL;
+    }
+    try {
+      return \Drupal::service('file_url_generator')->generateString($file->getFileUri());
+    }
+    catch (\Exception $e) {
+      return NULL;
+    }
+  }
+
+  /**
    * Sets the creation timestamp.
    *
    * @param int $timestamp
@@ -244,6 +275,35 @@ class Room extends ContentEntityBase {
       ->setDisplayOptions('form', [
         'type' => 'string_textfield',
         'weight' => -5,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['image'] = BaseFieldDefinition::create('image')
+      ->setLabel(t('Изображение (превью)'))
+      ->setDescription(t('Превью номера. Рекомендуется 800×600, до 2 МБ (jpg, png, webp).'))
+      ->setCardinality(1)
+      ->setRequired(FALSE)
+      ->setSettings([
+        'file_directory' => 'hotel-rooms',
+        'alt_field' => TRUE,
+        'alt_field_required' => FALSE,
+        'title_field' => FALSE,
+        'max_filesize' => '2 MB',
+        'file_extensions' => 'png jpg jpeg webp',
+        'max_resolution' => '2000x2000',
+        'min_resolution' => '200x150',
+        'default_image' => ['uuid' => NULL],
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'image',
+        'weight' => -4,
+        'settings' => ['image_style' => 'medium', 'image_link' => ''],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'image_image',
+        'weight' => -6,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);

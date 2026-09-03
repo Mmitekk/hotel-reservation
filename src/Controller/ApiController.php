@@ -114,10 +114,21 @@ class ApiController extends ControllerBase {
       $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
       $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
       $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
+      $imageUrl = NULL;
+      $imageAlt = '';
+      if (method_exists($room, 'getImageUrl')) {
+        $imageUrl = $room->getImageUrl();
+        $img_field = $room->get('image')->first();
+        if ($img_field && !empty($img_field->alt)) {
+          $imageAlt = $img_field->alt;
+        }
+      }
       $results[] = [
         'id' => (int) $room->id(),
         'name' => $room->label(),
         'description' => $plainDesc,
+        'image_url' => $imageUrl,
+        'image_alt' => $imageAlt,
         'capacity' => $room->getCapacity(),
         'base_price' => number_format((float) $room->getBasePrice(), 2, '.', ''),
         'total_price' => number_format($pricing['total'], 2, '.', ''),

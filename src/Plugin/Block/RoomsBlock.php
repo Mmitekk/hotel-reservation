@@ -59,6 +59,7 @@ class RoomsBlock extends BlockBase {
       'show_description' => TRUE,
       'show_price' => TRUE,
       'show_amenities' => TRUE,
+      'show_image' => TRUE,
       'layout' => 'grid',
       'use_page_content_section' => FALSE,
       'use_block_spacing' => FALSE,
@@ -105,6 +106,12 @@ class RoomsBlock extends BlockBase {
       '#default_value' => $config['show_amenities'] ?? TRUE,
     ];
 
+    $form['show_image'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Показывать превью (изображение)'),
+      '#default_value' => $config['show_image'] ?? TRUE,
+    ];
+
     $form['layout'] = [
       '#type' => 'select',
       '#title' => $this->t('Макет'),
@@ -141,6 +148,7 @@ class RoomsBlock extends BlockBase {
     $this->configuration['show_description'] = (bool) $form_state->getValue('show_description');
     $this->configuration['show_price'] = (bool) $form_state->getValue('show_price');
     $this->configuration['show_amenities'] = (bool) $form_state->getValue('show_amenities');
+    $this->configuration['show_image'] = (bool) $form_state->getValue('show_image');
     $this->configuration['layout'] = $form_state->getValue('layout');
     $this->configuration['use_page_content_section'] = (bool) $form_state->getValue('use_page_content_section');
     $this->configuration['use_block_spacing'] = (bool) $form_state->getValue('use_block_spacing');
@@ -156,6 +164,7 @@ class RoomsBlock extends BlockBase {
     $showDescription = !empty($config['show_description']);
     $showPrice = !empty($config['show_price']);
     $showAmenities = !empty($config['show_amenities']);
+    $showImage = !empty($config['show_image']);
     $layout = $config['layout'] ?? 'grid';
 
     // Currency settings.
@@ -231,6 +240,22 @@ class RoomsBlock extends BlockBase {
 
       $html .= '<div class="hr-room-card" style="--room-color: ' . Html::escape($typeColor) . '">';
 
+      // Image.
+      if ($showImage) {
+        $imageUrl = NULL;
+        $imageAlt = $name;
+        if (method_exists($room, 'getImageUrl')) {
+          $imageUrl = $room->getImageUrl();
+          $img_field = $room->get('image')->first();
+          if ($img_field && !empty($img_field->alt)) {
+            $imageAlt = $img_field->alt;
+          }
+        }
+        if (!empty($imageUrl)) {
+          $html .= '<div class="hr-room-card__image-wrap"><img class="hr-room-card__image" src="' . Html::escape($imageUrl) . '" alt="' . Html::escape($imageAlt) . '" loading="lazy"></div>';
+        }
+      }
+
       // Header: type badge + price.
       $html .= '<div class="hr-room-card__header">';
       $html .= '<span class="hr-room-card__type-badge" style="background:var(--room-color);color:#fff">' . Html::escape($typeLabel) . '</span>';
@@ -276,7 +301,7 @@ class RoomsBlock extends BlockBase {
         'max-age' => 0,
       ],
       '#allowed_tags' => [
-        'div', 'h3', 'p', 'span',
+        'div', 'h3', 'p', 'span', 'img',
       ],
     ];
   }

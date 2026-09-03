@@ -16,6 +16,7 @@ class RoomListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
+    $header['image'] = $this->t('Превью');
     $header['name'] = $this->t('Название');
     $header['room_type'] = $this->t('Тип');
     $header['capacity'] = $this->t('Вместимость');
@@ -33,6 +34,26 @@ class RoomListBuilder extends EntityListBuilder {
     $config = \Drupal::config('hotel_reservation.settings');
     if ($config->get('currency_symbol')) {
       $currency_symbol = $config->get('currency_symbol');
+    }
+
+    $image_url = NULL;
+    $image_alt = '';
+    if (method_exists($entity, 'getImageUrl')) {
+      $image_url = $entity->getImageUrl();
+      $img_field = $entity->get('image')->first();
+      if ($img_field) {
+        $image_alt = $img_field->alt ?? '';
+      }
+    }
+    if (!empty($image_url)) {
+      $row['image']['data'] = [
+        '#markup' => '<img src="' . htmlspecialchars($image_url, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($image_alt, ENT_QUOTES, 'UTF-8') . '" style="width:64px;height:48px;object-fit:cover;border-radius:6px;">',
+      ];
+    }
+    else {
+      $row['image']['data'] = [
+        '#markup' => '<span style="display:inline-block;width:64px;height:48px;background:#f3f4f6;border-radius:6px;text-align:center;line-height:48px;color:#9ca3af;font-size:11px;">—</span>',
+      ];
     }
 
     $row['name']['data'] = [
