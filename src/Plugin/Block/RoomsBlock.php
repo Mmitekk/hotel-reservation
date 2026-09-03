@@ -191,12 +191,14 @@ class RoomsBlock extends BlockBase {
 
       $name = Html::escape($room->getName());
 
-      // Description trimmed to 120 characters.
+      // Description trimmed to 120 characters — strip all HTML tags.
       $description = '';
       if ($showDescription) {
         $rawDesc = $room->getDescription() ?? '';
-        $plainDesc = trim(strip_tags($rawDesc));
-        $description = Html::escape(strlen($plainDesc) > 120 ? mb_substr($plainDesc, 0, 120) . '...' : $plainDesc);
+        $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
+        $description = Html::escape(mb_strlen($plainDesc) > 120 ? mb_substr($plainDesc, 0, 120) . '...' : $plainDesc);
       }
 
       // Format price.

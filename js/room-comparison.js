@@ -119,7 +119,8 @@
             key: 'description',
             format: function (val) {
               if (!val) { return '—'; }
-              return val.length > 120 ? val.substring(0, 120) + '…' : val;
+              var plain = stripHtml(val);
+              return plain.length > 120 ? plain.substring(0, 120) + '…' : plain;
             }
           }
         ];
@@ -190,6 +191,14 @@
        *
        * @return {string}
        */
+      function stripHtml(html) {
+        if (!html) return '';
+        var tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        var text = tmp.textContent || tmp.innerText || '';
+        return text.replace(/\s+/g, ' ').trim();
+      }
+
       function escapeHtml(str) {
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));

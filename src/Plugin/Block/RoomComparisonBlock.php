@@ -108,8 +108,12 @@ class RoomComparisonBlock extends BlockBase {
         }
         $amenitiesString = implode(', ', $amenities);
 
-        // Truncate description for comparison — strip HTML tags first.
-        $description = trim(strip_tags($room->getDescription() ?? ''));
+        // Truncate description for comparison — strip all HTML tags.
+        $rawDesc = $room->getDescription() ?? '';
+        $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
+        $description = $plainDesc;
 
         $roomsData[] = [
           'id' => (int) $room->id(),

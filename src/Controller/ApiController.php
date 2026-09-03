@@ -110,10 +110,14 @@ class ApiController extends ControllerBase {
     foreach ($available_rooms as $room) {
       $pricing = hotel_reservation_calculate_price($room->id(), $check_in, $check_out);
 
+      $rawDesc = $room->getDescription() ?: '';
+      $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+      $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+      $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
       $results[] = [
         'id' => (int) $room->id(),
         'name' => $room->label(),
-        'description' => $room->getDescription() ?: '',
+        'description' => $plainDesc,
         'capacity' => $room->getCapacity(),
         'base_price' => number_format((float) $room->getBasePrice(), 2, '.', ''),
         'total_price' => number_format($pricing['total'], 2, '.', ''),
