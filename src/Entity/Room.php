@@ -342,7 +342,7 @@ class Room extends ContentEntityBase {
           'family' => 'Семейный',
           'economy' => 'Эконом',
         ],
-        'allowed_values_function' => '',
+        'allowed_values_function' => 'hotel_reservation_room_type_allowed_values',
       ])
       ->setDefaultValue('standard')
       ->setDisplayOptions('view', [

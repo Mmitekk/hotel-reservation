@@ -7,6 +7,25 @@
 
 use Drupal\Core\Entity\EntityTypeInterface;
 
+function hotel_reservation_create_default_room_types() {
+  $defaults = [
+    'standard' => ['label' => 'Стандарт', 'color' => '#6b7280', 'weight' => 0],
+    'superior' => ['label' => 'Супериор', 'color' => '#0ea5e9', 'weight' => 1],
+    'deluxe' => ['label' => 'Делюкс', 'color' => '#8b5cf6', 'weight' => 2],
+    'suite' => ['label' => 'Сьют', 'color' => '#f59e0b', 'weight' => 3],
+    'apartment' => ['label' => 'Апартаменты', 'color' => '#10b981', 'weight' => 4],
+    'villa' => ['label' => 'Вилла', 'color' => '#ec4899', 'weight' => 5],
+    'family' => ['label' => 'Семейный', 'color' => '#06b6d4', 'weight' => 6],
+    'economy' => ['label' => 'Эконом', 'color' => '#64748b', 'weight' => 7],
+  ];
+  $storage = \Drupal::entityTypeManager()->getStorage('hr_room_type');
+  foreach ($defaults as $id => $values) {
+    if (!$storage->load($id)) {
+      $storage->create(['id' => $id, 'label' => $values['label'], 'color' => $values['color'], 'weight' => $values['weight']])->save();
+    }
+  }
+}
+
 /**
  * Implements hook_install().
  */
@@ -26,6 +45,8 @@ function hotel_reservation_install(bool $is_syncing) {
     ->set('booking_conditions', '')
     ->save();
 
+  hotel_reservation_create_default_room_types();
+
   \Drupal::messenger()->addStatus(t('Hotel Reservation module installed successfully. Configure it at <a href=":url">Settings</a>.', [
     ':url' => \Drupal\Core\Url::fromRoute('hotel_reservation.settings')->toString(),
   ]));
@@ -36,7 +57,6 @@ function hotel_reservation_install(bool $is_syncing) {
  */
 function hotel_reservation_update_10001() {
   $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
-  $entity_type = $definition_update_manager->getEntityType('hr_room');
   $field_storage_definition = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('hr_room')['image'] ?? NULL;
   if (!$field_storage_definition) {
     $field_storage_definition = \Drupal\Core\Field\BaseFieldDefinition::create('image')
@@ -54,6 +74,13 @@ function hotel_reservation_update_10001() {
       ]);
   }
   $definition_update_manager->installFieldStorageDefinition('image', 'hr_room', 'hotel_reservation', $field_storage_definition);
+}
+
+/**
+ * Create default room types.
+ */
+function hotel_reservation_update_10002() {
+  hotel_reservation_create_default_room_types();
 }
 
 /**

@@ -67,6 +67,25 @@ hotel_reservation.settings:
       type: string
       label: 'Success message text'
 
+hr_room_type.*:
+  type: config_entity
+  label: 'Room type'
+  mapping:
+    id:
+      type: string
+      label: 'Machine name'
+    label:
+      type: label
+      label: 'Label'
+    color:
+      type: string
+      label: 'Color'
+    weight:
+      type: integer
+      label: 'Weight'
+    uuid:
+      type: string
+
 hr_room.*:
   type: config_entity
   label: 'Room'

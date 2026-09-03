@@ -62,7 +62,7 @@ class RoomListBuilder extends EntityListBuilder {
       '#url' => $entity->toUrl('edit-form'),
     ];
 
-    $room_type_options = [
+    $room_type_options = function_exists('hotel_reservation_room_type_allowed_values') ? hotel_reservation_room_type_allowed_values() : [
       'standard' => 'Стандарт',
       'superior' => 'Супериор',
       'deluxe' => 'Делюкс',
@@ -73,8 +73,17 @@ class RoomListBuilder extends EntityListBuilder {
       'economy' => 'Эконом',
     ];
     $rt = $entity->get('room_type')->value;
+    $colorMap = [];
+    try {
+      foreach (\Drupal::entityTypeManager()->getStorage('hr_room_type')->loadMultiple() as $rt_entity) {
+        $colorMap[$rt_entity->id()] = $rt_entity->getColor();
+      }
+    }
+    catch (\Exception $e) {
+    }
+    $bg = $colorMap[$rt] ?? '#6b7280';
     $row['room_type']['data'] = [
-      '#markup' => '<span class="hr-admin-room-type hr-admin-room-type--' . $rt . '">' . ($room_type_options[$rt] ?? $rt) . '</span>',
+      '#markup' => '<span class="hr-admin-room-type" style="background:' . htmlspecialchars($bg, ENT_QUOTES, 'UTF-8') . ';color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">' . htmlspecialchars($room_type_options[$rt] ?? $rt, ENT_QUOTES, 'UTF-8') . '</span>',
     ];
 
     $row['capacity'] = $entity->get('capacity')->value;

@@ -3,3 +3,9 @@ hotel_reservation.room_add:
   title: 'Добавить номер'
   appears_on:
     - entity.hr_room.collection
+
+hotel_reservation.room_type_add:
+  route_name: entity.hr_room_type.add_form
+  title: 'Добавить тип номера'
+  appears_on:
+    - entity.hr_room_type.collection

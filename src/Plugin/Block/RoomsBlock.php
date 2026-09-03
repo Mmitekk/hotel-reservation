@@ -17,12 +17,7 @@ use Drupal\Component\Utility\Html;
  */
 class RoomsBlock extends BlockBase {
 
-  /**
-   * Room type labels in Russian.
-   *
-   * @var string[]
-   */
-  private const ROOM_TYPE_LABELS = [
+  private const FALLBACK_LABELS = [
     'standard' => 'Стандарт',
     'superior' => 'Супериор',
     'deluxe' => 'Делюкс',
@@ -33,12 +28,7 @@ class RoomsBlock extends BlockBase {
     'economy' => 'Эконом',
   ];
 
-  /**
-   * Room type accent colors.
-   *
-   * @var string[]
-   */
-  private const ROOM_TYPE_COLORS = [
+  private const FALLBACK_COLORS = [
     'standard' => '#6b7280',
     'superior' => '#0ea5e9',
     'deluxe' => '#8b5cf6',
@@ -48,6 +38,25 @@ class RoomsBlock extends BlockBase {
     'family' => '#06b6d4',
     'economy' => '#64748b',
   ];
+
+  private function getRoomTypeMap(): array {
+    $map = [];
+    try {
+      $storage = \Drupal::entityTypeManager()->getStorage('hr_room_type');
+      $types = $storage->loadMultiple();
+      foreach ($types as $type) {
+        $map[$type->id()] = ['label' => $type->label(), 'color' => $type->getColor()];
+      }
+    }
+    catch (\Exception $e) {
+    }
+    if (empty($map)) {
+      foreach (self::FALLBACK_LABELS as $id => $label) {
+        $map[$id] = ['label' => $label, 'color' => self::FALLBACK_COLORS[$id] ?? '#6b7280'];
+      }
+    }
+    return $map;
+  }
 
   /**
    * {@inheritdoc}
@@ -193,10 +202,11 @@ class RoomsBlock extends BlockBase {
 
     $html = '<div class="hr-rooms-grid hr-rooms-grid--' . Html::escape($layout) . '">';
 
+    $typeMap = $this->getRoomTypeMap();
     foreach ($rooms as $room) {
       $roomType = $room->get('room_type')->value ?? 'standard';
-      $typeLabel = self::ROOM_TYPE_LABELS[$roomType] ?? $roomType;
-      $typeColor = self::ROOM_TYPE_COLORS[$roomType] ?? '#6b7280';
+      $typeLabel = $typeMap[$roomType]['label'] ?? self::FALLBACK_LABELS[$roomType] ?? $roomType;
+      $typeColor = $typeMap[$roomType]['color'] ?? self::FALLBACK_COLORS[$roomType] ?? '#6b7280';
 
       $name = Html::escape($room->getName());
 

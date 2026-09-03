@@ -25,6 +25,13 @@ hotel_reservation.rooms:
   route_name: entity.hr_room.collection
   parent: hotel_reservation.admin
 
+hotel_reservation.room_types:
+  title: 'Типы номеров'
+  description: 'Управление типами номеров.'
+  route_name: entity.hr_room_type.collection
+  parent: hotel_reservation.admin
+  weight: 1
+
 hotel_reservation.reservations:
   title: 'Бронирования'
   description: 'Управление бронированиями.'

@@ -17,12 +17,7 @@ use Drupal\Component\Utility\Html;
  */
 class RoomComparisonBlock extends BlockBase {
 
-  /**
-   * Room type labels in Russian.
-   *
-   * @var string[]
-   */
-  private const ROOM_TYPE_LABELS = [
+  private const FALLBACK_LABELS = [
     'standard' => 'Стандарт',
     'superior' => 'Супериор',
     'deluxe' => 'Делюкс',
@@ -32,6 +27,22 @@ class RoomComparisonBlock extends BlockBase {
     'family' => 'Семейный',
     'economy' => 'Эконом',
   ];
+
+  private function getRoomTypeLabels(): array {
+    $labels = [];
+    try {
+      $storage = \Drupal::entityTypeManager()->getStorage('hr_room_type');
+      foreach ($storage->loadMultiple() as $type) {
+        $labels[$type->id()] = $type->label();
+      }
+    }
+    catch (\Exception $e) {
+    }
+    if (empty($labels)) {
+      $labels = self::FALLBACK_LABELS;
+    }
+    return $labels;
+  }
 
   /**
    * {@inheritdoc}
@@ -91,12 +102,13 @@ class RoomComparisonBlock extends BlockBase {
 
     $roomsData = [];
 
+    $typeLabels = $this->getRoomTypeLabels();
     if (!empty($ids)) {
       $rooms = \Drupal::entityTypeManager()->getStorage('hr_room')->loadMultiple($ids);
 
       foreach ($rooms as $room) {
         $roomType = $room->get('room_type')->value ?? 'standard';
-        $typeLabel = self::ROOM_TYPE_LABELS[$roomType] ?? $roomType;
+        $typeLabel = $typeLabels[$roomType] ?? self::FALLBACK_LABELS[$roomType] ?? $roomType;
         $priceValue = (float) $room->getBasePrice();
 
         // Parse and sort amenities.
