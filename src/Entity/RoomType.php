@@ -31,6 +31,13 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "label" = "label",
  *     "uuid" = "uuid"
  *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "color",
+ *     "weight",
+ *     "uuid"
+ *   },
  *   links = {
  *     "collection" = "/admin/hotel-reservation/room-types",
  *     "add-form" = "/admin/hotel-reservation/room-types/add",

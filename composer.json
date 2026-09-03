@@ -16,8 +16,8 @@
   },
   "extra": {
     "drupal": {
-      "version": "1.8.0",
-      "datestamp": "1788442179",
+      "version": "1.8.1",
+      "datestamp": "1788448047",
       "security-coverage": {
         "status": "not-covered",
         "message": "This is a custom module. No security coverage provided by the Drupal Security Team."
