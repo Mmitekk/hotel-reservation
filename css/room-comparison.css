@@ -78,8 +78,9 @@
   width: 100%;
 }
 
-.hr-comparison-room-btn:hover {
-  border-color: #d1d5db;
+.hr-comparison-room-btn:hover:not(.is-selected):not(.is-disabled) {
+  background: #f5f3ff;
+  border-color: #c4b5fd;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
