@@ -195,7 +195,8 @@ class RoomsBlock extends BlockBase {
       $description = '';
       if ($showDescription) {
         $rawDesc = $room->getDescription() ?? '';
-        $description = Html::escape(strlen($rawDesc) > 120 ? mb_substr($rawDesc, 0, 120) . '...' : $rawDesc);
+        $plainDesc = trim(strip_tags($rawDesc));
+        $description = Html::escape(strlen($plainDesc) > 120 ? mb_substr($plainDesc, 0, 120) . '...' : $plainDesc);
       }
 
       // Format price.
