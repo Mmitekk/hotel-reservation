@@ -44,19 +44,20 @@ class SharedController extends ControllerBase {
 
   protected function buildLoginForm(string $token, string $currentUrl, bool $error = FALSE): array {
     $msg = $error ? '<p style="color:#dc2626;margin-bottom:12px;">Неверный пароль</p>' : '';
-    $html = '<div class="page-content-section"><div style="max-width:420px;margin:60px auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;font-family:system-ui;">';
-    $html .= '<h2 style="margin:0 0 12px;">Доступ ограничен</h2>';
-    $html .= '<p style="color:#6b7280;margin:0 0 16px;">Введите пароль для просмотра статистики.</p>';
+    $html = '<div class="page-content-section"><div class="hr-share-login">';
+    $html .= '<h2>Доступ ограничен</h2>';
+    $html .= '<p>Введите пароль для просмотра статистики.</p>';
     $html .= $msg;
     $html .= '<form method="POST" action="' . htmlspecialchars($currentUrl, ENT_QUOTES, 'UTF-8') . '">';
-    $html .= '<input type="password" name="password" placeholder="Пароль" required style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:12px;">';
-    $html .= '<button type="submit" style="width:100%;padding:10px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:2rem;">Войти</button>';
+    $html .= '<input type="password" name="password" placeholder="Пароль" required class="hr-share-login__input">';
+    $html .= '<button type="submit" class="hr-share-login__btn">Войти</button>';
     $html .= '</form></div></div>';
 
     return [
       '#markup' => $html,
       '#allowed_tags' => ['div', 'h2', 'p', 'form', 'input', 'button', 'span'],
       '#attached' => [
+        'library' => ['hotel_reservation/shared'],
         'html_head' => [
           [['#tag' => 'meta', '#attributes' => ['name' => 'robots', 'content' => 'noindex, nofollow, noarchive']], 'robots_noindex'],
         ],

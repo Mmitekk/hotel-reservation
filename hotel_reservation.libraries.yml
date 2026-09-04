@@ -49,3 +49,9 @@ room-comparison:
     - core/drupalSettings
     - core/jquery
     - core/once
+
+shared:
+  version: 1.10.3
+  css:
+    theme:
+      css/shared.css: {}
