@@ -1,5 +1,5 @@
 booking-form:
-  version: 1.12.3
+  version: 1.12.4
   css:
     theme:
       css/booking-form.css: {}

@@ -95,6 +95,12 @@
   right: 8px;
   width: 36px;
   height: 36px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  flex-shrink: 0;
   border-radius: 50%;
   border: none;
   background: var(--hr-text, #1a1a2e);
@@ -744,6 +750,13 @@
 .hr-guest-counter__btn {
   width: 36px;
   height: 36px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  box-sizing: border-box;
   border: 1.5px solid var(--hr-border);
   background: var(--hr-bg-alt);
   color: var(--hr-text);
@@ -776,6 +789,12 @@
 .hr-guest-counter__value {
   width: 48px;
   height: 36px;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  line-height: 36px;
+  flex-shrink: 0;
+  box-sizing: border-box;
   border: 1.5px solid var(--hr-border);
   border-left: none;
   border-right: none;
