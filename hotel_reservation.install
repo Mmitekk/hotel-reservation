@@ -163,17 +163,21 @@ function hotel_reservation_update_10003() {
 }
 
 /**
- * Add teaser + gallery images to hr_room.
+ * Ensures teaser + gallery images storage exists on hr_room.
+ *
+ * NOTE: must check INSTALLED definitions via entityDefinitionUpdateManager,
+ * not entity_field.manager (which also returns code-defined base fields
+ * and would wrongly report the storage as existing).
  */
-function hotel_reservation_update_10004() {
+function hotel_reservation_ensure_room_gallery_fields() {
   $def_manager = \Drupal::entityDefinitionUpdateManager();
   try {
-    $defs = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('hr_room');
+    $installed = $def_manager->getFieldStorageDefinitions('hr_room');
   }
   catch (\Exception $e) {
     return;
   }
-  if (empty($defs['teaser'])) {
+  if (empty($installed['teaser'])) {
     $teaser = \Drupal\Core\Field\BaseFieldDefinition::create('string_long')
       ->setLabel(t('Анонс (краткое описание)'))
       ->setDescription(t('Показывается в карточке «Наши номера».'))
@@ -185,7 +189,7 @@ function hotel_reservation_update_10004() {
       ->setDisplayConfigurable('view', TRUE);
     $def_manager->installFieldStorageDefinition('teaser', 'hr_room', 'hotel_reservation', $teaser);
   }
-  if (empty($defs['images'])) {
+  if (empty($installed['images'])) {
     $images = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Слайдер (изображения номера)'))
       ->setCardinality(-1)
@@ -209,6 +213,21 @@ function hotel_reservation_update_10004() {
   if ($config->get('room_modal_width') === NULL) {
     $config->set('room_modal_width', 80)->save();
   }
+}
+
+/**
+ * Add teaser + gallery images to hr_room.
+ */
+function hotel_reservation_update_10004() {
+  hotel_reservation_ensure_room_gallery_fields();
+}
+
+/**
+ * Re-run gallery fields install (10004 checked code definitions instead of
+ * installed storage and could skip table creation).
+ */
+function hotel_reservation_update_10005() {
+  hotel_reservation_ensure_room_gallery_fields();
 }
 
 /**
