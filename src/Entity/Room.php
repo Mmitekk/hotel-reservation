@@ -251,7 +251,7 @@ class Room extends ContentEntityBase {
 
   public function getImageAlt(): string {
     $item = $this->get('image')->first();
-    if (!$item) {
+    if (!$item || empty($item->target_id)) {
       return $this->getName();
     }
     if (!empty($item->alt)) {
