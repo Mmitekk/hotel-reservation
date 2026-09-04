@@ -11,11 +11,11 @@
   'use strict';
 
   var NAMESPACE = '.hrRoomModal';
-  var GAP = 12;
 
   var CHEVRON_LEFT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var CHEVRON_RIGHT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var ICON_CLOSE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+  var ICON_ZOOM = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
 
   function esc(str) {
     var div = document.createElement('div');
@@ -127,18 +127,15 @@
     if (slides.length) {
       html += '<div class="hr-room-modal__slider"><div class="hr-room-modal__track-viewport"><div class="hr-room-modal__track">';
       slides.forEach(function (s) {
-        html += '<div class="hr-room-modal__slide" title="Нажмите, чтобы увеличить">';
-        html += '<img src="' + esc(s.url) + '" alt="' + esc(s.alt || room.name) + '" loading="lazy" draggable="false"></div>';
+        html += '<div class="hr-room-modal__slide">';
+        html += '<img src="' + esc(s.url) + '" alt="' + esc(s.alt || room.name) + '" loading="lazy" draggable="false">';
+        html += '<button type="button" class="hr-room-modal__zoom" aria-label="Открыть фото на весь экран">' + ICON_ZOOM + '</button></div>';
       });
       html += '</div></div>';
       if (slides.length > 1) {
         html += '<button type="button" class="hr-room-modal__nav hr-room-modal__nav--prev" aria-label="Предыдущее фото">' + CHEVRON_LEFT + '</button>';
         html += '<button type="button" class="hr-room-modal__nav hr-room-modal__nav--next" aria-label="Следующее фото">' + CHEVRON_RIGHT + '</button>';
-        html += '<div class="hr-room-modal__dots">';
-        slides.forEach(function (s, i) {
-          html += '<button type="button" class="hr-room-modal__dot' + (i === 0 ? ' is-active' : '') + '" data-index="' + i + '" aria-label="Фото ' + (i + 1) + '"></button>';
-        });
-        html += '</div>';
+        html += '<div class="hr-room-modal__counter">1 / ' + slides.length + '</div>';
       }
       html += '</div>';
     }
@@ -180,42 +177,100 @@
         return;
       }
       if (e.key === 'Escape') { close(); }
-      else if (e.key === 'ArrowLeft') { show(idx - 1); }
-      else if (e.key === 'ArrowRight') { show(idx + 1); }
+      else if (e.key === 'ArrowLeft') { go(idx - 1); }
+      else if (e.key === 'ArrowRight') { go(idx + 1); }
     });
 
-    // Slick-like center mode: active slide centered, neighbours peek.
+    // Free-scroll carousel: row of slides, drag with mouse, arrows snap.
     var idx = 0;
-    var $track = $overlay.find('.hr-room-modal__track');
     var $vp = $overlay.find('.hr-room-modal__track-viewport');
     var $slides = $overlay.find('.hr-room-modal__slide');
+    var $counter = $overlay.find('.hr-room-modal__counter');
+    var justDragged = false;
 
-    function layout() {
-      if (!slides.length) { return; }
-      var vpW = $vp.width();
-      var slideW = $slides.eq(0).outerWidth();
-      var x = (vpW - slideW) / 2 - idx * (slideW + GAP);
-      $track.css('transform', 'translateX(' + x + 'px)');
+    function activeIndex() {
+      if (!slides.length) { return 0; }
+      var vpR = $vp[0].getBoundingClientRect();
+      var mid = vpR.left + vpR.width / 2;
+      var best = 0;
+      var bestD = Infinity;
+      $slides.each(function (i) {
+        var r = this.getBoundingClientRect();
+        var d = Math.abs((r.left + r.width / 2) - mid);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      return best;
     }
 
-    function show(i) {
+    function updateCounter() {
+      idx = activeIndex();
+      $counter.text((idx + 1) + ' / ' + slides.length);
+    }
+
+    var scrollRaf = null;
+    $vp.on('scroll' + NAMESPACE, function () {
+      if (scrollRaf) { return; }
+      scrollRaf = requestAnimationFrame(function () {
+        scrollRaf = null;
+        updateCounter();
+      });
+    });
+
+    function go(i, instant) {
       if (!slides.length) { return; }
       idx = ((i % slides.length) + slides.length) % slides.length;
-      $slides.removeClass('is-active').eq(idx).addClass('is-active');
-      $overlay.find('.hr-room-modal__dot').removeClass('is-active').eq(idx).addClass('is-active');
-      layout();
+      try {
+        $slides[idx].scrollIntoView({behavior: instant ? 'auto' : 'smooth', inline: 'center', block: 'nearest'});
+      }
+      catch (e) {
+        $slides[idx].scrollIntoView(instant ? true : false);
+      }
+      updateCounter();
     }
 
-    $overlay.on('click', '.hr-room-modal__nav--prev', function () { show(idx - 1); });
-    $overlay.on('click', '.hr-room-modal__nav--next', function () { show(idx + 1); });
-    $overlay.on('click', '.hr-room-modal__dot', function () { show(parseInt($(this).attr('data-index'), 10)); });
-    $overlay.on('click', '.hr-room-modal__slide', function () {
-      openLightbox($overlay, slides, $slides.index(this));
+    // Drag-to-scroll with mouse.
+    var dragging = false;
+    var startX = 0;
+    var startL = 0;
+    var moved = 0;
+    $vp.on('pointerdown' + NAMESPACE, function (e) {
+      if (e.button !== undefined && e.button !== 0) { return; }
+      dragging = true;
+      moved = 0;
+      startX = e.clientX;
+      startL = $vp[0].scrollLeft;
+      $vp.addClass('is-dragging');
+      try { $vp[0].setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    });
+    $vp.on('pointermove' + NAMESPACE, function (e) {
+      if (!dragging) { return; }
+      var dx = e.clientX - startX;
+      if (Math.abs(dx) > moved) { moved = Math.abs(dx); }
+      $vp[0].scrollLeft = startL - dx;
+    });
+    function endDrag() {
+      if (!dragging) { return; }
+      dragging = false;
+      $vp.removeClass('is-dragging');
+      if (moved > 8) {
+        justDragged = true;
+        setTimeout(function () { justDragged = false; }, 80);
+      }
+    }
+    $vp.on('pointerup' + NAMESPACE + ' pointercancel' + NAMESPACE, endDrag);
+    $vp.on('dragstart' + NAMESPACE, function (e) { e.preventDefault(); });
+
+    $overlay.on('click', '.hr-room-modal__nav--prev', function () { go(idx - 1); });
+    $overlay.on('click', '.hr-room-modal__nav--next', function () { go(idx + 1); });
+    $overlay.on('click', '.hr-room-modal__zoom', function (e) {
+      e.stopPropagation();
+      if (justDragged) { return; }
+      var $slide = $(this).closest('.hr-room-modal__slide');
+      openLightbox($overlay, slides, Math.max(0, $slides.index($slide)));
     });
     $overlay.on('click', '.hr-room-modal__book', function () { bookRoom(room); });
-    $(window).on('resize' + NAMESPACE, layout);
 
-    show(0);
+    go(0, true);
   }
 
   Drupal.hotelReservationRoomModal = Drupal.hotelReservationRoomModal || {
