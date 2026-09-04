@@ -84,6 +84,84 @@ function hotel_reservation_update_10002() {
 }
 
 /**
+ * Convert image field to media reference.
+ */
+function hotel_reservation_update_10003() {
+  if (!\Drupal::moduleHandler()->moduleExists('media')) {
+    return;
+  }
+  $def_manager = \Drupal::entityDefinitionUpdateManager();
+  try {
+    $old_def = $def_manager->getFieldStorageDefinition('image', 'hr_room');
+  }
+  catch (\Exception $e) {
+    return;
+  }
+  if (!$old_def || $old_def->getType() === 'entity_reference') {
+    return;
+  }
+  $storage = \Drupal::entityTypeManager()->getStorage('hr_room');
+  $rooms = $storage->loadMultiple();
+  $map = [];
+  foreach ($rooms as $room) {
+    $item = $room->get('image')->first();
+    if ($item && !empty($item->target_id)) {
+      $map[$room->id()] = ['fid' => $item->target_id, 'alt' => $item->alt ?? '', 'title' => $item->title ?? ''];
+    }
+  }
+  $def_manager->uninstallFieldStorageDefinition($old_def);
+  $new_def = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Изображение (превью)'))
+    ->setDescription(t('Превью номера. Выберите из медиа-библиотеки.'))
+    ->setCardinality(1)
+    ->setRequired(FALSE)
+    ->setSettings([
+      'target_type' => 'media',
+      'handler' => 'default:media',
+      'handler_settings' => [
+        'target_bundles' => ['image' => 'image'],
+        'sort' => ['field' => '_none'],
+        'auto_create' => FALSE,
+      ],
+    ])
+    ->setDisplayOptions('view', ['label' => 'hidden', 'type' => 'entity_reference_label', 'weight' => -4])
+    ->setDisplayOptions('form', ['type' => 'media_library_widget', 'weight' => -6, 'settings' => ['media_types' => ['image']]])
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+  $def_manager->installFieldStorageDefinition('image', 'hr_room', 'hotel_reservation', $new_def);
+  if (empty($map)) {
+    return;
+  }
+  $media_storage = \Drupal::entityTypeManager()->getStorage('media');
+  $file_storage = \Drupal::entityTypeManager()->getStorage('file');
+  foreach ($map as $rid => $data) {
+    $file = $file_storage->load($data['fid']);
+    if (!$file) {
+      continue;
+    }
+    $file->setPermanent();
+    $file->save();
+    try {
+      $media = $media_storage->create([
+        'bundle' => 'image',
+        'name' => $file->getFilename(),
+        'field_media_image' => ['target_id' => $file->id(), 'alt' => $data['alt'], 'title' => $data['title']],
+        'status' => 1,
+      ]);
+      $media->save();
+      $room = $storage->load($rid);
+      if ($room) {
+        $room->set('image', ['target_id' => $media->id()]);
+        $room->save();
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('hotel_reservation')->error('Image migration failed for room @id: @msg', ['@id' => $rid, '@msg' => $e->getMessage()]);
+    }
+  }
+}
+
+/**
  * Implements hook_uninstall().
  */
 function hotel_reservation_uninstall(bool $is_syncing) {

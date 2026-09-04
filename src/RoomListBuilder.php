@@ -40,10 +40,7 @@ class RoomListBuilder extends EntityListBuilder {
     $image_alt = '';
     if (method_exists($entity, 'getImageUrl')) {
       $image_url = $entity->getImageUrl();
-      $img_field = $entity->get('image')->first();
-      if ($img_field) {
-        $image_alt = $img_field->alt ?? '';
-      }
+      $image_alt = $entity->getImageAlt();
     }
     if (!empty($image_url)) {
       $row['image']['data'] = [

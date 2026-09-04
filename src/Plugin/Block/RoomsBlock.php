@@ -256,10 +256,7 @@ class RoomsBlock extends BlockBase {
         $imageAlt = $name;
         if (method_exists($room, 'getImageUrl')) {
           $imageUrl = $room->getImageUrl();
-          $img_field = $room->get('image')->first();
-          if ($img_field && !empty($img_field->alt)) {
-            $imageAlt = $img_field->alt;
-          }
+          $imageAlt = $room->getImageAlt();
         }
         if (!empty($imageUrl)) {
           $html .= '<div class="hr-room-card__image-wrap"><img class="hr-room-card__image" src="' . Html::escape($imageUrl) . '" alt="' . Html::escape($imageAlt) . '" loading="lazy"></div>';

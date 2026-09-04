@@ -209,7 +209,7 @@ class Room extends ContentEntityBase {
   }
 
   /**
-   * Gets the room image file.
+   * Gets the room image file (supports both media and legacy file).
    *
    * @return \Drupal\file\FileInterface|null
    */
@@ -218,7 +218,60 @@ class Room extends ContentEntityBase {
     if (!$item || empty($item->target_id)) {
       return NULL;
     }
-    return \Drupal::entityTypeManager()->getStorage('file')->load($item->target_id);
+    $id = $item->target_id;
+    try {
+      $media = \Drupal::entityTypeManager()->getStorage('media')->load($id);
+      if ($media && $media->bundle() === 'image' && $media->hasField('field_media_image')) {
+        $f = $media->get('field_media_image')->first();
+        if ($f && !empty($f->target_id)) {
+          return \Drupal::entityTypeManager()->getStorage('file')->load($f->target_id);
+        }
+      }
+    }
+    catch (\Exception $e) {
+    }
+    return \Drupal::entityTypeManager()->getStorage('file')->load($id);
+  }
+
+  public function getImageMedia(): ?\Drupal\media\MediaInterface {
+    $item = $this->get('image')->first();
+    if (!$item || empty($item->target_id)) {
+      return NULL;
+    }
+    try {
+      $media = \Drupal::entityTypeManager()->getStorage('media')->load($item->target_id);
+      if ($media && $media->bundle() === 'image') {
+        return $media;
+      }
+    }
+    catch (\Exception $e) {
+    }
+    return NULL;
+  }
+
+  public function getImageAlt(): string {
+    $item = $this->get('image')->first();
+    if (!$item) {
+      return $this->getName();
+    }
+    if (!empty($item->alt)) {
+      return $item->alt;
+    }
+    try {
+      $media = \Drupal::entityTypeManager()->getStorage('media')->load($item->target_id);
+      if ($media) {
+        if ($media->hasField('field_media_image')) {
+          $f = $media->get('field_media_image')->first();
+          if ($f && !empty($f->alt)) {
+            return $f->alt;
+          }
+        }
+        return $media->label();
+      }
+    }
+    catch (\Exception $e) {
+    }
+    return $this->getName();
   }
 
   /**
@@ -279,31 +332,31 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['image'] = BaseFieldDefinition::create('image')
+    $fields['image'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Изображение (превью)'))
-      ->setDescription(t('Превью номера. Рекомендуется 800×600, до 2 МБ (jpg, png, webp).'))
+      ->setDescription(t('Превью номера. Выберите из медиа-библиотеки.'))
       ->setCardinality(1)
       ->setRequired(FALSE)
       ->setSettings([
-        'file_directory' => 'hotel-rooms',
-        'alt_field' => TRUE,
-        'alt_field_required' => FALSE,
-        'title_field' => FALSE,
-        'max_filesize' => '2 MB',
-        'file_extensions' => 'png jpg jpeg webp',
-        'max_resolution' => '2000x2000',
-        'min_resolution' => '200x150',
-        'default_image' => ['uuid' => NULL],
+        'target_type' => 'media',
+        'handler' => 'default:media',
+        'handler_settings' => [
+          'target_bundles' => ['image' => 'image'],
+          'sort' => ['field' => '_none'],
+          'auto_create' => FALSE,
+        ],
       ])
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'type' => 'image',
+        'type' => 'entity_reference_label',
         'weight' => -4,
-        'settings' => ['image_style' => 'medium', 'image_link' => ''],
       ])
       ->setDisplayOptions('form', [
-        'type' => 'image_image',
+        'type' => 'media_library_widget',
         'weight' => -6,
+        'settings' => [
+          'media_types' => ['image'],
+        ],
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);

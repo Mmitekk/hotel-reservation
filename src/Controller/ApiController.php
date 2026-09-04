@@ -118,10 +118,7 @@ class ApiController extends ControllerBase {
       $imageAlt = '';
       if (method_exists($room, 'getImageUrl')) {
         $imageUrl = $room->getImageUrl();
-        $img_field = $room->get('image')->first();
-        if ($img_field && !empty($img_field->alt)) {
-          $imageAlt = $img_field->alt;
-        }
+        $imageAlt = $room->getImageAlt();
       }
       $results[] = [
         'id' => (int) $room->id(),

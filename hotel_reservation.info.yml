@@ -10,5 +10,7 @@ dependencies:
   - drupal:field
   - drupal:user
   - drupal:system
-version: '1.8.1'
+  - drupal:media
+  - drupal:media_library
+version: '1.9.0'
 project: 'hotel_reservation'
