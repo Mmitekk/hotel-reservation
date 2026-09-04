@@ -1,0 +1,204 @@
+<?php
+
+namespace Drupal\hotel_reservation\Controller;
+
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
+class SharedController extends ControllerBase {
+
+  public static function create(ContainerInterface $container) {
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->dateFormatter = $container->get('date.formatter');
+    return $instance;
+  }
+
+  protected $entityTypeManager;
+  protected $dateFormatter;
+
+  protected function checkAccess(Request $request, string $token) {
+    $config = \Drupal::config('hotel_reservation.settings');
+    if (!$config->get('share_enabled')) {
+      throw new NotFoundHttpException();
+    }
+    $stored = (string) $config->get('share_token');
+    if ($stored === '' || !hash_equals($stored, $token)) {
+      throw new NotFoundHttpException();
+    }
+    $password = (string) $config->get('share_password');
+    if ($password === '') {
+      return TRUE;
+    }
+    $session = $request->getSession();
+    $key = 'hr_share_auth_' . $token;
+    if ($session->get($key)) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  protected function buildLoginForm(string $token, string $currentUrl, bool $error = FALSE): array {
+    $msg = $error ? '<p style="color:#dc2626;margin-bottom:12px;">Неверный пароль</p>' : '';
+    $html = '<div style="max-width:420px;margin:60px auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;font-family:system-ui;">';
+    $html .= '<h2 style="margin:0 0 12px;">Доступ ограничен</h2>';
+    $html .= '<p style="color:#6b7280;margin:0 0 16px;">Введите пароль для просмотра статистики.</p>';
+    $html .= $msg;
+    $html .= '<form method="POST" action="' . htmlspecialchars($currentUrl, ENT_QUOTES, 'UTF-8') . '">';
+    $html .= '<input type="password" name="password" placeholder="Пароль" required style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:12px;">';
+    $html .= '<button type="submit" style="width:100%;padding:10px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">Войти</button>';
+    $html .= '</form></div>';
+
+    return [
+      '#markup' => $html,
+      '#allowed_tags' => ['div', 'h2', 'p', 'form', 'input', 'button', 'span'],
+      '#attached' => [
+        'html_head' => [
+          [['#tag' => 'meta', '#attributes' => ['name' => 'robots', 'content' => 'noindex, nofollow, noarchive']], 'robots_noindex'],
+        ],
+      ],
+      '#cache' => ['max-age' => 0],
+    ];
+  }
+
+  protected function handleAuth(Request $request, string $token) {
+    $config = \Drupal::config('hotel_reservation.settings');
+    $password = (string) $config->get('share_password');
+    if ($password === '') {
+      return NULL;
+    }
+    $session = $request->getSession();
+    $key = 'hr_share_auth_' . $token;
+    if ($session->get($key)) {
+      return NULL;
+    }
+    if ($request->isMethod('POST') && $request->request->has('password')) {
+      $input = (string) $request->request->get('password');
+      $ok = FALSE;
+      if ($password !== '' && password_get_info($password)['algo']) {
+        $ok = password_verify($input, $password);
+      }
+      else {
+        $ok = hash_equals($password, $input);
+      }
+      if ($ok) {
+        $session->set($key, TRUE);
+        return new RedirectResponse($request->getRequestUri());
+      }
+      else {
+        return $this->buildLoginForm($token, $request->getRequestUri(), TRUE);
+      }
+    }
+    return $this->buildLoginForm($token, $request->getRequestUri(), FALSE);
+  }
+
+  protected function addNoindex(array $build): array {
+    $build['#attached']['html_head'][] = [['#tag' => 'meta', '#attributes' => ['name' => 'robots', 'content' => 'noindex, nofollow, noarchive']], 'robots_noindex'];
+    $build['#cache']['max-age'] = 0;
+    $build['#cache']['contexts'][] = 'session';
+    $build['#cache']['contexts'][] = 'url';
+    return $build;
+  }
+
+  public function dashboard(Request $request, string $token) {
+    $config = \Drupal::config('hotel_reservation.settings');
+    if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
+      throw new NotFoundHttpException();
+    }
+    $auth = $this->handleAuth($request, $token);
+    if ($auth instanceof RedirectResponse) {
+      return $auth;
+    }
+    if (is_array($auth)) {
+      return $auth;
+    }
+
+    $controller = new DashboardController();
+    $controller->setContainer($this->container);
+    $build = $controller->dashboard();
+    $build = $this->addNoindex($build);
+    $build['#attached']['library'][] = 'hotel_reservation/admin-styles';
+    if (isset($build['#theme']) && $build['#theme'] === 'hotel_reservation_dashboard') {
+      $build['#is_shared'] = TRUE;
+    }
+    if (isset($build['#pending_reservations'])) {
+      foreach ($build['#pending_reservations'] as &$r) {
+        $r['confirm_url'] = '';
+        $r['cancel_url'] = '';
+      }
+      unset($r);
+    }
+    $build['#cache']['contexts'][] = 'session';
+    return $build;
+  }
+
+  public function analytics(Request $request, string $token) {
+    $config = \Drupal::config('hotel_reservation.settings');
+    if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
+      throw new NotFoundHttpException();
+    }
+    $auth = $this->handleAuth($request, $token);
+    if ($auth instanceof RedirectResponse) {
+      return $auth;
+    }
+    if (is_array($auth)) {
+      return $auth;
+    }
+    $controller = new AnalyticsController();
+    $controller->setContainer($this->container);
+    $build = $controller->analytics();
+    $build = $this->addNoindex($build);
+    $build['#cache']['contexts'][] = 'session';
+    return $build;
+  }
+
+  public function calendar(Request $request, string $token, $month = NULL, $year = NULL) {
+    $config = \Drupal::config('hotel_reservation.settings');
+    if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
+      throw new NotFoundHttpException();
+    }
+    $auth = $this->handleAuth($request, $token);
+    if ($auth instanceof RedirectResponse) {
+      return $auth;
+    }
+    if (is_array($auth)) {
+      return $auth;
+    }
+    $controller = new HotelReservationController();
+    $controller->setContainer($this->container);
+    $build = $controller->calendar($month, $year);
+    $build = $this->addNoindex($build);
+    if (isset($build['#prev_url']) && isset($build['#next_url'])) {
+      $build['#prev_url'] = Url::fromRoute('hotel_reservation.share_calendar_month', ['token' => $token, 'month' => $this->extractMonth($build['#prev_url']), 'year' => $this->extractYear($build['#prev_url'])])->toString();
+      $build['#next_url'] = Url::fromRoute('hotel_reservation.share_calendar_month', ['token' => $token, 'month' => $this->extractMonth($build['#next_url']), 'year' => $this->extractYear($build['#next_url'])])->toString();
+      $build['#current_url'] = Url::fromRoute('hotel_reservation.share_calendar', ['token' => $token])->toString();
+    }
+    if (!empty($build['#month_selector'])) {
+      foreach ($build['#month_selector'] as &$opt) {
+        $opt['url'] = Url::fromRoute('hotel_reservation.share_calendar_month', ['token' => $token, 'month' => $opt['month'], 'year' => $opt['year']])->toString();
+      }
+      unset($opt);
+    }
+    $build['#cache']['contexts'][] = 'session';
+    return $build;
+  }
+
+  protected function extractMonth(string $url): int {
+    if (preg_match('#/calendar/(\d+)/\d+#', $url, $m)) {
+      return (int) $m[1];
+    }
+    return (int) date('n');
+  }
+
+  protected function extractYear(string $url): int {
+    if (preg_match('#/calendar/\d+/(\d+)#', $url, $m)) {
+      return (int) $m[1];
+    }
+    return (int) date('Y');
+  }
+
+}
