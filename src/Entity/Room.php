@@ -106,6 +106,38 @@ class Room extends ContentEntityBase {
     return $this;
   }
 
+  public function getTeaser(): ?string {
+    return $this->get('teaser')->value ?? NULL;
+  }
+
+  public function setTeaser(?string $teaser): self {
+    $this->set('teaser', $teaser);
+    return $this;
+  }
+
+  public static function plainText(?string $raw): string {
+    if ($raw === NULL || $raw === '') {
+      return '';
+    }
+    $plain = trim(strip_tags(html_entity_decode($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+    $plain = html_entity_decode($plain, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $plain = preg_replace('/\s+/', ' ', $plain);
+    return $plain;
+  }
+
+  public function getTeaserPlain(int $limit = 120): string {
+    $plain = self::plainText($this->getTeaser() ?? '');
+    if ($plain !== '') {
+      return mb_strlen($plain) > $limit ? mb_substr($plain, 0, $limit) . '...' : $plain;
+    }
+    $fallback = self::plainText($this->getDescription() ?? '');
+    return mb_strlen($fallback) > $limit ? mb_substr($fallback, 0, $limit) . '...' : $fallback;
+  }
+
+  public function getDescriptionPlain(): string {
+    return self::plainText($this->getDescription() ?? '');
+  }
+
   /**
    * Gets the room capacity.
    *
@@ -292,6 +324,74 @@ class Room extends ContentEntityBase {
     }
   }
 
+  public static function mediaImageData($mid): ?array {
+    if (empty($mid)) {
+      return NULL;
+    }
+    try {
+      $media = \Drupal::entityTypeManager()->getStorage('media')->load($mid);
+      if (!$media || $media->bundle() !== 'image' || !$media->hasField('field_media_image')) {
+        return NULL;
+      }
+      $f = $media->get('field_media_image')->first();
+      if (!$f || empty($f->target_id)) {
+        return NULL;
+      }
+      $file = \Drupal::entityTypeManager()->getStorage('file')->load($f->target_id);
+      if (!$file) {
+        return NULL;
+      }
+      $url = \Drupal::service('file_url_generator')->generateString($file->getFileUri());
+      $alt = !empty($f->alt) ? $f->alt : $media->label();
+      return ['url' => $url, 'alt' => $alt, 'mid' => (int) $mid];
+    }
+    catch (\Exception $e) {
+      return NULL;
+    }
+  }
+
+  public function getGalleryIds(): array {
+    $ids = [];
+    try {
+      foreach ($this->get('images') as $item) {
+        if (!empty($item->target_id)) {
+          $ids[] = (int) $item->target_id;
+        }
+      }
+    }
+    catch (\Exception $e) {
+    }
+    return $ids;
+  }
+
+  public function getSliderImages(): array {
+    $slides = [];
+    $seen = [];
+    $preview = $this->getImageUrl();
+    if ($preview) {
+      $slides[] = ['url' => $preview, 'alt' => $this->getImageAlt()];
+      foreach ($this->getGalleryIds() as $mid) {
+        $d = self::mediaImageData($mid);
+        if ($d && $d['url'] !== $preview) {
+          $seen[$mid] = TRUE;
+          $slides[] = $d;
+        }
+      }
+      return $slides;
+    }
+    foreach ($this->getGalleryIds() as $mid) {
+      if (!empty($seen[$mid])) {
+        continue;
+      }
+      $d = self::mediaImageData($mid);
+      if ($d) {
+        $seen[$mid] = TRUE;
+        $slides[] = $d;
+      }
+    }
+    return $slides;
+  }
+
   /**
    * Sets the creation timestamp.
    *
@@ -361,9 +461,58 @@ class Room extends ContentEntityBase {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['teaser'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Анонс (краткое описание)'))
+      ->setDescription(t('Показывается в карточке «Наши номера». Если пусто — используется обрезанное основное описание.'))
+      ->setDefaultValue('')
+      ->setRequired(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'basic_string',
+        'weight' => -1,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textarea',
+        'weight' => -1,
+        'settings' => [
+          'rows' => 2,
+        ],
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['images'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Слайдер (изображения номера)'))
+      ->setDescription(t('Дополнительные фото для слайдера в расширенной карточке. Первое фото превью подставляется автоматически.'))
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setSettings([
+        'target_type' => 'media',
+        'handler' => 'default:media',
+        'handler_settings' => [
+          'target_bundles' => ['image' => 'image'],
+          'sort' => ['field' => '_none'],
+          'auto_create' => FALSE,
+        ],
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'entity_reference_label',
+        'weight' => -3,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'media_library_widget',
+        'weight' => -5,
+        'settings' => [
+          'media_types' => ['image'],
+        ],
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['description'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Описание'))
-      ->setDescription(t('Подробное описание номера.'))
+      ->setLabel(t('Описание (основное)'))
+      ->setDescription(t('Полное описание номера для расширенной карточки (модальное окно).'))
       ->setDefaultValue('')
       ->setRequired(FALSE)
       ->setDisplayOptions('view', [

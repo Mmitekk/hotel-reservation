@@ -95,6 +95,14 @@ hotel_reservation.api_room_prices:
     _permission: 'access content'
     _format: json
 
+hotel_reservation.api_room:
+  path: '/api/hotel-reservation/room/{room_id}'
+  defaults:
+    _controller: '\Drupal\hotel_reservation\Controller\ApiController::getRoom'
+  requirements:
+    _permission: 'access content'
+    _format: json
+
 hotel_reservation.share_dashboard:
   path: '/hotel-reservation/share/{token}/dashboard'
   defaults:

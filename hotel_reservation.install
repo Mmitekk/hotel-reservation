@@ -43,6 +43,7 @@ function hotel_reservation_install(bool $is_syncing) {
     ->set('enable_guest_confirmation', TRUE)
     ->set('reservation_expiration_hours', 24)
     ->set('booking_conditions', '')
+    ->set('room_modal_width', 80)
     ->save();
 
   hotel_reservation_create_default_room_types();
@@ -158,6 +159,55 @@ function hotel_reservation_update_10003() {
     catch (\Exception $e) {
       \Drupal::logger('hotel_reservation')->error('Image migration failed for room @id: @msg', ['@id' => $rid, '@msg' => $e->getMessage()]);
     }
+  }
+}
+
+/**
+ * Add teaser + gallery images to hr_room.
+ */
+function hotel_reservation_update_10004() {
+  $def_manager = \Drupal::entityDefinitionUpdateManager();
+  try {
+    $defs = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('hr_room');
+  }
+  catch (\Exception $e) {
+    return;
+  }
+  if (empty($defs['teaser'])) {
+    $teaser = \Drupal\Core\Field\BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Анонс (краткое описание)'))
+      ->setDescription(t('Показывается в карточке «Наши номера».'))
+      ->setDefaultValue('')
+      ->setRequired(FALSE)
+      ->setDisplayOptions('view', ['label' => 'above', 'type' => 'basic_string', 'weight' => -1])
+      ->setDisplayOptions('form', ['type' => 'string_textarea', 'weight' => -1, 'settings' => ['rows' => 2]])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+    $def_manager->installFieldStorageDefinition('teaser', 'hr_room', 'hotel_reservation', $teaser);
+  }
+  if (empty($defs['images'])) {
+    $images = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Слайдер (изображения номера)'))
+      ->setCardinality(-1)
+      ->setRequired(FALSE)
+      ->setSettings([
+        'target_type' => 'media',
+        'handler' => 'default:media',
+        'handler_settings' => [
+          'target_bundles' => ['image' => 'image'],
+          'sort' => ['field' => '_none'],
+          'auto_create' => FALSE,
+        ],
+      ])
+      ->setDisplayOptions('view', ['label' => 'hidden', 'type' => 'entity_reference_label', 'weight' => -3])
+      ->setDisplayOptions('form', ['type' => 'media_library_widget', 'weight' => -5, 'settings' => ['media_types' => ['image']]])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+    $def_manager->installFieldStorageDefinition('images', 'hr_room', 'hotel_reservation', $images);
+  }
+  $config = \Drupal::configFactory()->getEditable('hotel_reservation.settings');
+  if ($config->get('room_modal_width') === NULL) {
+    $config->set('room_modal_width', 80)->save();
   }
 }
 

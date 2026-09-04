@@ -176,9 +176,10 @@ class RoomsBlock extends BlockBase {
     $showImage = !empty($config['show_image']);
     $layout = $config['layout'] ?? 'grid';
 
-    // Currency settings.
+    // Currency + modal settings.
     $settingsConfig = \Drupal::config('hotel_reservation.settings');
     $currencySymbol = $settingsConfig->get('currency_symbol') ?: '₽';
+    $modalWidth = max(50, min(95, (int) ($settingsConfig->get('room_modal_width') ?: 80)));
 
     // Query published rooms ordered by sort_weight.
     $query = \Drupal::entityTypeManager()->getStorage('hr_room')->getQuery()
@@ -200,9 +201,10 @@ class RoomsBlock extends BlockBase {
 
     $rooms = \Drupal::entityTypeManager()->getStorage('hr_room')->loadMultiple($ids);
 
-    $html = '<div class="hr-rooms-grid hr-rooms-grid--' . Html::escape($layout) . '">';
+    $html = '<div class="hr-rooms-grid hr-rooms-grid--' . Html::escape($layout) . '" style="--hr-room-modal-width: ' . (int) $modalWidth . '%">';
 
     $typeMap = $this->getRoomTypeMap();
+    $roomsDetail = [];
     foreach ($rooms as $room) {
       $roomType = $room->get('room_type')->value ?? 'standard';
       $typeLabel = $typeMap[$roomType]['label'] ?? self::FALLBACK_LABELS[$roomType] ?? $roomType;
@@ -210,14 +212,19 @@ class RoomsBlock extends BlockBase {
 
       $name = Html::escape($room->getName());
 
-      // Description trimmed to 120 characters — strip all HTML tags.
-      $description = '';
+      // Teaser for the card (falls back to trimmed main description).
+      $teaser = '';
       if ($showDescription) {
-        $rawDesc = $room->getDescription() ?? '';
-        $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
-        $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
-        $description = Html::escape(mb_strlen($plainDesc) > 120 ? mb_substr($plainDesc, 0, 120) . '...' : $plainDesc);
+        if (method_exists($room, 'getTeaserPlain')) {
+          $teaser = Html::escape($room->getTeaserPlain(120));
+        }
+        else {
+          $rawDesc = $room->getDescription() ?? '';
+          $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+          $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+          $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
+          $teaser = Html::escape(mb_strlen($plainDesc) > 120 ? mb_substr($plainDesc, 0, 120) . '...' : $plainDesc);
+        }
       }
 
       // Format price.
@@ -248,7 +255,28 @@ class RoomsBlock extends BlockBase {
         '@guests' => $capacity === 1 ? $this->t('гостя') : $this->t('гостей'),
       ]);
 
-      $html .= '<div class="hr-room-card" style="--room-color: ' . Html::escape($typeColor) . '">';
+      $rid = (int) $room->id();
+      $slides = method_exists($room, 'getSliderImages') ? $room->getSliderImages() : [];
+      $fullDesc = method_exists($room, 'getDescriptionPlain') ? $room->getDescriptionPlain() : '';
+      $amenityList = [];
+      $rawAmenities = $room->getAmenities();
+      if (!empty($rawAmenities)) {
+        $amenityList = array_values(array_filter(array_map('trim', explode(',', $rawAmenities))));
+      }
+      $roomsDetail[$rid] = [
+        'id' => $rid,
+        'name' => $room->getName(),
+        'type_label' => $typeLabel,
+        'type_color' => $typeColor,
+        'capacity' => (int) $room->getCapacity(),
+        'price' => number_format((float) $room->getBasePrice(), 0, '.', ' ') . ' ' . $currencySymbol,
+        'amenities' => $amenityList,
+        'teaser' => method_exists($room, 'getTeaserPlain') ? $room->getTeaserPlain(200) : '',
+        'description' => $fullDesc,
+        'slides' => $slides,
+      ];
+
+      $html .= '<div class="hr-room-card hr-room-card--clickable" data-room-id="' . $rid . '" tabindex="0" role="button" aria-label="' . $name . '" style="--room-color: ' . Html::escape($typeColor) . '">';
 
       // Image.
       if ($showImage) {
@@ -276,9 +304,9 @@ class RoomsBlock extends BlockBase {
         $html .= '<h3 class="hr-room-card__name">' . $name . '</h3>';
       }
 
-      // Description.
-      if ($showDescription && !empty($description)) {
-        $html .= '<p class="hr-room-card__desc">' . $description . '</p>';
+      // Teaser.
+      if ($showDescription && !empty($teaser)) {
+        $html .= '<p class="hr-room-card__desc">' . $teaser . '</p>';
       }
 
       // Amenities.
@@ -302,13 +330,20 @@ class RoomsBlock extends BlockBase {
         'library' => [
           'hotel_reservation/rooms-block',
         ],
+        'drupalSettings' => [
+          'hotelReservation' => [
+            'roomsDetail' => $roomsDetail,
+            'roomModalWidth' => $modalWidth,
+            'currencySymbol' => $currencySymbol,
+          ],
+        ],
       ],
       '#cache' => [
         'tags' => ['hr_room_list'],
         'max-age' => 0,
       ],
       '#allowed_tags' => [
-        'div', 'h3', 'p', 'span', 'img',
+        'div', 'h3', 'p', 'span', 'img', 'button',
       ],
     ];
   }

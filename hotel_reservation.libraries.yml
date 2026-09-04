@@ -32,10 +32,17 @@ analytics:
       css/analytics.css: {}
 
 rooms-block:
-  version: 1.6.0
+  version: 1.11.0
   css:
     theme:
       css/rooms-block.css: {}
+  js:
+    js/rooms-block.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
+    - core/once
 
 room-comparison:
   version: 1.0.0

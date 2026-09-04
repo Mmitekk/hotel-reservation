@@ -268,6 +268,23 @@ class SettingsForm extends ConfigFormBase {
       '#maxlength' => 255,
     ];
 
+    $form['rooms'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Карточки номеров'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    ];
+
+    $form['rooms']['room_modal_width'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Ширина модального окна номера (%)'),
+      '#description' => $this->t('Ширина всплывающей расширенной карточки при клике (50–95%, по умолчанию 80).'),
+      '#default_value' => $config->get('room_modal_width') ?: 80,
+      '#required' => TRUE,
+      '#min' => 50,
+      '#max' => 95,
+    ];
+
     $form['share'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Доступ для клиента (поделиться статистикой)'),
@@ -381,6 +398,11 @@ class SettingsForm extends ConfigFormBase {
         $form_state->setErrorByName('share_token', $this->t('Токен обязателен и только a-z, 0-9, _-.'));
       }
     }
+
+    $modal_width = (int) $form_state->getValue('room_modal_width');
+    if ($modal_width < 50 || $modal_width > 95) {
+      $form_state->setErrorByName('room_modal_width', $this->t('Ширина должна быть от 50 до 95%.'));
+    }
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
@@ -409,6 +431,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('share_enabled', (bool) $form_state->getValue('share_enabled'))
       ->set('share_token', trim((string) $form_state->getValue('share_token')))
       ->set('share_password', trim((string) $form_state->getValue('share_password')))
+      ->set('room_modal_width', max(50, min(95, (int) $form_state->getValue('room_modal_width') ?: 80)))
       ->save();
 
     parent::submitForm($form, $form_state);

@@ -123,9 +123,11 @@ class ApiController extends ControllerBase {
       $results[] = [
         'id' => (int) $room->id(),
         'name' => $room->label(),
+        'teaser' => method_exists($room, 'getTeaserPlain') ? $room->getTeaserPlain(200) : $plainDesc,
         'description' => $plainDesc,
         'image_url' => $imageUrl,
         'image_alt' => $imageAlt,
+        'slides' => method_exists($room, 'getSliderImages') ? $room->getSliderImages() : [],
         'capacity' => $room->getCapacity(),
         'base_price' => number_format((float) $room->getBasePrice(), 2, '.', ''),
         'total_price' => number_format($pricing['total'], 2, '.', ''),
@@ -425,6 +427,46 @@ class ApiController extends ControllerBase {
       'formatted_total' => number_format($pricing['total'], 2) . ' ' . $currency,
       'currency' => $currency,
       'daily_prices' => $daily,
+    ]);
+  }
+
+  public function getRoom($room_id) {
+    $room = $this->entityTypeManager->getStorage('hr_room')->load($room_id);
+    if (!$room || !$room->isPublished()) {
+      return new SymfonyJsonResponse(['success' => FALSE, 'message' => 'Номер не найден.'], 404);
+    }
+    $config = $this->config('hotel_reservation.settings');
+    $currency = $config->get('currency_symbol') ?: '₽';
+    $typeLabel = $room->get('room_type')->value ?? 'standard';
+    try {
+      $allowed = function_exists('hotel_reservation_room_type_allowed_values') ? hotel_reservation_room_type_allowed_values() : [];
+      if (!empty($allowed[$typeLabel])) {
+        $typeLabel = $allowed[$typeLabel];
+      }
+    }
+    catch (\Exception $e) {
+    }
+    $amenities = [];
+    $raw = $room->getAmenities();
+    if (!empty($raw)) {
+      $amenities = array_values(array_filter(array_map('trim', explode(',', $raw))));
+    }
+    return new SymfonyJsonResponse([
+      'success' => TRUE,
+      'room' => [
+        'id' => (int) $room->id(),
+        'name' => $room->label(),
+        'room_type' => $room->get('room_type')->value,
+        'room_type_label' => $typeLabel,
+        'capacity' => (int) $room->getCapacity(),
+        'base_price' => number_format((float) $room->getBasePrice(), 2, '.', ''),
+        'price_formatted' => number_format((float) $room->getBasePrice(), 0, '.', ' ') . ' ' . $currency,
+        'teaser' => method_exists($room, 'getTeaserPlain') ? $room->getTeaserPlain(200) : '',
+        'description' => method_exists($room, 'getDescriptionPlain') ? $room->getDescriptionPlain() : '',
+        'amenities' => $amenities,
+        'slides' => method_exists($room, 'getSliderImages') ? $room->getSliderImages() : [],
+        'currency' => $currency,
+      ],
     ]);
   }
 

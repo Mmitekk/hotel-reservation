@@ -75,6 +75,9 @@ hotel_reservation.settings:
     share_password:
       type: string
       label: 'Share password'
+    room_modal_width:
+      type: integer
+      label: 'Room modal width (%)'
 
 hr_room_type.*:
   type: config_entity
@@ -105,6 +108,9 @@ hr_room.*:
     name:
       type: label
       label: 'Room name'
+    teaser:
+      type: text
+      label: 'Teaser'
     description:
       type: text
       label: 'Description'

@@ -36,6 +36,8 @@ class RoomForm extends ContentEntityForm {
     $field_order = [
       'name' => -5,
       'image' => -4.5,
+      'images' => -4.4,
+      'teaser' => -4.2,
       'description' => -4,
       'capacity' => -3,
       'base_price' => -2,
