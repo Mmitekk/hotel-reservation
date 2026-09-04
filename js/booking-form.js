@@ -47,7 +47,7 @@
 
   Drupal.behaviors.hotelReservationBookingForm = {
     attach: function (context, settings) {
-      const $form = $('.hr-booking-form', context);
+      const $form = $('.hr-booking-form', context).once('hr-booking-form');
       if ($form.length === 0) return;
 
       const config = drupalSettings.hotelReservation || {};

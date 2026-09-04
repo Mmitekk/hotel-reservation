@@ -1,6 +1,6 @@
 /**
  * @file
- * Shared room detail modal with carousel and booking button.
+ * Shared room detail modal with slick-like carousel, lightbox and booking.
  *
  * Exposes Drupal.hotelReservationRoomModal.open(room, options).
  * Room shape: {id, name, type_label, type_color, capacity, price,
@@ -11,6 +11,7 @@
   'use strict';
 
   var NAMESPACE = '.hrRoomModal';
+  var GAP = 12;
 
   var CHEVRON_LEFT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var CHEVRON_RIGHT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -33,9 +34,11 @@
   }
 
   function close() {
+    $('.hr-room-lightbox-overlay').remove();
     $('.hr-room-modal-overlay').remove();
     $('body').css('overflow', '');
     $(document).off('keydown' + NAMESPACE);
+    $(window).off('resize' + NAMESPACE);
   }
 
   function bookRoom(room) {
@@ -56,6 +59,58 @@
     }
   }
 
+  function openLightbox($overlay, slides, index) {
+    $('.hr-room-lightbox-overlay').remove();
+    var idx = index;
+    var total = slides.length;
+
+    function render() {
+      var s = slides[idx];
+      var html = '<div class="hr-room-lightbox-overlay" role="dialog" aria-modal="true" aria-label="' + esc(s.alt || '') + '">';
+      html += '<button type="button" class="hr-room-lightbox__close" aria-label="Закрыть просмотр">' + ICON_CLOSE + '</button>';
+      html += '<img src="' + esc(s.url) + '" alt="' + esc(s.alt || '') + '">';
+      if (total > 1) {
+        html += '<button type="button" class="hr-room-modal__nav hr-room-modal__nav--prev" aria-label="Предыдущее фото">' + CHEVRON_LEFT + '</button>';
+        html += '<button type="button" class="hr-room-modal__nav hr-room-modal__nav--next" aria-label="Следующее фото">' + CHEVRON_RIGHT + '</button>';
+        html += '<div class="hr-room-lightbox__counter">' + (idx + 1) + ' / ' + total + '</div>';
+      }
+      html += '</div>';
+      $('.hr-room-lightbox-overlay').remove();
+      var $lb = $(html);
+      $('body').append($lb);
+      $lb.on('click', function (e) {
+        if (e.target === this) {
+          closeLightbox();
+        }
+      });
+      $lb.find('.hr-room-lightbox__close').on('click', function (e) {
+        e.stopPropagation();
+        closeLightbox();
+      });
+      $lb.find('.hr-room-modal__nav--prev').on('click', function (e) {
+        e.stopPropagation();
+        step(-1);
+      });
+      $lb.find('.hr-room-modal__nav--next').on('click', function (e) {
+        e.stopPropagation();
+        step(1);
+      });
+    }
+
+    function step(d) {
+      idx = ((idx + d) % total + total) % total;
+      render();
+    }
+
+    function closeLightbox() {
+      $('.hr-room-lightbox-overlay').remove();
+      $overlay.data('hrLightboxStep', null);
+    }
+
+    $overlay.data('hrLightboxStep', step);
+    render();
+  }
+
   function open(room, options) {
     if (!room) {
       return;
@@ -72,8 +127,8 @@
     if (slides.length) {
       html += '<div class="hr-room-modal__slider"><div class="hr-room-modal__track-viewport"><div class="hr-room-modal__track">';
       slides.forEach(function (s) {
-        html += '<div class="hr-room-modal__slide">';
-        html += '<img src="' + esc(s.url) + '" alt="' + esc(s.alt || room.name) + '" loading="lazy"></div>';
+        html += '<div class="hr-room-modal__slide" title="Нажмите, чтобы увеличить">';
+        html += '<img src="' + esc(s.url) + '" alt="' + esc(s.alt || room.name) + '" loading="lazy" draggable="false"></div>';
       });
       html += '</div></div>';
       if (slides.length > 1) {
@@ -116,19 +171,51 @@
       if (e.target === this) { close(); }
     });
     $(document).on('keydown' + NAMESPACE, function (e) {
+      if ($('.hr-room-lightbox-overlay').length) {
+        var step = $overlay.data('hrLightboxStep');
+        if (e.key === 'Escape') { $('.hr-room-lightbox-overlay').remove(); }
+        else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && step) {
+          step(e.key === 'ArrowRight' ? 1 : -1);
+        }
+        return;
+      }
       if (e.key === 'Escape') { close(); }
+      else if (e.key === 'ArrowLeft') { show(idx - 1); }
+      else if (e.key === 'ArrowRight') { show(idx + 1); }
     });
 
+    // Slick-like center mode: active slide centered, neighbours peek.
     var idx = 0;
-    function show(i) {
-      idx = ((i % slides.length) + slides.length) % slides.length;
-      $overlay.find('.hr-room-modal__track').css('transform', 'translateX(-' + (idx * 100) + '%)');
-      $overlay.find('.hr-room-modal__dot').removeClass('is-active').eq(idx).addClass('is-active');
+    var $track = $overlay.find('.hr-room-modal__track');
+    var $vp = $overlay.find('.hr-room-modal__track-viewport');
+    var $slides = $overlay.find('.hr-room-modal__slide');
+
+    function layout() {
+      if (!slides.length) { return; }
+      var vpW = $vp.width();
+      var slideW = $slides.eq(0).outerWidth();
+      var x = (vpW - slideW) / 2 - idx * (slideW + GAP);
+      $track.css('transform', 'translateX(' + x + 'px)');
     }
+
+    function show(i) {
+      if (!slides.length) { return; }
+      idx = ((i % slides.length) + slides.length) % slides.length;
+      $slides.removeClass('is-active').eq(idx).addClass('is-active');
+      $overlay.find('.hr-room-modal__dot').removeClass('is-active').eq(idx).addClass('is-active');
+      layout();
+    }
+
     $overlay.on('click', '.hr-room-modal__nav--prev', function () { show(idx - 1); });
     $overlay.on('click', '.hr-room-modal__nav--next', function () { show(idx + 1); });
     $overlay.on('click', '.hr-room-modal__dot', function () { show(parseInt($(this).attr('data-index'), 10)); });
+    $overlay.on('click', '.hr-room-modal__slide', function () {
+      openLightbox($overlay, slides, $slides.index(this));
+    });
     $overlay.on('click', '.hr-room-modal__book', function () { bookRoom(room); });
+    $(window).on('resize' + NAMESPACE, layout);
+
+    show(0);
   }
 
   Drupal.hotelReservationRoomModal = Drupal.hotelReservationRoomModal || {
