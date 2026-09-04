@@ -67,6 +67,9 @@ class SharedController extends ControllerBase {
   }
 
   protected function handleAuth(Request $request, string $token) {
+    if (\Drupal::currentUser()->hasPermission('administer hotel reservation')) {
+      return NULL;
+    }
     $config = \Drupal::config('hotel_reservation.settings');
     $password = (string) $config->get('share_password');
     if ($password === '') {
@@ -102,51 +105,49 @@ class SharedController extends ControllerBase {
     $build['#cache']['max-age'] = 0;
     $build['#cache']['contexts'][] = 'session';
     $build['#cache']['contexts'][] = 'url';
+    $build['#prefix'] = '<div class="page-content-section">';
+    $build['#suffix'] = '</div>';
     return $build;
   }
 
   public function dashboard(Request $request, string $token) {
+    $isAdmin = \Drupal::currentUser()->hasPermission('administer hotel reservation');
     $config = \Drupal::config('hotel_reservation.settings');
-    if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
-      throw new NotFoundHttpException();
-    }
-    $auth = $this->handleAuth($request, $token);
-    if ($auth instanceof RedirectResponse) {
-      return $auth;
-    }
-    if (is_array($auth)) {
-      return $auth;
+    if (!$isAdmin) {
+      if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
+        throw new NotFoundHttpException();
+      }
+      $auth = $this->handleAuth($request, $token);
+      if ($auth instanceof RedirectResponse) {
+        return $auth;
+      }
+      if (is_array($auth)) {
+        return $auth;
+      }
     }
 
     $controller = \Drupal::classResolver()->getInstanceFromDefinition(DashboardController::class);
     $build = $controller->dashboard();
     $build = $this->addNoindex($build);
     $build['#attached']['library'][] = 'hotel_reservation/admin-styles';
-    if (isset($build['#theme']) && $build['#theme'] === 'hotel_reservation_dashboard') {
-      $build['#is_shared'] = TRUE;
-    }
-    if (isset($build['#pending_reservations'])) {
-      foreach ($build['#pending_reservations'] as &$r) {
-        $r['confirm_url'] = '';
-        $r['cancel_url'] = '';
-      }
-      unset($r);
-    }
     $build['#cache']['contexts'][] = 'session';
     return $build;
   }
 
   public function analytics(Request $request, string $token) {
+    $isAdmin = \Drupal::currentUser()->hasPermission('administer hotel reservation');
     $config = \Drupal::config('hotel_reservation.settings');
-    if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
-      throw new NotFoundHttpException();
-    }
-    $auth = $this->handleAuth($request, $token);
-    if ($auth instanceof RedirectResponse) {
-      return $auth;
-    }
-    if (is_array($auth)) {
-      return $auth;
+    if (!$isAdmin) {
+      if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
+        throw new NotFoundHttpException();
+      }
+      $auth = $this->handleAuth($request, $token);
+      if ($auth instanceof RedirectResponse) {
+        return $auth;
+      }
+      if (is_array($auth)) {
+        return $auth;
+      }
     }
     $controller = \Drupal::classResolver()->getInstanceFromDefinition(AnalyticsController::class);
     $build = $controller->analytics();
@@ -156,16 +157,19 @@ class SharedController extends ControllerBase {
   }
 
   public function calendar(Request $request, string $token, $month = NULL, $year = NULL) {
+    $isAdmin = \Drupal::currentUser()->hasPermission('administer hotel reservation');
     $config = \Drupal::config('hotel_reservation.settings');
-    if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
-      throw new NotFoundHttpException();
-    }
-    $auth = $this->handleAuth($request, $token);
-    if ($auth instanceof RedirectResponse) {
-      return $auth;
-    }
-    if (is_array($auth)) {
-      return $auth;
+    if (!$isAdmin) {
+      if (!$config->get('share_enabled') || !hash_equals((string) $config->get('share_token'), $token)) {
+        throw new NotFoundHttpException();
+      }
+      $auth = $this->handleAuth($request, $token);
+      if ($auth instanceof RedirectResponse) {
+        return $auth;
+      }
+      if (is_array($auth)) {
+        return $auth;
+      }
     }
     $controller = \Drupal::classResolver()->getInstanceFromDefinition(HotelReservationController::class);
     $build = $controller->calendar($month, $year);
