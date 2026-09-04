@@ -529,7 +529,13 @@
       const $overlay = displayMode === 'modal' ? $form.closest('.hr-booking-modal-overlay') : $();
       const $wrapper = displayMode === 'modal' ? $('.hr-booking-preview-wrapper') : $();
 
-      if (displayMode === 'modal') {
+      if (displayMode === 'modal' && $overlay.length) {
+        // Move the overlay to <body> so no ancestor stacking context
+        // (transform/filter/opacity in the theme) can trap it below
+        // the site header.
+        if (!$overlay.parent().is('body')) {
+          $overlay.appendTo('body');
+        }
         // Open modal from preview button.
         $wrapper.on('click', '.hr-booking-preview__btn', function (e) {
           e.preventDefault();

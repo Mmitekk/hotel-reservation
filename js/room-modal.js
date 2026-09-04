@@ -228,36 +228,52 @@
       updateCounter();
     }
 
-    // Drag-to-scroll with mouse.
+    // Drag-to-scroll with mouse. Pointer capture is taken lazily only
+    // after a real drag starts — capturing on pointerdown retargets the
+    // follow-up click to the viewport and breaks buttons (e.g. the zoom).
     var dragging = false;
+    var captured = false;
     var startX = 0;
     var startL = 0;
     var moved = 0;
     $vp.on('pointerdown' + NAMESPACE, function (e) {
       if (e.button !== undefined && e.button !== 0) { return; }
       dragging = true;
+      captured = false;
       moved = 0;
       startX = e.clientX;
       startL = $vp[0].scrollLeft;
       $vp.addClass('is-dragging');
-      try { $vp[0].setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     });
     $vp.on('pointermove' + NAMESPACE, function (e) {
       if (!dragging) { return; }
       var dx = e.clientX - startX;
       if (Math.abs(dx) > moved) { moved = Math.abs(dx); }
+      if (moved > 8 && !captured) {
+        captured = true;
+        try { $vp[0].setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      }
       $vp[0].scrollLeft = startL - dx;
     });
-    function endDrag() {
+    function endDrag(e) {
       if (!dragging) { return; }
       dragging = false;
+      captured = false;
       $vp.removeClass('is-dragging');
+      if (e && e.pointerId !== undefined) {
+        try {
+          if ($vp[0].hasPointerCapture && $vp[0].hasPointerCapture(e.pointerId)) {
+            $vp[0].releasePointerCapture(e.pointerId);
+          }
+        }
+        catch (err) { /* ignore */ }
+      }
       if (moved > 8) {
         justDragged = true;
         setTimeout(function () { justDragged = false; }, 80);
       }
     }
-    $vp.on('pointerup' + NAMESPACE + ' pointercancel' + NAMESPACE, endDrag);
+    $vp.on('pointerup' + NAMESPACE + ' pointercancel' + NAMESPACE + ' pointerleave' + NAMESPACE, endDrag);
     $vp.on('dragstart' + NAMESPACE, function (e) { e.preventDefault(); });
 
     $overlay.on('click', '.hr-room-modal__nav--prev', function () { go(idx - 1); });
