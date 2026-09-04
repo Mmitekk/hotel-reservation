@@ -44,14 +44,14 @@ class SharedController extends ControllerBase {
 
   protected function buildLoginForm(string $token, string $currentUrl, bool $error = FALSE): array {
     $msg = $error ? '<p style="color:#dc2626;margin-bottom:12px;">Неверный пароль</p>' : '';
-    $html = '<div style="max-width:420px;margin:60px auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;font-family:system-ui;">';
+    $html = '<div class="page-content-section"><div style="max-width:420px;margin:60px auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;font-family:system-ui;">';
     $html .= '<h2 style="margin:0 0 12px;">Доступ ограничен</h2>';
     $html .= '<p style="color:#6b7280;margin:0 0 16px;">Введите пароль для просмотра статистики.</p>';
     $html .= $msg;
     $html .= '<form method="POST" action="' . htmlspecialchars($currentUrl, ENT_QUOTES, 'UTF-8') . '">';
     $html .= '<input type="password" name="password" placeholder="Пароль" required style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:12px;">';
-    $html .= '<button type="submit" style="width:100%;padding:10px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">Войти</button>';
-    $html .= '</form></div>';
+    $html .= '<button type="submit" style="width:100%;padding:10px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:2rem;">Войти</button>';
+    $html .= '</form></div></div>';
 
     return [
       '#markup' => $html,
@@ -117,8 +117,7 @@ class SharedController extends ControllerBase {
       return $auth;
     }
 
-    $controller = new DashboardController();
-    $controller->setContainer($this->container);
+    $controller = \Drupal::classResolver()->getInstanceFromDefinition(DashboardController::class);
     $build = $controller->dashboard();
     $build = $this->addNoindex($build);
     $build['#attached']['library'][] = 'hotel_reservation/admin-styles';
@@ -148,8 +147,7 @@ class SharedController extends ControllerBase {
     if (is_array($auth)) {
       return $auth;
     }
-    $controller = new AnalyticsController();
-    $controller->setContainer($this->container);
+    $controller = \Drupal::classResolver()->getInstanceFromDefinition(AnalyticsController::class);
     $build = $controller->analytics();
     $build = $this->addNoindex($build);
     $build['#cache']['contexts'][] = 'session';
@@ -168,8 +166,7 @@ class SharedController extends ControllerBase {
     if (is_array($auth)) {
       return $auth;
     }
-    $controller = new HotelReservationController();
-    $controller->setContainer($this->container);
+    $controller = \Drupal::classResolver()->getInstanceFromDefinition(HotelReservationController::class);
     $build = $controller->calendar($month, $year);
     $build = $this->addNoindex($build);
     if (isset($build['#prev_url']) && isset($build['#next_url'])) {
