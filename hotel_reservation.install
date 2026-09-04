@@ -171,13 +171,10 @@ function hotel_reservation_update_10003() {
  */
 function hotel_reservation_ensure_room_gallery_fields() {
   $def_manager = \Drupal::entityDefinitionUpdateManager();
-  try {
-    $installed = $def_manager->getFieldStorageDefinitions('hr_room');
-  }
-  catch (\Exception $e) {
-    return;
-  }
-  if (empty($installed['teaser'])) {
+  $schema = \Drupal::database()->schema();
+  $has_teaser = $schema->fieldExists('hr_room', 'teaser__value') || $schema->fieldExists('hr_room', 'teaser');
+  $has_images = $schema->tableExists('hr_room__images');
+  if (empty($has_teaser)) {
     $teaser = \Drupal\Core\Field\BaseFieldDefinition::create('string_long')
       ->setLabel(t('Анонс (краткое описание)'))
       ->setDescription(t('Показывается в карточке «Наши номера».'))
@@ -189,7 +186,7 @@ function hotel_reservation_ensure_room_gallery_fields() {
       ->setDisplayConfigurable('view', TRUE);
     $def_manager->installFieldStorageDefinition('teaser', 'hr_room', 'hotel_reservation', $teaser);
   }
-  if (empty($installed['images'])) {
+  if (empty($has_images)) {
     $images = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Слайдер (изображения номера)'))
       ->setCardinality(-1)
