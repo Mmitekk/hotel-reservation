@@ -32,7 +32,7 @@ analytics:
       css/analytics.css: {}
 
 rooms-block:
-  version: 1.11.0
+  version: 1.12.0
   css:
     theme:
       css/rooms-block.css: {}
@@ -43,9 +43,22 @@ rooms-block:
     - core/drupalSettings
     - core/jquery
     - core/once
+    - hotel_reservation/room-modal
+
+room-modal:
+  version: 1.12.0
+  css:
+    theme:
+      css/room-modal.css: {}
+  js:
+    js/room-modal.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
 
 room-comparison:
-  version: 1.0.0
+  version: 1.12.0
   css:
     theme:
       css/room-comparison.css: {}
@@ -56,6 +69,7 @@ room-comparison:
     - core/drupalSettings
     - core/jquery
     - core/once
+    - hotel_reservation/room-modal
 
 shared:
   version: 1.10.3

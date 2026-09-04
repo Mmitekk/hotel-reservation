@@ -43,7 +43,7 @@ function hotel_reservation_install(bool $is_syncing) {
     ->set('enable_guest_confirmation', TRUE)
     ->set('reservation_expiration_hours', 24)
     ->set('booking_conditions', '')
-    ->set('room_modal_width', 80)
+    ->set('room_modal_width', 65)
     ->save();
 
   hotel_reservation_create_default_room_types();
@@ -208,7 +208,7 @@ function hotel_reservation_ensure_room_gallery_fields() {
   }
   $config = \Drupal::configFactory()->getEditable('hotel_reservation.settings');
   if ($config->get('room_modal_width') === NULL) {
-    $config->set('room_modal_width', 80)->save();
+    $config->set('room_modal_width', 65)->save();
   }
 }
 
@@ -225,6 +225,17 @@ function hotel_reservation_update_10004() {
  */
 function hotel_reservation_update_10005() {
   hotel_reservation_ensure_room_gallery_fields();
+}
+
+/**
+ * Change default room modal width 80% → 65%, height capped at 70vh.
+ */
+function hotel_reservation_update_10006() {
+  $config = \Drupal::configFactory()->getEditable('hotel_reservation.settings');
+  $current = $config->get('room_modal_width');
+  if ($current === NULL || (int) $current === 80) {
+    $config->set('room_modal_width', 65)->save();
+  }
 }
 
 /**

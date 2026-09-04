@@ -28,18 +28,39 @@ class RoomComparisonBlock extends BlockBase {
     'economy' => 'Эконом',
   ];
 
-  private function getRoomTypeLabels(): array {
-    $labels = [];
+  private const FALLBACK_COLORS = [
+    'standard' => '#6b7280',
+    'superior' => '#0ea5e9',
+    'deluxe' => '#8b5cf6',
+    'suite' => '#f59e0b',
+    'apartment' => '#10b981',
+    'villa' => '#ec4899',
+    'family' => '#06b6d4',
+    'economy' => '#64748b',
+  ];
+
+  private function getRoomTypeMap(): array {
+    $map = [];
     try {
       $storage = \Drupal::entityTypeManager()->getStorage('hr_room_type');
       foreach ($storage->loadMultiple() as $type) {
-        $labels[$type->id()] = $type->label();
+        $map[$type->id()] = ['label' => $type->label(), 'color' => $type->getColor()];
       }
     }
     catch (\Exception $e) {
     }
-    if (empty($labels)) {
-      $labels = self::FALLBACK_LABELS;
+    if (empty($map)) {
+      foreach (self::FALLBACK_LABELS as $id => $label) {
+        $map[$id] = ['label' => $label, 'color' => self::FALLBACK_COLORS[$id] ?? '#6b7280'];
+      }
+    }
+    return $map;
+  }
+
+  private function getRoomTypeLabels(): array {
+    $labels = [];
+    foreach ($this->getRoomTypeMap() as $id => $info) {
+      $labels[$id] = $info['label'];
     }
     return $labels;
   }
@@ -89,9 +110,10 @@ class RoomComparisonBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
-    // Currency settings.
+    // Currency + modal settings.
     $settingsConfig = \Drupal::config('hotel_reservation.settings');
     $currencySymbol = $settingsConfig->get('currency_symbol') ?: '₽';
+    $modalWidth = max(50, min(95, (int) ($settingsConfig->get('room_modal_width') ?: 65)));
 
     // Query all published rooms sorted by sort_weight.
     $query = \Drupal::entityTypeManager()->getStorage('hr_room')->getQuery()
@@ -102,13 +124,14 @@ class RoomComparisonBlock extends BlockBase {
 
     $roomsData = [];
 
-    $typeLabels = $this->getRoomTypeLabels();
+    $typeMap = $this->getRoomTypeMap();
     if (!empty($ids)) {
       $rooms = \Drupal::entityTypeManager()->getStorage('hr_room')->loadMultiple($ids);
 
       foreach ($rooms as $room) {
         $roomType = $room->get('room_type')->value ?? 'standard';
-        $typeLabel = $typeLabels[$roomType] ?? self::FALLBACK_LABELS[$roomType] ?? $roomType;
+        $typeLabel = $typeMap[$roomType]['label'] ?? self::FALLBACK_LABELS[$roomType] ?? $roomType;
+        $typeColor = $typeMap[$roomType]['color'] ?? self::FALLBACK_COLORS[$roomType] ?? '#6b7280';
         $priceValue = (float) $room->getBasePrice();
 
         // Parse and sort amenities.
@@ -120,22 +143,37 @@ class RoomComparisonBlock extends BlockBase {
         }
         $amenitiesString = implode(', ', $amenities);
 
-        // Truncate description for comparison — strip all HTML tags.
-        $rawDesc = $room->getDescription() ?? '';
-        $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
-        $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
-        $description = $plainDesc;
+        // Full plain description for the detail modal.
+        if (method_exists($room, 'getDescriptionPlain')) {
+          $description = $room->getDescriptionPlain();
+        }
+        else {
+          $rawDesc = $room->getDescription() ?? '';
+          $description = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+          $description = html_entity_decode($description, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+          $description = preg_replace('/\s+/', ' ', $description);
+        }
+        $teaser = method_exists($room, 'getTeaserPlain') ? $room->getTeaserPlain(200) : mb_substr($description, 0, 200);
+        try {
+          $slides = method_exists($room, 'getSliderImages') ? $room->getSliderImages() : [];
+        }
+        catch (\Exception $e) {
+          $slides = [];
+        }
 
         $roomsData[] = [
           'id' => (int) $room->id(),
           'name' => $room->getName(),
           'room_type_label' => $typeLabel,
+          'type_color' => $typeColor,
           'capacity' => $room->getCapacity(),
+          'price' => number_format($priceValue, 0, '.', ' ') . ' ' . $currencySymbol,
           'base_price_formatted' => number_format($priceValue, 0, '.', ' ') . ' ' . $currencySymbol,
           'amenities' => $amenities,
           'amenities_string' => $amenitiesString,
+          'teaser' => $teaser,
           'description' => $description,
+          'slides' => $slides,
         ];
       }
     }
@@ -189,6 +227,7 @@ class RoomComparisonBlock extends BlockBase {
         'drupalSettings' => [
           'hotelReservation' => [
             'comparisonRooms' => $roomsData,
+            'roomModalWidth' => $modalWidth,
           ],
         ],
       ],

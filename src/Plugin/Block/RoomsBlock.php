@@ -179,7 +179,7 @@ class RoomsBlock extends BlockBase {
     // Currency + modal settings.
     $settingsConfig = \Drupal::config('hotel_reservation.settings');
     $currencySymbol = $settingsConfig->get('currency_symbol') ?: '₽';
-    $modalWidth = max(50, min(95, (int) ($settingsConfig->get('room_modal_width') ?: 80)));
+    $modalWidth = max(50, min(95, (int) ($settingsConfig->get('room_modal_width') ?: 65)));
 
     // Query published rooms ordered by sort_weight.
     $query = \Drupal::entityTypeManager()->getStorage('hr_room')->getQuery()

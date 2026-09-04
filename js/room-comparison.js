@@ -88,10 +88,10 @@
           }
         });
 
-        // Rebuild thead with room names.
+        // Rebuild thead with clickable room names (open detail modal).
         var headHtml = '<th class="hr-comparison-table__label-col">Параметр</th>';
         selectedRooms.forEach(function (room) {
-          headHtml += '<th>' + escapeHtml(room.name) + '</th>';
+          headHtml += '<th><button type="button" class="hr-comparison-table__room-name" data-room-id="' + room.id + '" title="Подробнее о номере">' + escapeHtml(room.name) + '</button></th>';
         });
         $tableHead.html(headHtml);
 
@@ -228,6 +228,15 @@
         e.preventDefault();
         selectedIds.clear();
         updateUI();
+      });
+
+      // Room name in the table header opens the shared detail modal.
+      var modalWidth = (drupalSettings.hotelReservation && drupalSettings.hotelReservation.roomModalWidth) || 65;
+      $tableHead.on('click', '.hr-comparison-table__room-name', function () {
+        var id = parseInt($(this).attr('data-room-id'), 10);
+        if (roomMap[id] && Drupal.hotelReservationRoomModal) {
+          Drupal.hotelReservationRoomModal.open(roomMap[id], {width: modalWidth});
+        }
       });
 
       // Initial state.

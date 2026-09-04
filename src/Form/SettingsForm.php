@@ -278,8 +278,8 @@ class SettingsForm extends ConfigFormBase {
     $form['rooms']['room_modal_width'] = [
       '#type' => 'number',
       '#title' => $this->t('Ширина модального окна номера (%)'),
-      '#description' => $this->t('Ширина всплывающей расширенной карточки при клике (50–95%, по умолчанию 80).'),
-      '#default_value' => $config->get('room_modal_width') ?: 80,
+      '#description' => $this->t('Ширина всплывающей расширенной карточки при клике (50–95%, по умолчанию 65). Высота ограничена 70% экрана.'),
+      '#default_value' => $config->get('room_modal_width') ?: 65,
       '#required' => TRUE,
       '#min' => 50,
       '#max' => 95,
@@ -431,7 +431,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('share_enabled', (bool) $form_state->getValue('share_enabled'))
       ->set('share_token', trim((string) $form_state->getValue('share_token')))
       ->set('share_password', trim((string) $form_state->getValue('share_password')))
-      ->set('room_modal_width', max(50, min(95, (int) $form_state->getValue('room_modal_width') ?: 80)))
+      ->set('room_modal_width', max(50, min(95, (int) $form_state->getValue('room_modal_width') ?: 65)))
       ->save();
 
     parent::submitForm($form, $form_state);
