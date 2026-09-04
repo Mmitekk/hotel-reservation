@@ -132,3 +132,11 @@ hotel_reservation.share_calendar_month:
     token: '[a-zA-Z0-9_-]+'
     month: '\d+'
     year: '\d+'
+
+hotel_reservation.share_info:
+  path: '/admin/hotel-reservation/share'
+  defaults:
+    _controller: '\Drupal\hotel_reservation\Controller\SharedController::shareInfo'
+    _title: 'Открытые страницы'
+  requirements:
+    _permission: 'administer hotel reservation'

@@ -44,8 +44,16 @@ hotel_reservation.calendar:
   route_name: hotel_reservation.calendar
   parent: hotel_reservation.admin
 
+hotel_reservation.share_info:
+  title: 'Открытые страницы'
+  description: 'Ссылки для клиента (календарь, аналитика, панель).'
+  route_name: hotel_reservation.share_info
+  parent: hotel_reservation.admin
+  weight: 5
+
 hotel_reservation.settings_menu:
   title: 'Настройки'
   description: 'Настройка параметров бронирования.'
   route_name: hotel_reservation.settings
   parent: hotel_reservation.admin
+  weight: 10

@@ -201,4 +201,56 @@ class SharedController extends ControllerBase {
     return (int) date('Y');
   }
 
+  public function shareInfo() {
+    $config = \Drupal::config('hotel_reservation.settings');
+    $enabled = (bool) $config->get('share_enabled');
+    $token = (string) $config->get('share_token');
+    $hasPassword = (string) $config->get('share_password') !== '';
+    $base = \Drupal::request()->getSchemeAndHttpHost();
+
+    if (!$enabled || $token === '') {
+      $html = '<div style="padding:16px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;margin-bottom:16px;">';
+      $html .= '<strong>Общий доступ отключён.</strong> Включите его в <a href="' . Url::fromRoute('hotel_reservation.settings')->toString() . '">Настройках</a> — секция «Доступ для клиента».';
+      $html .= '</div>';
+      $html .= '<p>После включения здесь появятся ссылки вида <code>/hotel-reservation/share/{token}/dashboard</code> и т.д., защищённые паролем и закрытые от индексации (<code>noindex,nofollow</code>).</p>';
+      return [
+        '#markup' => $html,
+        '#allowed_tags' => ['div', 'strong', 'a', 'p', 'code'],
+        '#cache' => ['max-age' => 0],
+      ];
+    }
+
+    $urls = [
+      'dashboard' => $base . '/hotel-reservation/share/' . $token . '/dashboard',
+      'analytics' => $base . '/hotel-reservation/share/' . $token . '/analytics',
+      'calendar' => $base . '/hotel-reservation/share/' . $token . '/calendar',
+      'calendar_sample' => $base . '/hotel-reservation/share/' . $token . '/calendar/' . date('n') . '/' . date('Y'),
+    ];
+
+    $html = '<div style="padding:16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;margin-bottom:16px;">';
+    $html .= '<strong>Доступ включён.</strong> Токен: <code>' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '</code> · Пароль: ' . ($hasPassword ? 'установлен' : 'не установлен (только секретная ссылка)') . ' · Страницы закрыты от индексации <code>noindex,nofollow,noarchive</code>.';
+    $html .= '</div>';
+
+    $html .= '<table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">';
+    $html .= '<thead><tr style="background:#f9fafb;text-align:left;"><th style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">Страница</th><th style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">Ссылка</th></tr></thead><tbody>';
+    $rows = [
+      ['Панель', $urls['dashboard']],
+      ['Аналитика', $urls['analytics']],
+      ['Календарь (текущий месяц)', $urls['calendar']],
+      ['Календарь (пример 9/2026)', $urls['calendar_sample']],
+    ];
+    foreach ($rows as [$label, $url]) {
+      $html .= '<tr><td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</td>';
+      $html .= '<td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;"><a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" target="_blank" style="word-break:break-all;">' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '</a></td></tr>';
+    }
+    $html .= '</tbody></table>';
+    $html .= '<p style="margin-top:12px;color:#6b7280;font-size:13px;">Ссылки требуют токен в URL' . ($hasPassword ? ' и пароль' : '') . '. Отправьте их клиенту. Изменить токен/пароль можно в <a href="' . Url::fromRoute('hotel_reservation.settings')->toString() . '">Настройках</a>.</p>';
+
+    return [
+      '#markup' => $html,
+      '#allowed_tags' => ['div', 'strong', 'a', 'p', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td'],
+      '#cache' => ['max-age' => 0],
+    ];
+  }
+
 }
