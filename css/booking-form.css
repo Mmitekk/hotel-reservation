@@ -619,8 +619,6 @@
 .hr-results-carousel__track {
   display: flex;
   gap: 10px;
-  width: max-content;
-  max-width: none;
   padding: 2px;
 }
 
@@ -676,11 +674,13 @@
   color: var(--hr-text);
   text-align: left;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
 .hr-room-card__name-btn:hover {
-  color: var(--hr-primary);
-  text-decoration: underline;
+  background: var(--hr-primary);
+  color: #fff;
+  text-decoration: none;
 }
 
 /* ---------- No Results ---------- */
