@@ -221,6 +221,7 @@ class BookingFormBlock extends BlockBase {
     $html .= '<div class="hr-section hr-section--search">';
     $html .= '<div class="hr-search-errors"></div>';
 
+    $html .= '<div class="hr-form-row hr-search-dates">';
     $html .= '<div class="hr-form-group">';
     $html .= '<label for="hr-check-in">' . $this->t('Дата заезда') . '</label>';
     $html .= '<input type="datetime-local" id="hr-check-in" class="hr-field-check-in" required>';
@@ -229,7 +230,9 @@ class BookingFormBlock extends BlockBase {
     $html .= '<label for="hr-check-out">' . $this->t('Дата выезда') . '</label>';
     $html .= '<input type="datetime-local" id="hr-check-out" class="hr-field-check-out" required>';
     $html .= '</div>';
+    $html .= '</div>';
 
+    $html .= '<div class="hr-search-actions">';
     $html .= '<div class="hr-form-group">';
     $html .= '<label>' . $this->t('Гости') . '</label>';
     $html .= '<div class="hr-guest-counter">';
@@ -240,6 +243,7 @@ class BookingFormBlock extends BlockBase {
     $html .= '</div>';
 
     $html .= '<button type="button" class="hr-btn hr-btn--primary hr-search-btn">' . $this->t('Найти свободные номера') . '</button>';
+    $html .= '</div>';
     $html .= '</div>';
 
     // === Section 2: Select Room ===

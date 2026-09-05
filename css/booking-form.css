@@ -238,6 +238,26 @@
 
 .hr-form-row .hr-form-group {
   flex: 1;
+  min-width: 0;
+}
+
+/* ---------- Search step: guests + button in one row ---------- */
+.hr-search-actions {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.hr-search-actions .hr-form-group {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.hr-search-actions .hr-search-btn {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+  white-space: nowrap;
 }
 
 /* ---------- Inputs ---------- */
@@ -569,6 +589,15 @@
 /* ---------- Results Carousel (step 2) ---------- */
 .hr-results-carousel {
   position: relative;
+  max-width: 100%;
+}
+
+.hr-results-carousel--single .hr-results-carousel__track {
+  width: 100%;
+}
+
+.hr-results-carousel--single .hr-room-card {
+  flex: 1 1 auto;
 }
 
 .hr-results-carousel__viewport {
@@ -605,7 +634,8 @@
 
 .hr-results-carousel__nav {
   position: absolute;
-  top: 110px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 32px;
   height: 32px;
   min-width: 0;
@@ -630,14 +660,15 @@
   color: var(--hr-primary);
 }
 
-.hr-results-carousel__nav--prev { left: -6px; }
-.hr-results-carousel__nav--next { right: -6px; }
+.hr-results-carousel__nav--prev { left: 6px; }
+.hr-results-carousel__nav--next { right: 6px; }
 
 /* Clickable room name inside booking cards. */
 .hr-room-card__name-btn {
-  padding: 0;
-  margin: 0;
+  padding: 5px 12px;
+  margin: 0 0 0 -12px;
   border: none;
+  border-radius: 8px;
   background: none;
   font: inherit;
   font-size: 15px;
@@ -747,16 +778,25 @@
   align-items: center;
   gap: 8px;
   padding: 5px 12px;
+  margin-bottom: 12px;
   background: none;
   border: none;
+  border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
   color: var(--hr-text-secondary);
   cursor: help;
+  transition: background 0.2s, color 0.2s;
 }
 
 .hr-terms__trigger:hover {
-  color: var(--hr-text);
+  background: var(--hr-primary);
+  color: #fff;
+}
+
+.hr-terms__trigger:hover .hr-terms__q {
+  background: #fff;
+  color: var(--hr-primary);
 }
 
 .hr-terms__q {
@@ -1046,6 +1086,16 @@
   .hr-form-row {
     flex-direction: column;
     gap: 0;
+  }
+
+  .hr-search-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .hr-search-actions .hr-search-btn {
+    white-space: normal;
   }
 
   .hr-booking-form__title {
