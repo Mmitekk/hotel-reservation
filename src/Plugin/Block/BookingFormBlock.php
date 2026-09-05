@@ -197,7 +197,17 @@ class BookingFormBlock extends BlockBase {
       $html .= '<div class="hr-booking-form">';
     } else {
       // ========== INLINE MODE ==========
-      $html = '<div class="hr-booking-inline-wrapper">';
+      // Mobile preview card (title + description + button). Hidden on
+      // desktop; on small screens JS converts the inline form to a modal
+      // and shows this card as the opener (same as modal mode).
+      $html = '<div class="hr-booking-preview-wrapper hr-booking-preview-wrapper--mobile">';
+      $html .= '<div class="hr-booking-preview">';
+      $html .= '<h3 class="hr-booking-preview__title">' . Html::escape($display_title) . '</h3>';
+      $html .= '<p class="hr-booking-preview__desc">' . Html::escape($display_subtitle) . '</p>';
+      $html .= '<button type="button" class="hr-btn hr-btn--primary hr-booking-preview__btn">' . Html::escape($button_text) . '</button>';
+      $html .= '</div>';
+      $html .= '</div>';
+      $html .= '<div class="hr-booking-inline-wrapper">';
       $html .= '<div class="hr-booking-form hr-booking-form--inline">';
     }
 

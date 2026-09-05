@@ -16,6 +16,15 @@
   justify-content: center;
 }
 
+/* Mobile opener for inline mode. Hidden until JS converts the form. */
+.hr-booking-preview-wrapper--mobile {
+  display: none;
+}
+
+.hr-booking-preview-wrapper--mobile.is-visible {
+  display: flex;
+}
+
 .hr-booking-preview {
   background: var(--hr-bg, #ffffff);
   border: 1.5px solid var(--hr-border, #e5e7eb);

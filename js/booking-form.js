@@ -60,7 +60,6 @@
       const checkOutTime = config.checkOutTime || '12:00';
       const bookingConditions = config.bookingConditions || '';
       const modalWidth = parseInt(config.roomModalWidth) || 65;
-      const buttonText = config.buttonText || Drupal.t('Забронировать');
 
       // ---- Apply color settings from config ----
       const primaryColor = config.formPrimaryColor || '#d97706';
@@ -631,11 +630,11 @@
       let effectiveMode = displayMode;
       if (displayMode === 'inline' && window.matchMedia('(max-width: 719px)').matches) {
         const $inlineWrapper = $form.closest('.hr-booking-inline-wrapper');
+        const $openWrap = $inlineWrapper.siblings('.hr-booking-preview-wrapper--mobile');
         const $mobileOverlay = $('<div class="hr-booking-modal-overlay"><div class="hr-booking-modal"><button type="button" class="hr-booking-modal__close">✕</button></div></div>');
         $mobileOverlay.find('.hr-booking-modal').append($form.detach());
         $('body').append($mobileOverlay);
-        const $openWrap = $('<div class="hr-booking-preview-wrapper hr-booking-preview-wrapper--mobile"><button type="button" class="hr-btn hr-btn--primary hr-booking-preview__btn">' + Drupal.checkPlain(buttonText) + '</button></div>');
-        $inlineWrapper.before($openWrap);
+        $openWrap.addClass('is-visible');
         $inlineWrapper.hide();
         effectiveMode = 'modal';
       }
