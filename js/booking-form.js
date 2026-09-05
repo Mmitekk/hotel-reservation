@@ -60,6 +60,7 @@
       const checkOutTime = config.checkOutTime || '12:00';
       const bookingConditions = config.bookingConditions || '';
       const modalWidth = parseInt(config.roomModalWidth) || 65;
+      const buttonText = config.buttonText || Drupal.t('Забронировать');
 
       // ---- Apply color settings from config ----
       const primaryColor = config.formPrimaryColor || '#d97706';
@@ -623,12 +624,27 @@
         }
       });
 
-      // ---- Modal open/close (only in modal mode) ----
+      // ---- Responsive: inline becomes modal on mobile ----
+      // Decided once at page load: an inline form takes too much room
+      // on small screens, so it is converted to a modal there.
       const displayMode = config.displayMode || 'modal';
-      const $overlay = displayMode === 'modal' ? $form.closest('.hr-booking-modal-overlay') : $();
-      const $wrapper = displayMode === 'modal' ? $('.hr-booking-preview-wrapper') : $();
+      let effectiveMode = displayMode;
+      if (displayMode === 'inline' && window.matchMedia('(max-width: 719px)').matches) {
+        const $inlineWrapper = $form.closest('.hr-booking-inline-wrapper');
+        const $mobileOverlay = $('<div class="hr-booking-modal-overlay"><div class="hr-booking-modal"><button type="button" class="hr-booking-modal__close">✕</button></div></div>');
+        $mobileOverlay.find('.hr-booking-modal').append($form.detach());
+        $('body').append($mobileOverlay);
+        const $openWrap = $('<div class="hr-booking-preview-wrapper hr-booking-preview-wrapper--mobile"><button type="button" class="hr-btn hr-btn--primary hr-booking-preview__btn">' + Drupal.checkPlain(buttonText) + '</button></div>');
+        $inlineWrapper.before($openWrap);
+        $inlineWrapper.hide();
+        effectiveMode = 'modal';
+      }
 
-      if (displayMode === 'modal' && $overlay.length) {
+      // ---- Modal open/close (only in modal mode) ----
+      const $overlay = effectiveMode === 'modal' ? $form.closest('.hr-booking-modal-overlay') : $();
+      const $wrapper = effectiveMode === 'modal' ? $('.hr-booking-preview-wrapper') : $();
+
+      if (effectiveMode === 'modal' && $overlay.length) {
         // Move the overlay to <body> so no ancestor stacking context
         // (transform/filter/opacity in the theme) can trap it below
         // the site header.

@@ -263,7 +263,7 @@ class BookingFormBlock extends BlockBase {
     $html .= '<div class="hr-book-grid">';
     $html .= '<div class="hr-book-grid__main">';
 
-    $html .= '<div class="hr-form-row">';
+    $html .= '<div class="hr-form-row hr-form-row--column">';
     $html .= '<div class="hr-form-group">';
     $html .= '<label>' . $this->t('Номер') . '</label>';
     $html .= '<div class="hr-room-selected-name">—</div>';

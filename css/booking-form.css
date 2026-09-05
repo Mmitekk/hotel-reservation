@@ -247,6 +247,11 @@
   min-width: 0;
 }
 
+.hr-form-row--column {
+  flex-direction: column;
+  gap: 0;
+}
+
 /* ---------- Search step: guests + button in one row ---------- */
 .hr-search-actions {
   display: flex;
@@ -1149,15 +1154,17 @@
   }
 
   .hr-booking-modal {
-    max-height: 100vh;
-    height: 100vh;
+    max-height: calc(100vh - 30px);
+    width: 100%;
     max-width: 100%;
-    border-radius: 0;
+    margin: auto;
+    border-radius: 16px;
   }
 
   .hr-booking-modal-overlay {
-    padding: 0;
-    align-items: stretch;
+    padding: 0 15px;
+    align-items: center;
+    justify-content: center;
   }
 
   .hr-booking-modal__close {
@@ -1168,7 +1175,7 @@
 
   .hr-booking-form {
     padding: 20px 16px;
-    border-radius: 0;
+    border-radius: 16px;
     margin: 0;
     max-width: 100%;
   }
