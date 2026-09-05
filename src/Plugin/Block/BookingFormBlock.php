@@ -260,6 +260,9 @@ class BookingFormBlock extends BlockBase {
     $html .= '<button type="button" class="hr-back-btn">← ' . $this->t('Выбрать другой номер') . '</button>';
     $html .= '<div class="hr-book-errors"></div>';
 
+    $html .= '<div class="hr-book-grid">';
+    $html .= '<div class="hr-book-grid__main">';
+
     $html .= '<div class="hr-form-row">';
     $html .= '<div class="hr-form-group">';
     $html .= '<label>' . $this->t('Номер') . '</label>';
@@ -295,9 +298,12 @@ class BookingFormBlock extends BlockBase {
     $html .= '<input type="email" id="hr-guest-email" class="hr-field-guest-email" placeholder="' . $this->t('email@example.com') . '">';
     $html .= '</div>';
 
+    $html .= '</div>'; // .hr-book-grid__main
+    $html .= '<div class="hr-book-grid__side">';
+
     $html .= '<div class="hr-form-group">';
     $html .= '<label for="hr-notes">' . $this->t('Заметки') . '</label>';
-    $html .= '<textarea id="hr-notes" class="hr-field-notes" rows="2" placeholder="' . $this->t('Пожелания...') . '"></textarea>';
+    $html .= '<textarea id="hr-notes" class="hr-field-notes" rows="5" placeholder="' . $this->t('Пожелания...') . '"></textarea>';
     $html .= '</div>';
 
     // Booking conditions as a hover hint.
@@ -320,6 +326,9 @@ class BookingFormBlock extends BlockBase {
     $html .= '</div>';
 
     $html .= '<button type="button" class="hr-btn hr-btn--primary hr-book-btn" data-btn-text="' . Html::escape($button_text) . '">' . Html::escape($button_text) . '</button>';
+
+    $html .= '</div>'; // .hr-book-grid__side
+    $html .= '</div>'; // .hr-book-grid
     $html .= '</div>';
 
     // === Section 4: Success ===

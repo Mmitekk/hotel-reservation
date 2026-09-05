@@ -83,6 +83,12 @@
   animation: hr-modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@media (min-width: 720px) {
+  .hr-booking-modal {
+    max-width: 700px;
+  }
+}
+
 @keyframes hr-modalSlideUp {
   from { opacity: 0; transform: translateY(24px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -641,29 +647,58 @@
 .hr-results-carousel__nav {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  margin-top: -16px;
   width: 32px;
   height: 32px;
   min-width: 0;
+  min-height: 0;
   padding: 0;
-  margin: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
   line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  flex-shrink: 0;
+  appearance: none;
+  -webkit-appearance: none;
   border-radius: 50%;
   border: 1px solid var(--hr-border);
   background: var(--hr-bg, #fff);
   color: var(--hr-text);
-  font-size: 18px;
+  font-size: 0;
   cursor: pointer;
   box-shadow: 0 2px 8px var(--hr-shadow);
   z-index: 2;
 }
 
+/* Chevron drawn with a pseudo-element — always optically centered,
+   immune to font glyph metrics of ‹ › characters. */
+.hr-results-carousel__nav::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border-top: 2.5px solid currentColor;
+  border-right: 2.5px solid currentColor;
+}
+
+.hr-results-carousel__nav--prev::before {
+  transform: translate(-30%, -50%) rotate(-135deg);
+}
+
+.hr-results-carousel__nav--next::before {
+  transform: translate(-70%, -50%) rotate(45deg);
+}
+
 .hr-results-carousel__nav:hover {
   border-color: var(--hr-primary);
   color: var(--hr-primary);
+}
+
+.hr-results-carousel__nav:focus-visible {
+  outline: 2px solid var(--hr-primary);
+  outline-offset: 2px;
 }
 
 .hr-results-carousel__nav--prev { left: 6px; }
@@ -710,7 +745,29 @@
   margin: 0;
 }
 
-/* ---------- Booking Details ---------- */
+/* ---------- Booking Details: two columns on desktop ---------- */
+.hr-book-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+  align-items: start;
+}
+
+.hr-book-grid__main,
+.hr-book-grid__side {
+  min-width: 0;
+}
+
+.hr-book-grid__side .hr-book-btn {
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .hr-book-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .hr-booking-details {
   animation: hr-slideUp 0.3s ease;
 }
@@ -1073,7 +1130,7 @@
 }
 
 .hr-booking-form--inline {
-  max-width: 560px;
+  max-width: 720px;
   width: 100%;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.25s ease, transform 0.25s ease;
@@ -1156,7 +1213,8 @@
   .hr-results-carousel__nav {
     width: 28px;
     height: 28px;
-    font-size: 16px;
+    margin-top: -14px;
+    font-size: 0;
   }
 
   .hr-results-carousel__nav--prev { left: 4px; }

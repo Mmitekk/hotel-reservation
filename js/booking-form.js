@@ -297,9 +297,9 @@
         }
         else {
           html += '<div class="hr-results-carousel">' +
-            '<button type="button" class="hr-results-carousel__nav hr-results-carousel__nav--prev" aria-label="' + Drupal.t('Назад') + '">‹</button>' +
+            '<button type="button" class="hr-results-carousel__nav hr-results-carousel__nav--prev" aria-label="' + Drupal.t('Назад') + '" tabindex="0"></button>' +
             '<div class="hr-results-carousel__viewport"><div class="hr-results-carousel__track">' + cardsHtml + '</div></div>' +
-            '<button type="button" class="hr-results-carousel__nav hr-results-carousel__nav--next" aria-label="' + Drupal.t('Вперёд') + '">›</button>' +
+            '<button type="button" class="hr-results-carousel__nav hr-results-carousel__nav--next" aria-label="' + Drupal.t('Вперёд') + '" tabindex="0"></button>' +
             '</div>';
         }
 
