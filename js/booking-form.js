@@ -79,19 +79,20 @@
       });
 
       // Also apply color variables to the preview card (outside the form).
-      var previewMode = config.displayMode || 'modal';
-      if (previewMode === 'modal') {
-        var $preview = $('.hr-booking-preview', context);
-        if ($preview.length) {
-          $preview.css({
-            '--hr-primary': primaryColor,
-            '--hr-primary-dark': darkenColor(primaryColor, 30),
-            '--hr-primary-light': lightenColor(primaryColor, 50),
-            '--hr-primary-bg': hexToRgba(primaryColor, 0.08),
-            '--hr-primary-border': hexToRgba(primaryColor, 0.25),
-            '--hr-btn-text': '#ffffff',
-          });
-        }
+      // In every display mode (not just modal): the mobile preview card
+      // of inline mode must get the same colors even if the <style> tag
+      // from html_head is missing on the page — otherwise it falls back
+      // to the orange :root defaults while the form is themed via JS.
+      var $preview = $('.hr-booking-preview', context);
+      if ($preview.length) {
+        $preview.css({
+          '--hr-primary': primaryColor,
+          '--hr-primary-dark': darkenColor(primaryColor, 30),
+          '--hr-primary-light': lightenColor(primaryColor, 50),
+          '--hr-primary-bg': hexToRgba(primaryColor, 0.08),
+          '--hr-primary-border': hexToRgba(primaryColor, 0.25),
+          '--hr-btn-text': '#ffffff',
+        });
       }
 
       // Set min datetime-local to now.
