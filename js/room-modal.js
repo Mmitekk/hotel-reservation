@@ -41,6 +41,28 @@
     $(window).off('resize' + NAMESPACE);
   }
 
+  function flashForm($form) {
+    $form.addClass('hr-booking-form--flash');
+    setTimeout(function () { $form.removeClass('hr-booking-form--flash'); }, 1900);
+    var $ci = $form.find('.hr-field-check-in').first();
+    if ($ci.length) {
+      setTimeout(function () {
+        try { $ci.trigger('focus'); } catch (e) { /* ignore */ }
+      }, 650);
+    }
+  }
+
+  function scrollToForm($form) {
+    if (!$form.length) { return; }
+    try {
+      $form[0].scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+    catch (e) {
+      $form[0].scrollIntoView();
+    }
+    flashForm($form);
+  }
+
   function bookRoom(room) {
     var roomId = room && room.id;
     close();
@@ -48,15 +70,15 @@
       document.dispatchEvent(new CustomEvent('hr:book-room', {detail: {roomId: roomId}}));
     }
     catch (e) { /* Older browsers — ignore. */ }
+    // Modal booking form on the page → open it.
     var $previewBtn = $('.hr-booking-preview__btn').first();
-    if ($previewBtn.length) {
+    var $overlay = $('.hr-booking-modal-overlay').first();
+    if ($previewBtn.length && $overlay.length) {
       $previewBtn.trigger('click');
       return;
     }
-    var $form = $('.hr-booking-form').first();
-    if ($form.length && $form[0].scrollIntoView) {
-      $form[0].scrollIntoView({behavior: 'smooth', block: 'start'});
-    }
+    // Inline booking form on the page → anchor-scroll to it with highlight.
+    scrollToForm($('.hr-booking-form').first());
   }
 
   function openLightbox($overlay, slides, index) {

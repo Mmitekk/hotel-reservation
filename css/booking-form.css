@@ -731,7 +731,12 @@
 .hr-guest-counter {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 0;
+}
+
+.hr-booking-form .hr-guest-counter .hr-guest-counter__btn {
+  flex: 0 0 36px !important;
 }
 
 /* Hide default number input spinners (Chrome/Safari/Edge/Firefox) — !important to override Drupal/theme CSS. */
@@ -786,14 +791,16 @@
   transform: scale(0.95);
 }
 
-.hr-guest-counter__value {
-  width: 48px;
+.hr-booking-form .hr-guest-counter input.hr-guest-counter__value {
+  width: 48px !important;
+  max-width: 48px !important;
+  min-width: 0 !important;
+  flex: 0 0 48px !important;
   height: 36px;
   min-height: 0;
   padding: 0;
   margin: 0;
   line-height: 36px;
-  flex-shrink: 0;
   box-sizing: border-box;
   border: 1.5px solid var(--hr-border);
   border-left: none;
@@ -803,6 +810,16 @@
   font-weight: 600;
   color: var(--hr-text);
   background: var(--hr-bg);
+}
+
+/* ---------- Flash highlight (jump from room modal) ---------- */
+.hr-booking-form--flash {
+  animation: hr-flashRing 1.8s ease;
+}
+
+@keyframes hr-flashRing {
+  0%, 100% { box-shadow: 0 4px 24px var(--hr-shadow), 0 1px 3px var(--hr-shadow); }
+  20%, 60% { box-shadow: 0 0 0 4px var(--hr-primary), 0 4px 24px var(--hr-shadow); }
 }
 
 /* ---------- Back button ---------- */
