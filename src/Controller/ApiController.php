@@ -309,25 +309,29 @@ class ApiController extends ControllerBase {
     $currency = $config->get('currency_symbol') ?: '₽';
     $langcode = $this->languageManager()->getCurrentLanguage()->getId();
 
+    // Shared mail tokens.
+    $mail_tokens = [
+      'guest' => $guest_name,
+      'email' => $guest_email ?: '—',
+      'phone' => $guest_phone,
+      'room' => $room->label(),
+      'check_in' => (new \DateTime($check_in))->format('d.m.Y'),
+      'check_out' => (new \DateTime($check_out))->format('d.m.Y'),
+      'count' => $guest_count,
+      'total' => $total_price,
+      'currency' => $currency,
+      'notes' => $notes ?: 'Нет',
+      'hotel' => $hotel_name,
+    ];
+
     // Send admin notification.
     if ((bool) $config->get('enable_admin_notification')) {
       $admin_email = $config->get('admin_notification_email');
       if (!empty($admin_email)) {
         $params['guest_name'] = $guest_name;
-        $params['message'] = $this->t(
-          "Создано новое бронирование через сайт:\n\nГость: @guest\nEmail: @email\nТелефон: @phone\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nГости: @count\nИтого: @total @currency\nЗаметки: @notes",
-          [
-            '@guest' => $guest_name,
-            '@email' => $guest_email ?: '—',
-            '@phone' => $guest_phone,
-            '@room' => $room->label(),
-            '@check_in' => (new \DateTime($check_in))->format('d.m.Y'),
-            '@check_out' => (new \DateTime($check_out))->format('d.m.Y'),
-            '@count' => $guest_count,
-            '@total' => $total_price,
-            '@currency' => $currency,
-            '@notes' => $notes ?: 'Нет',
-          ]
+        $params['message'] = hotel_reservation_build_mail_text(
+          hotel_reservation_get_mail_text('admin_new_booking'),
+          $mail_tokens
         );
 
         \Drupal::service('plugin.manager.mail')->mail(
@@ -343,18 +347,9 @@ class ApiController extends ControllerBase {
     // Auto-confirm if configured and guest email provided.
     if ((bool) $config->get('enable_guest_confirmation') && !empty($guest_email)) {
       // Send a pending notification (not yet confirmed).
-      $params2['message'] = $this->t(
-        "Уважаемый(ая) @guest,\n\nВаша заявка на бронирование в отеле @hotel получена и ожидает подтверждения.\n\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nГости: @count\nИтого: @total @currency\n\nВы получите подтверждение после обработки заявки.\n\nС уважением,\n@hotel",
-        [
-          '@guest' => $guest_name,
-          '@hotel' => $hotel_name,
-          '@room' => $room->label(),
-          '@check_in' => (new \DateTime($check_in))->format('d.m.Y'),
-          '@check_out' => (new \DateTime($check_out))->format('d.m.Y'),
-          '@count' => $guest_count,
-          '@total' => $total_price,
-          '@currency' => $currency,
-        ]
+      $params2['message'] = hotel_reservation_build_mail_text(
+        hotel_reservation_get_mail_text('guest_pending'),
+        $mail_tokens
       );
 
       \Drupal::service('plugin.manager.mail')->mail(

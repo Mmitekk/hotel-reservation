@@ -44,6 +44,9 @@ function hotel_reservation_install(bool $is_syncing) {
     ->set('reservation_expiration_hours', 24)
     ->set('booking_conditions', '')
     ->set('room_modal_width', 65)
+    ->set('mail_admin_new_booking', hotel_reservation_default_mail_text('admin_new_booking'))
+    ->set('mail_guest_pending', hotel_reservation_default_mail_text('guest_pending'))
+    ->set('mail_guest_confirmed', hotel_reservation_default_mail_text('guest_confirmed'))
     ->save();
 
   hotel_reservation_create_default_room_types();

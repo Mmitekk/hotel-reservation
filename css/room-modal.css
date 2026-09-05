@@ -207,6 +207,10 @@
   align-items: flex-start;
 }
 
+.hr-room-modal__body .hr-room-card__type-badge {
+  padding: 5px 10px;
+}
+
 .hr-room-modal__name {
   margin: 0;
   font-size: 22px;

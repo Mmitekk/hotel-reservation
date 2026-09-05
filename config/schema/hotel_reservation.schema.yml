@@ -78,6 +78,15 @@ hotel_reservation.settings:
     room_modal_width:
       type: integer
       label: 'Room modal width (%)'
+    mail_admin_new_booking:
+      type: text
+      label: 'Admin new booking email text'
+    mail_guest_pending:
+      type: text
+      label: 'Guest pending email text'
+    mail_guest_confirmed:
+      type: text
+      label: 'Guest confirmation email text'
 
 hr_room_type.*:
   type: config_entity

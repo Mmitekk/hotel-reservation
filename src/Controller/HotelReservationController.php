@@ -564,16 +564,16 @@ class HotelReservationController extends ControllerBase {
     $langcode = $this->languageManager()->getCurrentLanguage()->getId();
 
     if ($new_status === 'confirmed' && !empty($guest_email) && (bool) $config->get('enable_guest_confirmation')) {
-      $params['message'] = $this->t(
-        "Уважаемый(ая) @guest,\n\nВаше бронирование в отеле @hotel подтверждено!\n\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nИтого: @total @currency\n\nЖдём вас!\n\nС уважением,\n@hotel",
+      $params['message'] = hotel_reservation_build_mail_text(
+        hotel_reservation_get_mail_text('guest_confirmed'),
         [
-          '@guest' => $reservation->get('guest_name')->value,
-          '@hotel' => $hotel_name,
-          '@room' => $room_name,
-          '@check_in' => $check_in,
-          '@check_out' => $check_out,
-          '@total' => $total,
-          '@currency' => $currency,
+          'guest' => $reservation->get('guest_name')->value,
+          'hotel' => $hotel_name,
+          'room' => $room_name,
+          'check_in' => $check_in,
+          'check_out' => $check_out,
+          'total' => $total,
+          'currency' => $currency,
         ]
       );
 

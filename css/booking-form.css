@@ -564,6 +564,13 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 2px;
+  column-gap: 8px;
+}
+
+.hr-room-card__price > div {
+  min-width: 0;
 }
 
 .hr-room-card__price-value {
@@ -1095,6 +1102,55 @@
   .hr-form-row {
     flex-direction: column;
     gap: 0;
+  }
+
+  .hr-form-group {
+    margin-bottom: 12px;
+  }
+
+  .hr-steps {
+    margin-bottom: 16px;
+  }
+
+  .hr-booking-form__subtitle {
+    margin-bottom: 14px;
+  }
+
+  .hr-room-card {
+    padding: 12px;
+  }
+
+  .hr-room-card__price-value {
+    font-size: 17px;
+  }
+
+  .hr-room-card__price-unit {
+    font-size: 11px;
+  }
+
+  .hr-room-card__total {
+    font-size: 12px;
+  }
+
+  .hr-results-carousel__viewport {
+    padding: 2px 34px;
+  }
+
+  .hr-results-carousel__nav {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+
+  .hr-results-carousel__nav--prev { left: 4px; }
+  .hr-results-carousel__nav--next { right: 4px; }
+
+  .hr-price-breakdown {
+    padding: 10px;
+  }
+
+  .hr-success {
+    padding: 24px 8px;
   }
 
   .hr-search-actions {

@@ -345,3 +345,75 @@ function hotel_reservation_calculate_price($room_id, $check_in, $check_out) {
     'base_price' => $base_price,
   ];
 }
+
+/**
+ * Returns the default text of a notification email.
+ *
+ * Available tokens: @guest, @email, @phone, @room, @check_in, @check_out,
+ * @count, @total, @currency, @notes, @hotel.
+ *
+ * @param string $key
+ *   One of: admin_new_booking, guest_pending, guest_confirmed.
+ *
+ * @return string
+ *   The default email body with tokens.
+ */
+function hotel_reservation_default_mail_text(string $key): string {
+  switch ($key) {
+    case 'admin_new_booking':
+      return "Создано новое бронирование через сайт:\n\nГость: @guest\nEmail: @email\nТелефон: @phone\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nГости: @count\nИтого: @total @currency\nЗаметки: @notes";
+
+    case 'guest_pending':
+      return "Уважаемый(ая) @guest,\n\nВаша заявка на бронирование в отеле @hotel получена и ожидает подтверждения.\n\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nГости: @count\nИтого: @total @currency\n\nВы получите подтверждение после обработки заявки.\n\nС уважением,\n@hotel";
+
+    case 'guest_confirmed':
+      return "Уважаемый(ая) @guest,\n\nВаше бронирование в отеле @hotel подтверждено!\n\nНомер: @room\nЗаезд: @check_in\nВыезд: @check_out\nИтого: @total @currency\n\nЖдём вас!\n\nС уважением,\n@hotel";
+
+    default:
+      return '';
+  }
+}
+
+/**
+ * Builds a notification email body from a template with tokens.
+ *
+ * @param string $template
+ *   Template text with @tokens.
+ * @param array $tokens
+ *   Token values keyed by token name without @.
+ *
+ * @return string
+ *   The template with tokens replaced.
+ */
+function hotel_reservation_build_mail_text(string $template, array $tokens): string {
+  $replace = [];
+  foreach ($tokens as $name => $value) {
+    $replace['@' . $name] = (string) $value;
+  }
+  return strtr($template, $replace);
+}
+
+/**
+ * Returns the configured (or default) text of a notification email.
+ *
+ * @param string $key
+ *   One of: admin_new_booking, guest_pending, guest_confirmed.
+ *
+ * @return string
+ *   The email body template with tokens.
+ */
+function hotel_reservation_get_mail_text(string $key): string {
+  $map = [
+    'admin_new_booking' => 'mail_admin_new_booking',
+    'guest_pending' => 'mail_guest_pending',
+    'guest_confirmed' => 'mail_guest_confirmed',
+  ];
+  if (!isset($map[$key])) {
+    return '';
+  }
+  $stored = \Drupal::config('hotel_reservation.settings')->get($map[$key]);
+  if (is_string($stored) && trim($stored) !== '') {
+    return $stored;
+  }
+  return hotel_reservation_default_mail_text($key);
+}

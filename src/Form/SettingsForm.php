@@ -171,6 +171,38 @@ class SettingsForm extends ConfigFormBase {
     ];
 
     // ============================================================
+    // Fieldset: Email texts
+    // ============================================================
+    $form['mail_texts'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Тексты писем'),
+      '#description' => $this->t('Доступные токены: @guest, @email, @phone, @room, @check_in, @check_out, @count, @total, @currency, @notes, @hotel.'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    ];
+
+    $form['mail_texts']['mail_admin_new_booking'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Письмо админу о новом бронировании'),
+      '#default_value' => $config->get('mail_admin_new_booking') ?: hotel_reservation_default_mail_text('admin_new_booking'),
+      '#rows' => 8,
+    ];
+
+    $form['mail_texts']['mail_guest_pending'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Письмо клиенту при оформлении заявки'),
+      '#default_value' => $config->get('mail_guest_pending') ?: hotel_reservation_default_mail_text('guest_pending'),
+      '#rows' => 8,
+    ];
+
+    $form['mail_texts']['mail_guest_confirmed'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Письмо клиенту о подтверждении'),
+      '#default_value' => $config->get('mail_guest_confirmed') ?: hotel_reservation_default_mail_text('guest_confirmed'),
+      '#rows' => 8,
+    ];
+
+    // ============================================================
     // Fieldset: Automation
     // ============================================================
     $form['automation'] = [
@@ -418,6 +450,9 @@ class SettingsForm extends ConfigFormBase {
       ->set('enable_admin_notification', (bool) $form_state->getValue('enable_admin_notification'))
       ->set('admin_notification_email', $form_state->getValue('admin_notification_email'))
       ->set('enable_guest_confirmation', (bool) $form_state->getValue('enable_guest_confirmation'))
+      ->set('mail_admin_new_booking', trim((string) $form_state->getValue('mail_admin_new_booking')))
+      ->set('mail_guest_pending', trim((string) $form_state->getValue('mail_guest_pending')))
+      ->set('mail_guest_confirmed', trim((string) $form_state->getValue('mail_guest_confirmed')))
       ->set('reservation_expiration_hours', (int) $form_state->getValue('reservation_expiration_hours'))
       ->set('form_title', $form_state->getValue('form_title'))
       ->set('form_subtitle', $form_state->getValue('form_subtitle'))
