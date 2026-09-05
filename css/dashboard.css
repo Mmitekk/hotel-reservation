@@ -307,7 +307,7 @@
 }
 
 .hr-dashboard-checkin-card:hover {
-  background: var(--hr-dash-purple);
+  background: #ede9fe;
   transform: translateX(4px);
   box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
 }

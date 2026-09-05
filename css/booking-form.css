@@ -1008,6 +1008,23 @@
   20%, 60% { box-shadow: 0 0 0 4px var(--hr-primary), 0 4px 24px var(--hr-shadow); }
 }
 
+/* ---------- Privacy policy note ---------- */
+.hr-booking-policy {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--hr-text-secondary);
+  margin: 0 0 12px 0;
+}
+
+.hr-booking-policy a {
+  color: var(--hr-primary);
+  text-decoration: underline;
+}
+
+.hr-booking-policy a:hover {
+  text-decoration: none;
+}
+
 /* ---------- Back button ---------- */
 .hr-back-btn {
   background: none;
