@@ -291,6 +291,7 @@
 .hr-booking-form textarea {
   width: 100%;
   padding: 10px 14px;
+  line-height: 1.5;
   border: 1.5px solid var(--hr-border);
   border-radius: var(--hr-radius-sm);
   font-size: 14px;
@@ -1123,6 +1124,8 @@
   border-radius: 10px;
   border: 1.5px solid var(--hr-border);
   font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--hr-text);
 }
 
@@ -1134,6 +1137,10 @@
   font-weight: 700;
   color: var(--hr-primary);
   font-size: 18px;
+  line-height: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 
 /* ---------- Inline Mode ---------- */
