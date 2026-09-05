@@ -31,7 +31,10 @@ class ApiController extends ControllerBase {
   /**
    * Checks room availability and returns available rooms with prices.
    *
-   * Accepts JSON POST data: check_in, check_out, guest_count.
+   * Accepts JSON POST data: check_in, check_out, capacity (desired room
+   * capacity, exact match; falls back to guest_count for BC).
+   * If no rooms with the requested capacity are free, other available
+   * rooms are offered with exact_match = FALSE and a notice message.
    * Returns JSON: [{id, name, capacity, base_price, total_price, nights, available}].
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -54,6 +57,8 @@ class ApiController extends ControllerBase {
     $check_in = $data['check_in'] ?? '';
     $check_out = $data['check_out'] ?? '';
     $guest_count = (int) ($data['guest_count'] ?? 1);
+    // Desired capacity: exact room category filter, decoupled from guests.
+    $wanted_capacity = isset($data['capacity']) ? (int) $data['capacity'] : $guest_count;
 
     // Validate dates.
     if (empty($check_in) || empty($check_out)) {
@@ -80,6 +85,9 @@ class ApiController extends ControllerBase {
     if ($guest_count < 1) {
       $guest_count = 1;
     }
+    if ($wanted_capacity < 1) {
+      $wanted_capacity = 1;
+    }
 
     // Validate against config min/max stay.
     $config = $this->config('hotel_reservation.settings');
@@ -103,53 +111,26 @@ class ApiController extends ControllerBase {
       ], 400);
     }
 
-    // Get available rooms.
-    $available_rooms = hotel_reservation_get_available_rooms($check_in, $check_out, $guest_count);
+    // Get rooms with the exact requested capacity.
+    $exact_rooms = hotel_reservation_get_available_rooms($check_in, $check_out, $wanted_capacity, TRUE);
+    $exact_match = !empty($exact_rooms);
+
+    if ($exact_match) {
+      $rooms_to_show = $exact_rooms;
+      $notice = '';
+    }
+    else {
+      // No rooms with this capacity — offer all other available rooms.
+      $rooms_to_show = hotel_reservation_get_available_rooms($check_in, $check_out);
+      $notice = !empty($rooms_to_show)
+        ? (string) $this->t('У нас сейчас нет свободных номеров вместимостью @n. Посмотрите другие варианты:', ['@n' => $wanted_capacity])
+        : '';
+    }
 
     $results = [];
-    foreach ($available_rooms as $room) {
+    foreach ($rooms_to_show as $room) {
       $pricing = hotel_reservation_calculate_price($room->id(), $check_in, $check_out);
-
-      $rawDesc = $room->getDescription() ?: '';
-      $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
-      $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-      $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
-      $imageUrl = NULL;
-      $imageAlt = '';
-      if (method_exists($room, 'getImageUrl')) {
-        $imageUrl = $room->getImageUrl();
-        $imageAlt = $room->getImageAlt();
-      }
-      $roomTypeId = $room->get('room_type')->value ?? 'standard';
-      $typeLabel = $roomTypeId;
-      $typeColor = '#6b7280';
-      try {
-        $typeEntity = $this->entityTypeManager->getStorage('hr_room_type')->load($roomTypeId);
-        if ($typeEntity) {
-          $typeLabel = $typeEntity->label();
-          $typeColor = $typeEntity->getColor();
-        }
-      }
-      catch (\Exception $e) {
-      }
-      $results[] = [
-        'id' => (int) $room->id(),
-        'name' => $room->label(),
-        'room_type' => $roomTypeId,
-        'room_type_label' => $typeLabel,
-        'type_color' => $typeColor,
-        'teaser' => method_exists($room, 'getTeaserPlain') ? $room->getTeaserPlain(200) : $plainDesc,
-        'description' => $plainDesc,
-        'image_url' => $imageUrl,
-        'image_alt' => $imageAlt,
-        'slides' => method_exists($room, 'getSliderImages') ? $room->getSliderImages() : [],
-        'capacity' => $room->getCapacity(),
-        'base_price' => number_format((float) $room->getBasePrice(), 2, '.', ''),
-        'total_price' => number_format($pricing['total'], 2, '.', ''),
-        'nights' => $pricing['nights'],
-        'available' => TRUE,
-        'amenities' => $room->getAmenities(),
-      ];
+      $results[] = $this->buildRoomResult($room, $pricing);
     }
 
     return new SymfonyJsonResponse([
@@ -159,7 +140,64 @@ class ApiController extends ControllerBase {
       'check_out' => $check_out,
       'nights' => $nights,
       'guest_count' => $guest_count,
+      'requested_capacity' => $wanted_capacity,
+      'exact_match' => $exact_match,
+      'notice' => $notice,
     ]);
+  }
+
+  /**
+   * Builds a single room array for the availability response.
+   *
+   * @param \Drupal\hotel_reservation\Entity\Room $room
+   *   The room entity.
+   * @param array $pricing
+   *   Price data from hotel_reservation_calculate_price().
+   *
+   * @return array
+   *   Room data array.
+   */
+  protected function buildRoomResult($room, array $pricing): array {
+    $rawDesc = $room->getDescription() ?: '';
+    $plainDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+    $plainDesc = html_entity_decode($plainDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $plainDesc = preg_replace('/\s+/', ' ', $plainDesc);
+    $imageUrl = NULL;
+    $imageAlt = '';
+    if (method_exists($room, 'getImageUrl')) {
+      $imageUrl = $room->getImageUrl();
+      $imageAlt = $room->getImageAlt();
+    }
+    $roomTypeId = $room->get('room_type')->value ?? 'standard';
+    $typeLabel = $roomTypeId;
+    $typeColor = '#6b7280';
+    try {
+      $typeEntity = $this->entityTypeManager->getStorage('hr_room_type')->load($roomTypeId);
+      if ($typeEntity) {
+        $typeLabel = $typeEntity->label();
+        $typeColor = $typeEntity->getColor();
+      }
+    }
+    catch (\Exception $e) {
+    }
+    return [
+      'id' => (int) $room->id(),
+      'name' => $room->label(),
+      'room_type' => $roomTypeId,
+      'room_type_label' => $typeLabel,
+      'type_color' => $typeColor,
+      'teaser' => method_exists($room, 'getTeaserPlain') ? $room->getTeaserPlain(200) : $plainDesc,
+      'description' => $plainDesc,
+      'image_url' => $imageUrl,
+      'image_alt' => $imageAlt,
+      'slides' => method_exists($room, 'getSliderImages') ? $room->getSliderImages() : [],
+      'capacity' => $room->getCapacity(),
+      'base_price' => number_format((float) $room->getBasePrice(), 2, '.', ''),
+      'total_price' => number_format($pricing['total'], 2, '.', ''),
+      'nights' => $pricing['nights'],
+      'available' => TRUE,
+      'amenities' => $room->getAmenities(),
+    ];
   }
 
   /**
@@ -256,15 +294,10 @@ class ApiController extends ControllerBase {
         'message' => 'Номер недоступен для бронирования.',
       ], 400);
     }
-    if ($room->getCapacity() < $guest_count) {
-      return new SymfonyJsonResponse([
-        'success' => FALSE,
-        'message' => 'Вместимость номера — ' . $room->getCapacity() . ' гостей, запрошено — ' . $guest_count . '.',
-      ], 400);
-    }
 
-    // Check availability.
-    $available_rooms = hotel_reservation_get_available_rooms($check_in, $check_out, $guest_count);
+    // Check availability by dates only: room capacity is a category filter
+    // and is not linked to the number of guests.
+    $available_rooms = hotel_reservation_get_available_rooms($check_in, $check_out);
     if (!isset($available_rooms[$room_id])) {
       return new SymfonyJsonResponse([
         'success' => FALSE,

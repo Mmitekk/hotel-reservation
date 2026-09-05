@@ -374,9 +374,10 @@ Content-Type: application/json
 {
   "check_in": "2026-07-15",
   "check_out": "2026-07-18",
-  "guest_count": 2
+  "capacity": 2
 }
 ```
+`capacity` — желаемая вместимость номера (точное совпадение, `guest_count` принимается для совместимости). Вместимость не связана с числом гостей.
 
 **Успешный ответ (200):**
 ```json
@@ -398,9 +399,14 @@ Content-Type: application/json
   "check_in": "2026-07-15",
   "check_out": "2026-07-18",
   "nights": 3,
-  "guest_count": 2
+  "guest_count": 2,
+  "requested_capacity": 2,
+  "exact_match": true,
+  "notice": ""
 }
 ```
+
+Если свободных номеров с запрошенной вместимостью нет, возвращаются другие свободные номера с `"exact_match": false` и текстом `"notice": "У нас сейчас нет свободных номеров вместимостью 2. Посмотрите другие варианты:"`.
 
 **Ошибки (400):** `Неверные данные JSON`, `Укажите check_in и check_out`, `Неверный формат даты`, `Дата выезда должна быть позже`, `Мин/макс количество ночей: N`
 
@@ -567,20 +573,21 @@ $our_blocks = [
 
 Определены в `hotel_reservation.module`. Используются контроллерами и формами.
 
-### `hotel_reservation_get_available_rooms($check_in, $check_out, $guest_count)`
+### `hotel_reservation_get_available_rooms($check_in, $check_out, $capacity = NULL, $exact = TRUE)`
 
 ```php
 /**
- * @param string $check_in    Дата заезда (Y-m-d)
- * @param string $check_out   Дата выезда (Y-m-d)
- * @param int    $guest_count Количество гостей
+ * @param string   $check_in  Дата заезда (Y-m-d)
+ * @param string   $check_out Дата выезда (Y-m-d)
+ * @param int|null $capacity  Желаемая вместимость (NULL = любая, без фильтра)
+ * @param bool     $exact     TRUE = точное совпадение вместимости
  *
  * @return \Drupal\hotel_reservation\Entity\Room[] Массив доступных номеров, ключ = ID
  */
 ```
 
 Логика:
-1. Запрашивает опубликованные номера с `capacity >= $guest_count`
+1. Запрашивает опубликованные номера (опционально с фильтром вместимости; вместимость не связана с числом гостей)
 2. Ищет пересекающиеся бронирования (статусы: `pending`, `confirmed`, `checked_in`)
 3. Исключает занятые номера
 4. Возвращает массив доступных `Room` сущностей

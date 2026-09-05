@@ -213,7 +213,7 @@
         const originalText = $btn.html();
         $btn.prop('disabled', true).html('<span class="hr-spinner"></span>' + Drupal.t('Поиск...'));
 
-        const guestCount = parseInt($form.find('.hr-field-guests').val()) || 1;
+        const capacityValue = parseInt($form.find('.hr-field-guests').val()) || 1;
 
         $.ajax({
           url: apiCheckUrl,
@@ -223,11 +223,12 @@
           data: JSON.stringify({
             check_in: extractDate($checkIn.val()),
             check_out: extractDate($checkOut.val()),
-            guest_count: guestCount
+            capacity: capacityValue,
+            guest_count: capacityValue
           }),
           success: function (response) {
             searchResults = response.rooms || [];
-            renderResults(searchResults);
+            renderResults(searchResults, response);
             showStep('select');
           },
           error: function (xhr) {
@@ -248,7 +249,8 @@
       }
 
       // ---- Render Search Results ----
-      function renderResults(rooms) {
+      // meta: {exact_match, notice} from check-availability response.
+      function renderResults(rooms, meta) {
         const $container = $form.find('.hr-results-list');
         $container.empty();
 
@@ -268,7 +270,12 @@
         const d2 = new Date(checkOut);
         const nights = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
 
-        let html = '<div class="hr-results__title">' +
+        let html = '';
+        if (meta && meta.exact_match === false && meta.notice) {
+          html += '<div class="hr-results-notice">' + Drupal.checkPlain(meta.notice) + '</div>';
+        }
+
+        html += '<div class="hr-results__title">' +
           Drupal.t('Найдено @n номер(ов)', {'@n': rooms.length}) +
           ' · ' + nights + ' ' + pluralRu(nights, 'ночь', 'ночи', 'ночей') +
           '</div>';

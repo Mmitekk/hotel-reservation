@@ -505,6 +505,17 @@
   color: var(--hr-text);
 }
 
+.hr-results-notice {
+  background: var(--hr-primary-bg);
+  border: 1px solid var(--hr-primary-border);
+  border-radius: var(--hr-radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--hr-text);
+}
+
 .hr-room-card {
   border: 1.5px solid var(--hr-border);
   border-radius: var(--hr-radius);

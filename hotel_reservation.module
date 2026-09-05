@@ -168,24 +168,32 @@ function hotel_reservation_mail($key, &$message, $params) {
 /**
  * Get available rooms for given dates.
  *
+ * Capacity is a room category filter and is NOT linked to the number of
+ * guests anymore (e.g. 4 people may stay in a 2-capacity room).
+ *
  * @param string $check_in
  *   Check-in date string (Y-m-d).
  * @param string $check_out
  *   Check-out date string (Y-m-d).
- * @param int $guests_count
- *   Number of guests.
+ * @param int|null $capacity
+ *   Desired room capacity. NULL = any capacity (no capacity filter).
+ * @param bool $exact
+ *   TRUE = rooms with exactly this capacity, FALSE = capacity >= value.
+ *   Ignored when $capacity is NULL.
  *
  * @return array
  *   Array of available room entities.
  */
-function hotel_reservation_get_available_rooms($check_in, $check_out, $guests_count = 1) {
+function hotel_reservation_get_available_rooms($check_in, $check_out, $capacity = NULL, $exact = TRUE) {
   $room_storage = \Drupal::entityTypeManager()->getStorage('hr_room');
 
-  // Get all active rooms with enough capacity.
+  // Get all active rooms, optionally filtered by capacity.
   $query = $room_storage->getQuery()
     ->condition('status', 1)
-    ->condition('capacity', $guests_count, '>=')
     ->accessCheck(FALSE);
+  if ($capacity !== NULL) {
+    $query->condition('capacity', (int) $capacity, $exact ? '=' : '>=');
+  }
 
   $room_ids = $query->execute();
 
