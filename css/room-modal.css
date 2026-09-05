@@ -7,7 +7,9 @@
   position: fixed;
   inset: 0;
   background: rgba(17, 24, 39, 0.6);
-  z-index: 100000;
+  /* Above the booking modal (100002): the detail modal is also opened
+     from step 2 inside the booking modal and must stay on top. */
+  z-index: 100003;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -270,7 +272,7 @@
 .hr-room-lightbox-overlay {
   position: fixed;
   inset: 0;
-  z-index: 100001;
+  z-index: 100004;
   background: rgba(0, 0, 0, 0.92);
   display: flex;
   align-items: center;

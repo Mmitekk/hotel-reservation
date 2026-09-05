@@ -47,7 +47,7 @@ rooms-block:
     - hotel_reservation/room-modal
 
 room-modal:
-  version: 1.12.5
+  version: 1.12.17
   css:
     theme:
       css/room-modal.css: {}
