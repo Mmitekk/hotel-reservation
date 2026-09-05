@@ -229,14 +229,19 @@ class ReservationListBuilder extends EntityListBuilder {
       '#url' => $entity->toUrl('canonical'),
     ];
 
-    // Room name.
+    // Room name. Link to edit form only for managers; clients see text.
     $room = $entity->get('room_id')->entity;
     if ($room) {
-      $row['room']['data'] = [
-        '#type' => 'link',
-        '#title' => $room->label(),
-        '#url' => $room->toUrl('edit-form'),
-      ];
+      if (\Drupal::currentUser()->hasPermission('administer hotel reservation')) {
+        $row['room']['data'] = [
+          '#type' => 'link',
+          '#title' => $room->label(),
+          '#url' => $room->toUrl('edit-form'),
+        ];
+      }
+      else {
+        $row['room'] = $room->label();
+      }
     }
     else {
       $row['room'] = $this->t('—');
@@ -274,33 +279,38 @@ class ReservationListBuilder extends EntityListBuilder {
     $total_price = number_format((float) $entity->get('total_price')->value, 2, '.', ' ') . ' ' . $this->currencySymbol;
     $row['total_price'] = $total_price;
 
-    // Operations: edit, delete, and status change links.
-    $operations = [];
-    $operations['edit'] = [
-      'title' => $this->t('Изменить'),
-      'url' => $entity->toUrl('edit-form'),
-    ];
-    $operations['delete'] = [
-      'title' => $this->t('Удалить'),
-      'url' => $entity->toUrl('delete-form'),
-    ];
+    // Operations (managers only): edit, delete, and status change links.
+    if (\Drupal::currentUser()->hasPermission('administer hotel reservation')) {
+      $operations = [];
+      $operations['edit'] = [
+        'title' => $this->t('Изменить'),
+        'url' => $entity->toUrl('edit-form'),
+      ];
+      $operations['delete'] = [
+        'title' => $this->t('Удалить'),
+        'url' => $entity->toUrl('delete-form'),
+      ];
 
-    // Add quick status change links.
-    $status_transitions = $this->getStatusTransitions($status_value);
-    foreach ($status_transitions as $transition_status => $transition_label) {
-      $operations['status_' . $transition_status] = [
-        'title' => $transition_label,
-        'url' => Url::fromRoute('hotel_reservation.reservation_status', [
-          'hr_reservation' => $entity->id(),
-          'status' => $transition_status,
-        ]),
+      // Add quick status change links.
+      $status_transitions = $this->getStatusTransitions($status_value);
+      foreach ($status_transitions as $transition_status => $transition_label) {
+        $operations['status_' . $transition_status] = [
+          'title' => $transition_label,
+          'url' => Url::fromRoute('hotel_reservation.reservation_status', [
+            'hr_reservation' => $entity->id(),
+            'status' => $transition_status,
+          ]),
+        ];
+      }
+
+      $row['operations']['data'] = [
+        '#type' => 'operations',
+        '#links' => $operations,
       ];
     }
-
-    $row['operations']['data'] = [
-      '#type' => 'operations',
-      '#links' => $operations,
-    ];
+    else {
+      $row['operations'] = '';
+    }
 
     return $row + parent::buildRow($entity);
   }

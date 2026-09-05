@@ -317,64 +317,25 @@ class SettingsForm extends ConfigFormBase {
       '#max' => 95,
     ];
 
-    $form['share'] = [
+    $form['client_role'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Доступ для клиента (поделиться статистикой)'),
+      '#title' => $this->t('Доступ для клиента'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#description' => $this->t('Создайте секретную ссылку для клиента, чтобы он видел календарь/аналитику/панель без доступа в админку. Ссылка защищена паролем и закрыта от индексации.'),
+      '#description' => $this->t('Создайте учётную запись и назначьте ей роль «Клиент отеля»: календарь, аналитика, панель и просмотр бронирований без права менять статусы, номера и настройки.'),
     ];
 
-    $share_enabled = (bool) $config->get('share_enabled');
-    $share_token = $config->get('share_token') ?: bin2hex(random_bytes(16));
-    $share_password = $config->get('share_password') ?: '';
-
-    $form['share']['share_enabled'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Включить общий доступ'),
-      '#default_value' => $share_enabled,
-    ];
-
-    $form['share']['share_token'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Секретный токен (часть URL)'),
-      '#description' => $this->t('Только латиница, цифры, дефис и подчёркивание. Сгенерируйте случайный.'),
-      '#default_value' => $share_token,
-      '#required' => FALSE,
-      '#pattern' => '[a-zA-Z0-9_-]+',
-      '#states' => [
-        'visible' => [':input[name="share_enabled"]' => ['checked' => TRUE]],
-        'required' => [':input[name="share_enabled"]' => ['checked' => TRUE]],
-      ],
-    ];
-
-    $form['share']['share_password'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Пароль для клиента'),
-      '#description' => $this->t('Оставьте пустым — тогда доступ только по секретной ссылке. Если заполнить — потребуется ввод пароля.'),
-      '#default_value' => $share_password,
-      '#states' => [
-        'visible' => [':input[name="share_enabled"]' => ['checked' => TRUE]],
-      ],
-    ];
-
-    if ($share_enabled && $share_token) {
-      $base = \Drupal::request()->getSchemeAndHttpHost();
-      $urls = [
-        'dashboard' => $base . '/hotel-reservation/share/' . $share_token . '/dashboard',
-        'analytics' => $base . '/hotel-reservation/share/' . $share_token . '/analytics',
-        'calendar' => $base . '/hotel-reservation/share/' . $share_token . '/calendar',
+    $client_role = \Drupal::entityTypeManager()->getStorage('user_role')->load('hotel_client');
+    if ($client_role) {
+      $form['client_role']['info'] = [
+        '#markup' => '<p>' . $this->t('Роль «Клиент отеля» существует. Создайте пользователя на странице <a href=":url">Люди → Добавить пользователя</a> и назначьте ему эту роль.', [
+          ':url' => \Drupal\Core\Url::fromRoute('user.admin_create')->toString(),
+        ]) . '</p>',
       ];
-      $form['share']['share_links'] = [
-        '#type' => 'details',
-        '#title' => $this->t('Ссылки для клиента'),
-        '#open' => TRUE,
-      ];
-      $form['share']['share_links']['info'] = [
-        '#markup' => '<p>' . $this->t('Скопируйте и отправьте клиенту. Страницы закрыты от индексации (<code>noindex,nofollow</code>).') . '</p>' .
-          '<ul><li><strong>Панель:</strong> <a href="' . $urls['dashboard'] . '" target="_blank">' . $urls['dashboard'] . '</a></li>' .
-          '<li><strong>Аналитика:</strong> <a href="' . $urls['analytics'] . '" target="_blank">' . $urls['analytics'] . '</a></li>' .
-          '<li><strong>Календарь:</strong> <a href="' . $urls['calendar'] . '" target="_blank">' . $urls['calendar'] . '</a> (/9/2026 — пример)</li></ul>',
+    }
+    else {
+      $form['client_role']['info'] = [
+        '#markup' => '<p>' . $this->t('Роль «Клиент отеля» не найдена. Пересохраните настройки или выполните обновления базы — роль создастся автоматически.') . '</p>',
       ];
     }
 
@@ -424,13 +385,6 @@ class SettingsForm extends ConfigFormBase {
       $form_state->setErrorByName('admin_notification_email', $this->t('Укажите email администратора, если уведомления включены.'));
     }
 
-    if ((bool) $form_state->getValue('share_enabled')) {
-      $token = trim((string) $form_state->getValue('share_token'));
-      if ($token === '' || !preg_match('/^[a-zA-Z0-9_-]+$/', $token)) {
-        $form_state->setErrorByName('share_token', $this->t('Токен обязателен и только a-z, 0-9, _-.'));
-      }
-    }
-
     $modal_width = (int) $form_state->getValue('room_modal_width');
     if ($modal_width < 50 || $modal_width > 95) {
       $form_state->setErrorByName('room_modal_width', $this->t('Ширина должна быть от 50 до 95%.'));
@@ -463,11 +417,22 @@ class SettingsForm extends ConfigFormBase {
       ->set('form_border_radius', (int) $form_state->getValue('form_border_radius'))
       ->set('form_success_title', $form_state->getValue('form_success_title'))
       ->set('form_success_text', $form_state->getValue('form_success_text'))
-      ->set('share_enabled', (bool) $form_state->getValue('share_enabled'))
-      ->set('share_token', trim((string) $form_state->getValue('share_token')))
-      ->set('share_password', trim((string) $form_state->getValue('share_password')))
       ->set('room_modal_width', max(50, min(95, (int) $form_state->getValue('room_modal_width') ?: 65)))
       ->save();
+
+    // (Re)create the hotel_client role with read-only permissions.
+    $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+    $role = $role_storage->load('hotel_client');
+    if (!$role) {
+      $role = $role_storage->create([
+        'id' => 'hotel_client',
+        'label' => 'Клиент отеля',
+      ]);
+    }
+    foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::clientPermissions() as $permission) {
+      $role->grantPermission($permission);
+    }
+    $role->save();
 
     parent::submitForm($form, $form_state);
   }

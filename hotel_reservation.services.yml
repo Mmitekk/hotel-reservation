@@ -1,0 +1,5 @@
+services:
+  hotel_reservation.route_subscriber:
+    class: Drupal\hotel_reservation\Routing\HotelReservationRouteSubscriber
+    tags:
+      - { name: event_subscriber }

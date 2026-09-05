@@ -7,6 +7,24 @@
 
 use Drupal\Core\Entity\EntityTypeInterface;
 
+/**
+ * Creates the hotel_client role with read-only permissions (if missing).
+ */
+function hotel_reservation_ensure_client_role() {
+  $storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  $role = $storage->load('hotel_client');
+  if (!$role) {
+    $role = $storage->create([
+      'id' => 'hotel_client',
+      'label' => 'Клиент отеля',
+    ]);
+  }
+  foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::clientPermissions() as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
+}
+
 function hotel_reservation_create_default_room_types() {
   $defaults = [
     'standard' => ['label' => 'Стандарт', 'color' => '#6b7280', 'weight' => 0],
@@ -50,6 +68,7 @@ function hotel_reservation_install(bool $is_syncing) {
     ->save();
 
   hotel_reservation_create_default_room_types();
+  hotel_reservation_ensure_client_role();
 
   \Drupal::messenger()->addStatus(t('Hotel Reservation module installed successfully. Configure it at <a href=":url">Settings</a>.', [
     ':url' => \Drupal\Core\Url::fromRoute('hotel_reservation.settings')->toString(),
@@ -239,6 +258,15 @@ function hotel_reservation_update_10006() {
   if ($current === NULL || (int) $current === 80) {
     $config->set('room_modal_width', 65)->save();
   }
+}
+
+/**
+ * Create the hotel_client role and drop obsolete share settings.
+ */
+function hotel_reservation_update_10007() {
+  hotel_reservation_ensure_client_role();
+  $config = \Drupal::configFactory()->getEditable('hotel_reservation.settings');
+  $config->clear('share_enabled')->clear('share_token')->clear('share_password')->save();
 }
 
 /**

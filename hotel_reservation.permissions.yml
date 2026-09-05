@@ -12,3 +12,23 @@ create hotel reservation:
   title: 'Создание бронирования отеля'
   description: 'Создание бронирований номеров.'
   restrict access: false
+
+view hotel reservation dashboard:
+  title: 'Просмотр панели управления отеля'
+  description: 'Доступ к панели управления (статистика, ожидающие бронирования, заезды). Без права менять статусы и настройки.'
+  restrict access: false
+
+view hotel reservation analytics:
+  title: 'Просмотр аналитики отеля'
+  description: 'Доступ к странице аналитики бронирований.'
+  restrict access: false
+
+view hotel reservation calendar:
+  title: 'Просмотр календаря отеля'
+  description: 'Доступ к календарю бронирований.'
+  restrict access: false
+
+view hotel reservations:
+  title: 'Просмотр бронирований (админка)'
+  description: 'Доступ к списку и просмотру бронирований в админке. Без права создавать, менять и удалять.'
+  restrict access: false

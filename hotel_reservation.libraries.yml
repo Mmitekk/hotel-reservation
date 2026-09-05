@@ -72,8 +72,3 @@ room-comparison:
     - core/once
     - hotel_reservation/room-modal
 
-shared:
-  version: 1.10.3
-  css:
-    theme:
-      css/shared.css: {}

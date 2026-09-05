@@ -9,7 +9,7 @@ hotel_reservation.dashboard:
     _controller: '\Drupal\hotel_reservation\Controller\DashboardController::dashboard'
     _title: 'Панель управления'
   requirements:
-    _permission: 'administer hotel reservation'
+    _custom_access: '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessDashboard'
 
 hotel_reservation.analytics:
   path: '/admin/hotel-reservation/analytics'
@@ -17,7 +17,7 @@ hotel_reservation.analytics:
     _controller: '\Drupal\hotel_reservation\Controller\AnalyticsController::analytics'
     _title: 'Аналитика бронирований'
   requirements:
-    _permission: 'administer hotel reservation'
+    _custom_access: '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessAnalytics'
 
 hotel_reservation.settings:
   path: '/admin/config/hotel-reservation/settings'
@@ -62,7 +62,7 @@ hotel_reservation.calendar:
     month: NULL
     year: NULL
   requirements:
-    _permission: 'administer hotel reservation'
+    _custom_access: '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessCalendar'
 
 hotel_reservation.export_csv:
   path: '/admin/hotel-reservation/reservations/export'
@@ -103,48 +103,3 @@ hotel_reservation.api_room:
     _permission: 'access content'
     _format: json
 
-hotel_reservation.share_dashboard:
-  path: '/hotel-reservation/share/{token}/dashboard'
-  defaults:
-    _controller: '\Drupal\hotel_reservation\Controller\SharedController::dashboard'
-    _title: 'Панель — доступ для клиента'
-  requirements:
-    _permission: 'access content'
-    token: '[a-zA-Z0-9_-]+'
-
-hotel_reservation.share_analytics:
-  path: '/hotel-reservation/share/{token}/analytics'
-  defaults:
-    _controller: '\Drupal\hotel_reservation\Controller\SharedController::analytics'
-    _title: 'Аналитика — доступ для клиента'
-  requirements:
-    _permission: 'access content'
-    token: '[a-zA-Z0-9_-]+'
-
-hotel_reservation.share_calendar:
-  path: '/hotel-reservation/share/{token}/calendar'
-  defaults:
-    _controller: '\Drupal\hotel_reservation\Controller\SharedController::calendar'
-    _title: 'Календарь — доступ для клиента'
-  requirements:
-    _permission: 'access content'
-    token: '[a-zA-Z0-9_-]+'
-
-hotel_reservation.share_calendar_month:
-  path: '/hotel-reservation/share/{token}/calendar/{month}/{year}'
-  defaults:
-    _controller: '\Drupal\hotel_reservation\Controller\SharedController::calendar'
-    _title: 'Календарь — доступ для клиента'
-  requirements:
-    _permission: 'access content'
-    token: '[a-zA-Z0-9_-]+'
-    month: '\d+'
-    year: '\d+'
-
-hotel_reservation.share_info:
-  path: '/admin/hotel-reservation/share'
-  defaults:
-    _controller: '\Drupal\hotel_reservation\Controller\SharedController::shareInfo'
-    _title: 'Открытые страницы'
-  requirements:
-    _permission: 'administer hotel reservation'

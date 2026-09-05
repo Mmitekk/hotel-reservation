@@ -66,15 +66,6 @@ hotel_reservation.settings:
     form_success_text:
       type: string
       label: 'Success message text'
-    share_enabled:
-      type: boolean
-      label: 'Share enabled'
-    share_token:
-      type: string
-      label: 'Share token'
-    share_password:
-      type: string
-      label: 'Share password'
     room_modal_width:
       type: integer
       label: 'Room modal width (%)'

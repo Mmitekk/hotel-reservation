@@ -257,6 +257,7 @@ class DashboardController extends ControllerBase {
       '#weekly_revenue' => $weekly_revenue,
       '#weekly_total' => number_format($weekly_total, 2, '.', ' ') . ' ' . $currency,
       '#export_url' => $export_url,
+      '#can_manage' => \Drupal::currentUser()->hasPermission('administer hotel reservation'),
       '#attached' => [
         'library' => [
           'hotel_reservation/admin-styles',
@@ -265,6 +266,7 @@ class DashboardController extends ControllerBase {
       ],
       '#cache' => [
         'tags' => ['hr_reservation_list', 'hr_room_list'],
+        'contexts' => ['user.permissions'],
         'max-age' => 0,
       ],
     ];
