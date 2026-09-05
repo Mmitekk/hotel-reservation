@@ -566,6 +566,92 @@
   color: var(--hr-text);
 }
 
+/* ---------- Results Carousel (step 2) ---------- */
+.hr-results-carousel {
+  position: relative;
+}
+
+.hr-results-carousel__viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+  touch-action: pan-y;
+}
+
+.hr-results-carousel__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.hr-results-carousel__viewport.is-dragging {
+  cursor: grabbing;
+}
+
+.hr-results-carousel__track {
+  display: flex;
+  gap: 10px;
+  width: max-content;
+  max-width: none;
+  padding: 2px;
+}
+
+.hr-results-carousel .hr-room-card {
+  flex: 0 0 82%;
+  min-width: 0;
+  margin-bottom: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.hr-results-carousel__nav {
+  position: absolute;
+  top: 110px;
+  width: 32px;
+  height: 32px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--hr-border);
+  background: var(--hr-bg, #fff);
+  color: var(--hr-text);
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--hr-shadow);
+  z-index: 2;
+}
+
+.hr-results-carousel__nav:hover {
+  border-color: var(--hr-primary);
+  color: var(--hr-primary);
+}
+
+.hr-results-carousel__nav--prev { left: -6px; }
+.hr-results-carousel__nav--next { right: -6px; }
+
+/* Clickable room name inside booking cards. */
+.hr-room-card__name-btn {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--hr-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.hr-room-card__name-btn:hover {
+  color: var(--hr-primary);
+  text-decoration: underline;
+}
+
 /* ---------- No Results ---------- */
 .hr-no-results {
   text-align: center;
@@ -646,27 +732,79 @@
   color: var(--hr-text);
 }
 
-/* ---------- Terms ---------- */
+/* ---------- Terms (hover hint) ---------- */
 .hr-terms {
   margin-top: 16px;
-  padding: 12px;
-  background: var(--hr-primary-bg);
-  border-radius: var(--hr-radius-sm);
-  border: 1px solid var(--hr-primary-border);
 }
 
-.hr-terms__title {
-  font-size: 12px;
+.hr-terms--hint {
+  position: relative;
+  display: inline-block;
+}
+
+.hr-terms__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: none;
+  border: none;
+  font-size: 13px;
   font-weight: 600;
-  color: #92400e;
-  margin: 0 0 6px 0;
+  color: var(--hr-text-secondary);
+  cursor: help;
 }
 
-.hr-terms__text {
-  font-size: 12px;
-  color: #78350f;
+.hr-terms__trigger:hover {
+  color: var(--hr-text);
+}
+
+.hr-terms__q {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  padding: 0;
   margin: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--hr-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hr-terms__popup {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 50;
+  width: max-content;
+  max-width: 280px;
+  padding: 12px 14px;
+  background: var(--hr-text, #1a1a2e);
+  color: #fff;
+  font-size: 12px;
   line-height: 1.6;
+  border-radius: var(--hr-radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.hr-terms__popup::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 24px;
+  border: 6px solid transparent;
+  border-top-color: var(--hr-text, #1a1a2e);
+}
+
+.hr-terms--hint:hover .hr-terms__popup,
+.hr-terms--hint:focus-within .hr-terms__popup {
+  display: block;
 }
 
 /* ---------- Success ---------- */
@@ -829,7 +967,7 @@
   color: var(--hr-text-secondary);
   font-size: 13px;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 5px 12px;
   margin-bottom: 12px;
   display: flex;
   align-items: center;

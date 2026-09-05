@@ -165,6 +165,7 @@ class BookingFormBlock extends BlockBase {
       'formTextColor' => $text_color,
       'formBorderRadius' => $border_radius,
       'displayMode' => $display_mode,
+      'roomModalWidth' => max(50, min(95, (int) ($config->get('room_modal_width') ?: 65))),
     ];
 
     $preview_align = $block_config['preview_align'] ?? 'center';
@@ -295,12 +296,15 @@ class BookingFormBlock extends BlockBase {
     $html .= '<textarea id="hr-notes" class="hr-field-notes" rows="2" placeholder="' . $this->t('Пожелания...') . '"></textarea>';
     $html .= '</div>';
 
-    // Booking conditions.
+    // Booking conditions as a hover hint.
     if (!empty($block_config['show_conditions']) && !empty($booking_conditions)) {
       $escaped_conditions = Html::escape($booking_conditions);
-      $html .= '<div class="hr-terms">';
-      $html .= '<div class="hr-terms__title">' . $this->t('Условия бронирования') . '</div>';
-      $html .= '<div class="hr-terms__text">' . nl2br($escaped_conditions) . '</div>';
+      $html .= '<div class="hr-terms hr-terms--hint">';
+      $html .= '<button type="button" class="hr-terms__trigger" aria-label="' . $this->t('Показать условия бронирования') . '">';
+      $html .= '<span>' . $this->t('Условия бронирования') . '</span>';
+      $html .= '<span class="hr-terms__q" aria-hidden="true">?</span>';
+      $html .= '</button>';
+      $html .= '<div class="hr-terms__popup" role="tooltip">' . nl2br($escaped_conditions) . '</div>';
       $html .= '</div>';
     }
 

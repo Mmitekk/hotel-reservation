@@ -14,9 +14,10 @@
 
 /* Clickable room name in the comparison table header. */
 .hr-comparison-table__room-name {
-  padding: 0;
+  padding: 5px 12px;
   margin: 0;
   border: none;
+  border-radius: 20px;
   background: none;
   font: inherit;
   font-weight: 600;
@@ -24,11 +25,13 @@
   text-align: left;
   cursor: pointer;
   white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
 }
 
 .hr-comparison-table__room-name:hover {
-  color: #7c3aed;
-  text-decoration: underline;
+  background: #7c3aed;
+  color: #fff;
+  text-decoration: none;
 }
 
 .hr-comparison-table__room-name:focus-visible {

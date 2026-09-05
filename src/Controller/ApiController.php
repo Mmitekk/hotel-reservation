@@ -120,9 +120,24 @@ class ApiController extends ControllerBase {
         $imageUrl = $room->getImageUrl();
         $imageAlt = $room->getImageAlt();
       }
+      $roomTypeId = $room->get('room_type')->value ?? 'standard';
+      $typeLabel = $roomTypeId;
+      $typeColor = '#6b7280';
+      try {
+        $typeEntity = $this->entityTypeManager->getStorage('hr_room_type')->load($roomTypeId);
+        if ($typeEntity) {
+          $typeLabel = $typeEntity->label();
+          $typeColor = $typeEntity->getColor();
+        }
+      }
+      catch (\Exception $e) {
+      }
       $results[] = [
         'id' => (int) $room->id(),
         'name' => $room->label(),
+        'room_type' => $roomTypeId,
+        'room_type_label' => $typeLabel,
+        'type_color' => $typeColor,
         'teaser' => method_exists($room, 'getTeaserPlain') ? $room->getTeaserPlain(200) : $plainDesc,
         'description' => $plainDesc,
         'image_url' => $imageUrl,

@@ -59,6 +59,7 @@
       const checkInTime = config.checkInTime || '14:00';
       const checkOutTime = config.checkOutTime || '12:00';
       const bookingConditions = config.bookingConditions || '';
+      const modalWidth = parseInt(config.roomModalWidth) || 65;
 
       // ---- Apply color settings from config ----
       const primaryColor = config.formPrimaryColor || '#d97706';
@@ -266,13 +267,14 @@
           ' · ' + nights + ' ' + pluralRu(nights, 'ночь', 'ночи', 'ночей') +
           '</div>';
 
+        let cardsHtml = '';
         rooms.forEach(function (room) {
           const amenities = (room.amenities || '').split(',').map(a => a.trim()).filter(a => a);
           const amenitiesHtml = amenities.map(a => '<span class="hr-room-card__amenity">' + Drupal.checkPlain(a) + '</span>').join('');
 
-          html +=
+          cardsHtml +=
             '<div class="hr-room-card" data-room-id="' + room.id + '">' +
-            '<div class="hr-room-card__name">' + Drupal.checkPlain(room.name) + '</div>' +
+            '<div class="hr-room-card__name"><button type="button" class="hr-room-card__name-btn" data-room-id="' + room.id + '" title="' + Drupal.t('Подробнее о номере') + '">' + Drupal.checkPlain(room.name) + '</button></div>' +
             '<div class="hr-room-card__meta">' +
             Drupal.t('До @n гостей', {'@n': room.capacity}) +
             '</div>' +
@@ -285,7 +287,37 @@
             '</div></div>';
         });
 
+        if (rooms.length === 1) {
+          html += '<div class="hr-results-carousel hr-results-carousel--single"><div class="hr-results-carousel__track">' + cardsHtml + '</div></div>';
+        }
+        else {
+          html += '<div class="hr-results-carousel">' +
+            '<button type="button" class="hr-results-carousel__nav hr-results-carousel__nav--prev" aria-label="' + Drupal.t('Назад') + '">‹</button>' +
+            '<div class="hr-results-carousel__viewport"><div class="hr-results-carousel__track">' + cardsHtml + '</div></div>' +
+            '<button type="button" class="hr-results-carousel__nav hr-results-carousel__nav--next" aria-label="' + Drupal.t('Вперёд') + '">›</button>' +
+            '</div>';
+        }
+
         $container.html(html);
+        const $vp = $container.find('.hr-results-carousel__viewport');
+        if ($vp.length) { $vp.scrollLeft(0); }
+      }
+
+      // ---- Map API room to shared detail modal shape ----
+      function mapToModal(room) {
+        const amenities = (room.amenities || '').split(',').map(a => a.trim()).filter(a => a);
+        return {
+          id: room.id,
+          name: room.name,
+          type_label: room.room_type_label || '',
+          type_color: room.type_color || '#6b7280',
+          capacity: room.capacity,
+          price: currencySymbol + parseFloat(room.base_price).toLocaleString('ru-RU'),
+          amenities: amenities,
+          teaser: room.teaser || '',
+          description: room.description || '',
+          slides: room.slides || [],
+        };
       }
 
       // ---- Select Room ----
@@ -430,10 +462,65 @@
         searchRooms();
       });
 
-      // Room card click
-      $form.on('click', '.hr-room-card', function () {
+      // Room card click (ignores name button and post-drag clicks).
+      $form.on('click', '.hr-room-card', function (e) {
+        if ($(e.target).closest('.hr-room-card__name-btn').length) return;
+        if ($form.data('hrResultsDragged')) return;
         selectRoom(parseInt($(this).data('room-id')));
       });
+
+      // Room name opens the shared detail modal (like in comparison block).
+      $form.on('click', '.hr-room-card__name-btn', function (e) {
+        e.stopPropagation();
+        if ($form.data('hrResultsDragged')) return;
+        const id = parseInt($(this).data('room-id'));
+        const room = searchResults.find(function (r) { return r.id === id; });
+        if (room && Drupal.hotelReservationRoomModal) {
+          Drupal.hotelReservationRoomModal.open(mapToModal(room), {width: modalWidth});
+        }
+      });
+
+      // Results carousel: arrows + drag-to-scroll.
+      function resultsStep($car) {
+        const $card = $car.find('.hr-room-card').first();
+        return $card.length ? $card.outerWidth() + 10 : 280;
+      }
+      $form.on('click', '.hr-results-carousel__nav--prev', function () {
+        const $car = $(this).closest('.hr-results-carousel');
+        $car.find('.hr-results-carousel__viewport')[0].scrollBy({left: -resultsStep($car), behavior: 'smooth'});
+      });
+      $form.on('click', '.hr-results-carousel__nav--next', function () {
+        const $car = $(this).closest('.hr-results-carousel');
+        $car.find('.hr-results-carousel__viewport')[0].scrollBy({left: resultsStep($car), behavior: 'smooth'});
+      });
+      let resultsDragging = false;
+      let resultsStartX = 0;
+      let resultsStartL = 0;
+      let resultsMoved = 0;
+      $form.on('pointerdown', '.hr-results-carousel__viewport', function (e) {
+        if (e.button !== undefined && e.button !== 0) return;
+        resultsDragging = true;
+        resultsMoved = 0;
+        resultsStartX = e.clientX;
+        resultsStartL = this.scrollLeft;
+        $(this).addClass('is-dragging');
+      });
+      $form.on('pointermove', '.hr-results-carousel__viewport', function (e) {
+        if (!resultsDragging) return;
+        const dx = e.clientX - resultsStartX;
+        if (Math.abs(dx) > resultsMoved) resultsMoved = Math.abs(dx);
+        this.scrollLeft = resultsStartL - dx;
+      });
+      function resultsEndDrag() {
+        if (!resultsDragging) return;
+        resultsDragging = false;
+        $form.find('.hr-results-carousel__viewport').removeClass('is-dragging');
+        if (resultsMoved > 8) {
+          $form.data('hrResultsDragged', true);
+          setTimeout(function () { $form.data('hrResultsDragged', false); }, 100);
+        }
+      }
+      $form.on('pointerup pointercancel pointerleave', '.hr-results-carousel__viewport', resultsEndDrag);
 
       // Back buttons
       $form.on('click', '.hr-back-btn', function (e) {
