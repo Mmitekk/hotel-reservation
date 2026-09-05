@@ -606,6 +606,7 @@
   cursor: grab;
   scrollbar-width: none;
   touch-action: pan-y;
+  padding: 2px 40px;
 }
 
 .hr-results-carousel__viewport::-webkit-scrollbar {
@@ -1044,11 +1045,19 @@
 .hr-booking-inline-wrapper {
   display: flex;
   justify-content: center;
+  padding: 8px;
 }
 
 .hr-booking-form--inline {
   max-width: 560px;
   width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.hr-booking-form--inline:hover {
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 /* ---------- Responsive ---------- */

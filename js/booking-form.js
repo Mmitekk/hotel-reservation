@@ -106,10 +106,15 @@
       $checkIn.attr('min', nowLocal);
       $checkOut.attr('min', nowLocal);
 
-      // Set default times from config.
+      // Set default times from config. Checkout defaults to +7 days.
       if (!$checkIn.val()) {
         const todayStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
         $checkIn.val(todayStr + 'T' + checkInTime);
+      }
+      if (!$checkOut.val()) {
+        const base = $checkIn.val() ? new Date($checkIn.val()) : now;
+        base.setDate(base.getDate() + 7);
+        $checkOut.val(base.getFullYear() + '-' + pad(base.getMonth() + 1) + '-' + pad(base.getDate()) + 'T' + checkOutTime);
       }
 
       // State.
@@ -560,7 +565,8 @@
         if (val < 20) $input.val(val + 1);
       });
 
-      // Auto-set check-out min when check-in changes
+      // Auto-set check-out min when check-in changes. Empty checkout
+      // defaults to check-in + 7 days.
       $form.on('change', '.hr-field-check-in', function () {
         const val = $(this).val();
         if (val) {
@@ -569,7 +575,13 @@
           const nextStr = next.getFullYear() + '-' + pad(next.getMonth() + 1) + '-' + pad(next.getDate())
             + 'T' + checkOutTime;
           $checkOut.attr('min', val);
-          if ($checkOut.val() && new Date($checkOut.val()) <= new Date(val)) {
+          if (!$checkOut.val()) {
+            const week = new Date(val);
+            week.setDate(week.getDate() + 7);
+            $checkOut.val(week.getFullYear() + '-' + pad(week.getMonth() + 1) + '-' + pad(week.getDate())
+              + 'T' + checkOutTime);
+          }
+          else if (new Date($checkOut.val()) <= new Date(val)) {
             $checkOut.val(nextStr);
           }
         }
