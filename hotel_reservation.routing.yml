@@ -103,3 +103,11 @@ hotel_reservation.api_room:
     _permission: 'access content'
     _format: json
 
+hotel_reservation.my_bookings:
+  path: '/hotel-reservation/my-bookings'
+  defaults:
+    _controller: '\Drupal\hotel_reservation\Controller\MyBookingsController::myBookings'
+    _title: 'Мои бронирования'
+  requirements:
+    _permission: 'view own hotel reservations,administer hotel reservation'
+

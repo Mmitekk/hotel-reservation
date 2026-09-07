@@ -12,7 +12,7 @@ use Drupal\Core\Session\AccountInterface;
 class HotelReservationAccessCheck {
 
   /**
-   * Permissions granted to the hotel_client role.
+   * Permissions granted to the hotel_owner role.
    *
    * @return string[]
    *   Permission machine names.
@@ -31,12 +31,25 @@ class HotelReservationAccessCheck {
   }
 
   /**
+   * Permissions granted to the hotel_client (guest) role.
+   *
+   * @return string[]
+   *   Permission machine names.
+   */
+  public static function guestPermissions(): array {
+    return [
+      'access content',
+      'view own hotel reservations',
+    ];
+  }
+
+  /**
    * Combines full admin access with a read-only client permission.
    *
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The current user.
    * @param string $client_permission
-   *   The read-only permission for the hotel_client role.
+   *   The read-only permission for the hotel_owner role.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.

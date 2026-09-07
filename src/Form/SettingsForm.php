@@ -319,23 +319,25 @@ class SettingsForm extends ConfigFormBase {
 
     $form['client_role'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Доступ для клиента'),
+      '#title' => $this->t('Доступ для владельца и гостей'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
-      '#description' => $this->t('Создайте учётную запись и назначьте ей роль «Клиент отеля»: календарь, аналитика, панель и просмотр бронирований без права менять статусы, номера и настройки.'),
+      '#description' => $this->t('Роль «Владелец отеля»: календарь, аналитика, панель и просмотр бронирований без права менять статусы, номера и настройки. Роль «Клиент отеля»: гость видит только свои бронирования на странице «Мои бронирования».'),
     ];
 
-    $client_role = \Drupal::entityTypeManager()->getStorage('user_role')->load('hotel_client');
-    if ($client_role) {
+    $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+    $owner_exists = (bool) $role_storage->load('hotel_owner');
+    $guest_exists = (bool) $role_storage->load('hotel_client');
+    if ($owner_exists && $guest_exists) {
       $form['client_role']['info'] = [
-        '#markup' => '<p>' . $this->t('Роль «Клиент отеля» существует. Создайте пользователя на странице <a href=":url">Люди → Добавить пользователя</a> и назначьте ему эту роль.', [
+        '#markup' => '<p>' . $this->t('Обе роли существуют. Создайте пользователей на странице <a href=":url">Люди → Добавить пользователя</a> и назначьте им нужную роль.', [
           ':url' => \Drupal\Core\Url::fromRoute('user.admin_create')->toString(),
         ]) . '</p>',
       ];
     }
     else {
       $form['client_role']['info'] = [
-        '#markup' => '<p>' . $this->t('Роль «Клиент отеля» не найдена. Пересохраните настройки или выполните обновления базы — роль создастся автоматически.') . '</p>',
+        '#markup' => '<p>' . $this->t('Одна из ролей не найдена. Пересохраните настройки или выполните обновления базы — роли создадутся автоматически.') . '</p>',
       ];
     }
 
@@ -420,19 +422,31 @@ class SettingsForm extends ConfigFormBase {
       ->set('room_modal_width', max(50, min(95, (int) $form_state->getValue('room_modal_width') ?: 65)))
       ->save();
 
-    // (Re)create the hotel_client role with read-only permissions.
+    // (Re)create both hotel roles with correct permissions.
     $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
-    $role = $role_storage->load('hotel_client');
-    if (!$role) {
-      $role = $role_storage->create([
-        'id' => 'hotel_client',
+    $roles = [
+      'hotel_owner' => [
+        'label' => 'Владелец отеля',
+        'permissions' => \Drupal\hotel_reservation\Access\HotelReservationAccessCheck::clientPermissions(),
+      ],
+      'hotel_client' => [
         'label' => 'Клиент отеля',
-      ]);
+        'permissions' => \Drupal\hotel_reservation\Access\HotelReservationAccessCheck::guestPermissions(),
+      ],
+    ];
+    foreach ($roles as $id => $definition) {
+      $role = $role_storage->load($id);
+      if (!$role) {
+        $role = $role_storage->create([
+          'id' => $id,
+          'label' => $definition['label'],
+        ]);
+      }
+      foreach ($definition['permissions'] as $permission) {
+        $role->grantPermission($permission);
+      }
+      $role->save();
     }
-    foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::clientPermissions() as $permission) {
-      $role->grantPermission($permission);
-    }
-    $role->save();
 
     parent::submitForm($form, $form_state);
   }

@@ -33,3 +33,9 @@ hotel_reservation.settings_tab:
   title: Настройки
   base_route: hotel_reservation.settings
   weight: 4
+
+hotel_reservation.my_bookings_tab:
+  route_name: hotel_reservation.my_bookings
+  title: 'Мои бронирования'
+  base_route: entity.user.canonical
+  weight: 10

@@ -105,13 +105,22 @@ function hotel_reservation_theme($existing, $type, $theme, $path) {
       ],
       'template' => 'reservation-view',
     ],
+    'hotel_reservation_my_bookings' => [
+      'variables' => [
+        'bookings' => [],
+        'currency' => '₽',
+        'check_in_time' => '14:00',
+        'check_out_time' => '12:00',
+      ],
+      'template' => 'my-bookings',
+    ],
   ];
 }
 
 /**
  * Implements hook_ENTITY_TYPE_access() for hr_reservation entities.
  *
- * Grants the hotel_client role read-only access to reservations.
+ * Grants the hotel_owner role read-only access to reservations.
  */
 function hotel_reservation_hr_reservation_access(EntityInterface $entity, $operation, AccountInterface $account) {
   if ($operation === 'view') {

@@ -15,7 +15,7 @@ class HotelReservationRouteSubscriber extends RouteSubscriberBase {
    */
   protected function alterRoutes(RouteCollection $collection) {
     // The reservations list is admin-only by default (admin_permission).
-    // Relax it so the hotel_client role can view the list and entities.
+    // Relax it so the hotel_owner role can view the list and entities.
     if ($route = $collection->get('entity.hr_reservation.collection')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission']);

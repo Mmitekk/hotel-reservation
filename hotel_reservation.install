@@ -8,9 +8,29 @@
 use Drupal\Core\Entity\EntityTypeInterface;
 
 /**
- * Creates the hotel_client role with read-only permissions (if missing).
+ * Creates the hotel_owner role with read-only stats permissions (if missing).
  */
-function hotel_reservation_ensure_client_role() {
+function hotel_reservation_ensure_owner_role() {
+  $storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  $role = $storage->load('hotel_owner');
+  if (!$role) {
+    $role = $storage->create([
+      'id' => 'hotel_owner',
+      'label' => 'Владелец отеля',
+    ]);
+  }
+  foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::clientPermissions() as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
+}
+
+/**
+ * Creates the hotel_client guest role (if missing).
+ *
+ * Guests only see their own bookings on the «Мои бронирования» page.
+ */
+function hotel_reservation_ensure_guest_role() {
   $storage = \Drupal::entityTypeManager()->getStorage('user_role');
   $role = $storage->load('hotel_client');
   if (!$role) {
@@ -19,10 +39,18 @@ function hotel_reservation_ensure_client_role() {
       'label' => 'Клиент отеля',
     ]);
   }
-  foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::clientPermissions() as $permission) {
+  foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::guestPermissions() as $permission) {
     $role->grantPermission($permission);
   }
   $role->save();
+}
+
+/**
+ * Ensures both hotel roles exist with correct permissions.
+ */
+function hotel_reservation_ensure_hotel_roles() {
+  hotel_reservation_ensure_owner_role();
+  hotel_reservation_ensure_guest_role();
 }
 
 function hotel_reservation_create_default_room_types() {
@@ -68,7 +96,7 @@ function hotel_reservation_install(bool $is_syncing) {
     ->save();
 
   hotel_reservation_create_default_room_types();
-  hotel_reservation_ensure_client_role();
+  hotel_reservation_ensure_hotel_roles();
 
   \Drupal::messenger()->addStatus(t('Hotel Reservation module installed successfully. Configure it at <a href=":url">Settings</a>.', [
     ':url' => \Drupal\Core\Url::fromRoute('hotel_reservation.settings')->toString(),
@@ -264,9 +292,40 @@ function hotel_reservation_update_10006() {
  * Create the hotel_client role and drop obsolete share settings.
  */
 function hotel_reservation_update_10007() {
-  hotel_reservation_ensure_client_role();
+  hotel_reservation_ensure_hotel_roles();
   $config = \Drupal::configFactory()->getEditable('hotel_reservation.settings');
   $config->clear('share_enabled')->clear('share_token')->clear('share_password')->save();
+}
+
+/**
+ * Rename hotel_client role to hotel_owner, create guest hotel_client role.
+ */
+function hotel_reservation_update_10008() {
+  $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  $old = $role_storage->load('hotel_client');
+  if ($old && !$role_storage->load('hotel_owner')) {
+    // New owner role inherits the old role's permissions.
+    $owner = $role_storage->create([
+      'id' => 'hotel_owner',
+      'label' => 'Владелец отеля',
+    ]);
+    foreach ($old->getPermissions() as $permission) {
+      $owner->grantPermission($permission);
+    }
+    $owner->save();
+    // Move members to the renamed role.
+    $uids = \Drupal::entityTypeManager()->getStorage('user')->getQuery()
+      ->condition('roles', 'hotel_client')
+      ->accessCheck(FALSE)
+      ->execute();
+    foreach (\Drupal\user\Entity\User::loadMultiple($uids) as $account) {
+      $account->addRole('hotel_owner');
+      $account->removeRole('hotel_client');
+      $account->save();
+    }
+    $old->delete();
+  }
+  hotel_reservation_ensure_hotel_roles();
 }
 
 /**

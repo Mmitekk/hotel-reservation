@@ -72,3 +72,9 @@ room-comparison:
     - core/once
     - hotel_reservation/room-modal
 
+my-bookings:
+  version: 1.15.0
+  css:
+    theme:
+      css/my-bookings.css: {}
+

@@ -32,3 +32,8 @@ view hotel reservations:
   title: 'Просмотр бронирований (админка)'
   description: 'Доступ к списку и просмотру бронирований в админке. Без права создавать, менять и удалять.'
   restrict access: false
+
+view own hotel reservations:
+  title: 'Просмотр своих бронирований'
+  description: 'Гость видит только свои бронирования (по email учётной записи) на странице «Мои бронирования».'
+  restrict access: false

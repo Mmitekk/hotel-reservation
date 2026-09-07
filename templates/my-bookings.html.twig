@@ -1,0 +1,69 @@
+{#
+  @file
+  Guest's own bookings ("Мои бронирования").
+
+  Variables:
+  - bookings: [{id, status, status_label, guest_name, guest_count, room_name,
+      room_image_url, room_image_alt, amenities[], check_in, check_out,
+      nights, total_price, created}]
+  - currency, check_in_time, check_out_time
+#}
+
+<div class="hr-mybookings">
+  {% if bookings is empty %}
+    <div class="hr-mybookings-empty">
+      <div class="hr-mybookings-empty__icon">🧳</div>
+      <p class="hr-mybookings-empty__text">{{ 'У вас пока нет бронирований.'|t }}</p>
+    </div>
+  {% else %}
+    <div class="hr-mybookings-grid">
+      {% for booking in bookings %}
+        <article class="hr-mybook-card hr-mybook-card--{{ booking.status }}">
+          {% if booking.room_image_url %}
+            <div class="hr-mybook-card__image-wrap">
+              <img class="hr-mybook-card__image" src="{{ booking.room_image_url }}" alt="{{ booking.image_alt|default(booking.room_name) }}" loading="lazy">
+              <span class="hr-mybook-card__status">{{ booking.status_label }}</span>
+            </div>
+          {% endif %}
+          <div class="hr-mybook-card__body">
+            <div class="hr-mybook-card__top">
+              <h3 class="hr-mybook-card__room">{{ booking.room_name }}</h3>
+              {% if not booking.room_image_url %}
+                <span class="hr-mybook-card__status">{{ booking.status_label }}</span>
+              {% endif %}
+            </div>
+            <dl class="hr-mybook-card__details">
+              <div class="hr-mybook-card__row">
+                <dt>{{ 'Заезд'|t }}</dt>
+                <dd>{{ booking.check_in }} · {{ check_in_time }}</dd>
+              </div>
+              <div class="hr-mybook-card__row">
+                <dt>{{ 'Выезд'|t }}</dt>
+                <dd>{{ booking.check_out }} · {{ check_out_time }}</dd>
+              </div>
+              <div class="hr-mybook-card__row">
+                <dt>{{ 'Срок'|t }}</dt>
+                <dd>{{ booking.nights_text }} · {{ booking.guests_text }}</dd>
+              </div>
+              <div class="hr-mybook-card__row hr-mybook-card__row--total">
+                <dt>{{ 'Итого'|t }}</dt>
+                <dd>{{ booking.total_price }} {{ currency }}</dd>
+              </div>
+            </dl>
+            {% if booking.amenities is not empty %}
+              <div class="hr-mybook-card__amenities">
+                {% for amenity in booking.amenities|slice(0, 5) %}
+                  <span class="hr-mybook-card__amenity">{{ amenity }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="hr-mybook-card__meta">
+              <span>{{ 'Заявка №@id от @date'|t({'@id': booking.id, '@date': booking.created}) }}</span>
+              <span>{{ booking.guest_name }}</span>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
