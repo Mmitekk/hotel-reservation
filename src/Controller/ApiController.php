@@ -178,7 +178,7 @@ class ApiController extends ControllerBase {
         $typeColor = $typeEntity->getColor();
       }
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
     }
     return [
       'id' => (int) $room->id(),
@@ -343,7 +343,7 @@ class ApiController extends ControllerBase {
       $reservation = $this->entityTypeManager->getStorage('hr_reservation')->create($reservation_values);
       $reservation->save();
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       $this->getLogger('hotel_reservation')->error('Failed to create reservation: @message | File: @file Line: @line', [
         '@message' => $e->getMessage(),
         '@file' => $e->getFile(),
@@ -386,13 +386,23 @@ class ApiController extends ControllerBase {
           $mail_tokens
         );
 
-        \Drupal::service('plugin.manager.mail')->mail(
-          'hotel_reservation',
-          'reservation_admin_notification',
-          $admin_email,
-          $langcode,
-          $params
-        );
+        try {
+          \Drupal::service('plugin.manager.mail')->mail(
+            'hotel_reservation',
+            'reservation_admin_notification',
+            $admin_email,
+            $langcode,
+            $params
+          );
+        }
+        catch (\Throwable $e) {
+          // A broken mail backend must not fail the booking or corrupt
+          // the JSON response (e.g. PHP warnings printed into output).
+          $this->getLogger('hotel_reservation')->warning('Admin notification email failed for reservation @id: @message', [
+            '@id' => $reservation->id(),
+            '@message' => $e->getMessage(),
+          ]);
+        }
       }
     }
 
@@ -408,13 +418,22 @@ class ApiController extends ControllerBase {
         $mail_tokens
       );
 
-      \Drupal::service('plugin.manager.mail')->mail(
-        'hotel_reservation',
-        'reservation_confirmation',
-        $guest_email,
-        $langcode,
-        $params2
-      );
+      try {
+        \Drupal::service('plugin.manager.mail')->mail(
+          'hotel_reservation',
+          'reservation_confirmation',
+          $guest_email,
+          $langcode,
+          $params2
+        );
+      }
+      catch (\Throwable $e) {
+        // See above: mail failures must not break the booking response.
+        $this->getLogger('hotel_reservation')->warning('Guest confirmation email failed for reservation @id: @message', [
+          '@id' => $reservation->id(),
+          '@message' => $e->getMessage(),
+        ]);
+      }
     }
 
     // One-time token so a freshly created account owner can set a password
@@ -431,7 +450,7 @@ class ApiController extends ControllerBase {
         ]);
         $account_token = $raw_token;
       }
-      catch (\Exception $e) {
+      catch (\Throwable $e) {
         $this->getLogger('hotel_reservation')->error('Failed to issue password token: @message', [
           '@message' => $e->getMessage(),
         ]);
@@ -485,7 +504,7 @@ class ApiController extends ControllerBase {
     try {
       $stored = \Drupal::state()->get($state_key);
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       $stored = NULL;
     }
     if (empty($stored) || empty($stored['hash']) || empty($stored['uid'])) {
@@ -529,7 +548,7 @@ class ApiController extends ControllerBase {
       try {
         user_login_finalize($account);
       }
-      catch (\Exception $e) {
+      catch (\Throwable $e) {
         $this->getLogger('hotel_reservation')->error('Auto-login after password set failed: @message', [
           '@message' => $e->getMessage(),
         ]);
@@ -541,7 +560,7 @@ class ApiController extends ControllerBase {
         'redirect' => '/hotel-reservation/my-bookings',
       ]);
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       $this->getLogger('hotel_reservation')->error('Failed to set guest password: @message', [
         '@message' => $e->getMessage(),
       ]);
@@ -642,7 +661,7 @@ class ApiController extends ControllerBase {
         'login_url' => user_pass_reset_url($account)->toString(),
       ];
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       $this->getLogger('hotel_reservation')->error('Failed to ensure guest account: @message', [
         '@message' => $e->getMessage(),
       ]);
@@ -736,7 +755,7 @@ class ApiController extends ControllerBase {
         $typeLabel = $allowed[$typeLabel];
       }
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
     }
     $amenities = [];
     $raw = $room->getAmenities();
