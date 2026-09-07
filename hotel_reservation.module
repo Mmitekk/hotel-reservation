@@ -245,6 +245,29 @@ function hotel_reservation_get_available_rooms($check_in, $check_out, $capacity 
 }
 
 /**
+ * Whether hr_reservation has the uid field storage installed.
+ *
+ * Guards code paths on sites where update 10009 has not run yet: base
+ * field definitions come from code, but the DB column appears only after
+ * the update hook installs the field storage.
+ *
+ * @return bool
+ *   TRUE if the uid__target_id column exists.
+ */
+function hotel_reservation_reservation_has_uid(): bool {
+  static $has = NULL;
+  if ($has === NULL) {
+    try {
+      $has = \Drupal::database()->schema()->fieldExists('hr_reservation', 'uid__target_id');
+    }
+    catch (\Exception $e) {
+      $has = FALSE;
+    }
+  }
+  return $has;
+}
+
+/**
  * Returns allowed values for room_type field (dynamic from hr_room_type config).
  *
  * @return string[]
@@ -382,7 +405,7 @@ function hotel_reservation_calculate_price($room_id, $check_in, $check_out) {
  * Returns the default text of a notification email.
  *
  * Available tokens: @guest, @email, @phone, @room, @check_in, @check_out,
- * @count, @total, @currency, @notes, @hotel.
+ * @count, @total, @currency, @notes, @hotel, @login_url.
  *
  * @param string $key
  *   One of: admin_new_booking, guest_pending, guest_confirmed.

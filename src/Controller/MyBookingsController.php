@@ -29,15 +29,33 @@ class MyBookingsController extends ControllerBase {
       $email = trim((string) $account->getEmail());
     }
 
-    if ($email !== '') {
-      $storage = $this->entityTypeManager()->getStorage('hr_reservation');
-      $ids = $storage->getQuery()
+    $storage = $this->entityTypeManager()->getStorage('hr_reservation');
+    // Own bookings: linked by account id (set when the booking auto-created
+    // the account) or by matching guest email. The uid column exists only
+    // after update 10009, hence the guard.
+    $query = $storage->getQuery()->accessCheck(FALSE);
+    if (hotel_reservation_reservation_has_uid()) {
+      $or = $query->orConditionGroup()
+        ->condition('uid', (int) $account->id());
+      if ($email !== '') {
+        $or->condition('guest_email', $email);
+      }
+      $ids = $query
+        ->condition($or)
+        ->sort('check_in', 'DESC')
+        ->execute();
+    }
+    elseif ($email !== '') {
+      $ids = $query
         ->condition('guest_email', $email)
         ->sort('check_in', 'DESC')
-        ->accessCheck(FALSE)
         ->execute();
+    }
+    else {
+      $ids = [];
+    }
 
-      if (!empty($ids)) {
+    if (!empty($ids)) {
         /** @var \Drupal\hotel_reservation\Entity\Reservation[] $reservations */
         $reservations = $storage->loadMultiple($ids);
         foreach ($reservations as $reservation) {
@@ -78,7 +96,6 @@ class MyBookingsController extends ControllerBase {
           ];
         }
       }
-    }
 
     return [
       '#theme' => 'hotel_reservation_my_bookings',

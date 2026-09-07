@@ -170,13 +170,20 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('enable_guest_confirmation') !== NULL ? (bool) $config->get('enable_guest_confirmation') : TRUE,
     ];
 
+    $form['notifications']['auto_create_guest_account'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Создавать учётную запись гостя'),
+      '#description' => $this->t('При оформлении брони автоматически создавать учётную запись с ролью «Клиент отеля»: по email из заявки, а если email не указан — логином станет номер телефона. Гость увидит свои бронирования на странице «Мои бронирования».'),
+      '#default_value' => $config->get('auto_create_guest_account') !== NULL ? (bool) $config->get('auto_create_guest_account') : TRUE,
+    ];
+
     // ============================================================
     // Fieldset: Email texts
     // ============================================================
     $form['mail_texts'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Тексты писем'),
-      '#description' => $this->t('Доступные токены: @guest, @email, @phone, @room, @check_in, @check_out, @count, @total, @currency, @notes, @hotel.'),
+      '#description' => $this->t('Доступные токены: @guest, @email, @phone, @room, @check_in, @check_out, @count, @total, @currency, @notes, @hotel, @login_url (ссылка для разового входа гостя, если создана учётная запись).'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
     ];
@@ -406,6 +413,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('enable_admin_notification', (bool) $form_state->getValue('enable_admin_notification'))
       ->set('admin_notification_email', $form_state->getValue('admin_notification_email'))
       ->set('enable_guest_confirmation', (bool) $form_state->getValue('enable_guest_confirmation'))
+      ->set('auto_create_guest_account', (bool) $form_state->getValue('auto_create_guest_account'))
       ->set('mail_admin_new_booking', trim((string) $form_state->getValue('mail_admin_new_booking')))
       ->set('mail_guest_pending', trim((string) $form_state->getValue('mail_guest_pending')))
       ->set('mail_guest_confirmed', trim((string) $form_state->getValue('mail_guest_confirmed')))

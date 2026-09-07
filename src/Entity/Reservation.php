@@ -457,13 +457,35 @@ class Reservation extends ContentEntityBase {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Гость (учётная запись)'))
+      ->setDescription(t('Учётная запись гостя, созданная или привязанная при оформлении бронирования.'))
+      ->setSetting('target_type', 'user')
+      ->setRequired(FALSE)
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'entity_reference_label',
+        'weight' => 5,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'entity_reference_autocomplete',
+        'weight' => 5,
+        'settings' => [
+          'match_operator' => 'CONTAINS',
+          'size' => 60,
+          'placeholder' => '',
+        ],
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Создано'))
       ->setDescription(t('Время создания бронирования.'))
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'timestamp',
-        'weight' => 5,
+        'weight' => 6,
       ])
       ->setDisplayConfigurable('view', TRUE);
 
@@ -473,7 +495,7 @@ class Reservation extends ContentEntityBase {
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'timestamp',
-        'weight' => 6,
+        'weight' => 7,
       ])
       ->setDisplayConfigurable('view', TRUE);
 

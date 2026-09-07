@@ -87,6 +87,7 @@ function hotel_reservation_install(bool $is_syncing) {
     ->set('check_out_time', '12:00')
     ->set('enable_admin_notification', TRUE)
     ->set('enable_guest_confirmation', TRUE)
+    ->set('auto_create_guest_account', TRUE)
     ->set('reservation_expiration_hours', 24)
     ->set('booking_conditions', '')
     ->set('room_modal_width', 65)
@@ -326,6 +327,21 @@ function hotel_reservation_update_10008() {
     $old->delete();
   }
   hotel_reservation_ensure_hotel_roles();
+}
+
+/**
+ * Add guest account reference to hr_reservation.
+ */
+function hotel_reservation_update_10009() {
+  if (\Drupal::database()->schema()->fieldExists('hr_reservation', 'uid__target_id')) {
+    return;
+  }
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $field_storage_definition = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
+    ->setLabel(t('Гость (учётная запись)'))
+    ->setSetting('target_type', 'user')
+    ->setRequired(FALSE);
+  $definition_update_manager->installFieldStorageDefinition('uid', 'hr_reservation', 'hotel_reservation', $field_storage_definition);
 }
 
 /**

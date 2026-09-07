@@ -38,6 +38,9 @@ hotel_reservation.settings:
     enable_guest_confirmation:
       type: boolean
       label: 'Enable guest confirmation emails'
+    auto_create_guest_account:
+      type: boolean
+      label: 'Auto-create guest account on booking'
     # Booking form design settings.
     form_title:
       type: string

@@ -294,6 +294,7 @@ $reservation->getCreatedTime() / setCreatedTime($ts)
 | `enable_admin_notification` | boolean | `TRUE` | Уведомления администратору |
 | `admin_notification_email` | email | — | Email администратора |
 | `enable_guest_confirmation` | boolean | `TRUE` | Уведомления гостю |
+| `auto_create_guest_account` | boolean | `TRUE` | Автосоздание учётки гостя (роль «Клиент отеля») при бронировании |
 
 **Автоматизация:**
 | Ключ | Тип | По умолчанию | Описание |
@@ -436,9 +437,12 @@ Content-Type: application/json
 {
   "success": true,
   "message": "Бронирование создано. Ваша заявка ожидает подтверждения.",
-  "reservation_id": 42
+  "reservation_id": 42,
+  "account_created": true
 }
 ```
+
+При включённой настройке `auto_create_guest_account` бронь создаёт (или привязывает) учётную запись с ролью «Клиент отеля»: по `guest_email`, а если email пуст — логином становятся цифры телефона. Ссылка разового входа доступна гостю через токен `@login_url` в письме. Привязка хранится в поле `uid` бронирования (update 10009); страница «Мои бронирования» показывает брони по `uid` или совпадению `guest_email`.
 
 **Ошибки:** 400 (валидация), 404 (номер не найден), 409 (номер занят), 500 (ошибка создания)
 

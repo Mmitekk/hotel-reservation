@@ -309,9 +309,23 @@ class ApiController extends ControllerBase {
     $pricing = hotel_reservation_calculate_price($room_id, $check_in, $check_out);
     $total_price = number_format($pricing['total'], 2, '.', '');
 
+    // Auto-create (or link) the guest account: by email, or by phone
+    // digits as login when email is missing. Never breaks the booking.
+    $guest_uid = NULL;
+    $account_created = FALSE;
+    $login_url = '';
+    if ($config->get('auto_create_guest_account') ?? TRUE) {
+      $guest_account = $this->ensureGuestAccount($guest_name, $guest_email, $guest_phone);
+      if (!empty($guest_account['account'])) {
+        $guest_uid = (int) $guest_account['account']->id();
+        $account_created = !empty($guest_account['created']);
+        $login_url = (string) ($guest_account['login_url'] ?? '');
+      }
+    }
+
     // Create the reservation entity.
     try {
-      $reservation = $this->entityTypeManager->getStorage('hr_reservation')->create([
+      $reservation_values = [
         'room_id' => ['target_id' => $room_id],
         'check_in' => $check_in,
         'check_out' => $check_out,
@@ -322,7 +336,11 @@ class ApiController extends ControllerBase {
         'total_price' => $total_price,
         'notes' => ['value' => $notes, 'format' => 'plain_text'],
         'status' => 'pending',
-      ]);
+      ];
+      if ($guest_uid !== NULL && hotel_reservation_reservation_has_uid()) {
+        $reservation_values['uid'] = ['target_id' => $guest_uid];
+      }
+      $reservation = $this->entityTypeManager->getStorage('hr_reservation')->create($reservation_values);
       $reservation->save();
     }
     catch (\Exception $e) {
@@ -355,6 +373,7 @@ class ApiController extends ControllerBase {
       'currency' => $currency,
       'notes' => $notes ?: 'Нет',
       'hotel' => $hotel_name,
+      'login_url' => $login_url,
     ];
 
     // Send admin notification.
@@ -380,8 +399,12 @@ class ApiController extends ControllerBase {
     // Auto-confirm if configured and guest email provided.
     if ((bool) $config->get('enable_guest_confirmation') && !empty($guest_email)) {
       // Send a pending notification (not yet confirmed).
+      $pending_template = hotel_reservation_get_mail_text('guest_pending');
+      if ($login_url !== '' && strpos($pending_template, '@login_url') === FALSE) {
+        $pending_template .= "\n\n" . (string) $this->t('Личный кабинет и ваши бронирования: @login_url', ['@login_url' => $login_url]);
+      }
       $params2['message'] = hotel_reservation_build_mail_text(
-        hotel_reservation_get_mail_text('guest_pending'),
+        $pending_template,
         $mail_tokens
       );
 
@@ -398,7 +421,106 @@ class ApiController extends ControllerBase {
       'success' => TRUE,
       'message' => $this->t('Бронирование создано. Ваша заявка ожидает подтверждения.'),
       'reservation_id' => (int) $reservation->id(),
+      'account_created' => $account_created,
     ]);
+  }
+
+  /**
+   * Ensures a hotel_client account for the booking guest.
+   *
+   * Matches by email first, then by phone digits as login. Creates a new
+   * active account when nothing matches. Never throws: failures are logged
+   * and the booking proceeds without an account.
+   *
+   * @param string $guest_name
+   *   Guest name from the form.
+   * @param string $guest_email
+   *   Guest email from the form (may be empty).
+   * @param string $guest_phone
+   *   Guest phone from the form.
+   *
+   * @return array
+   *   Associative array with keys: account (?\Drupal\user\UserInterface),
+   *   created (bool), login_url (string, one-time login link or '').
+   */
+  protected function ensureGuestAccount(string $guest_name, string $guest_email, string $guest_phone): array {
+    $result = ['account' => NULL, 'created' => FALSE, 'login_url' => ''];
+    try {
+      $user_storage = $this->entityTypeManager->getStorage('user');
+      $digits = preg_replace('/\D/', '', $guest_phone);
+      if (strlen($digits) === 11 && $digits[0] === '8') {
+        $digits = '7' . substr($digits, 1);
+      }
+      $email_valid = $guest_email !== '' && \Drupal::service('email.validator')->isValid($guest_email);
+
+      $account = NULL;
+      if ($email_valid) {
+        $found = $user_storage->loadByProperties(['mail' => $guest_email]);
+        $account = $found ? reset($found) : NULL;
+      }
+      if (!$account && $digits !== '') {
+        $found = $user_storage->loadByProperties(['name' => $digits]);
+        $account = $found ? reset($found) : NULL;
+      }
+
+      if ($account) {
+        if (!$account->hasRole('hotel_client')) {
+          $account->addRole('hotel_client');
+          $account->save();
+        }
+        $result['account'] = $account;
+        $result['login_url'] = user_pass_reset_url($account)->toString();
+        return $result;
+      }
+
+      if ($email_valid) {
+        $username = $email = $guest_email;
+      }
+      elseif ($digits !== '') {
+        $username = $digits;
+        $site_mail = \Drupal::config('system.site')->get('mail') ?: '';
+        $domain = 'example.com';
+        if (preg_match('/@([^@\s]+)$/', $site_mail, $m)) {
+          $domain = $m[1];
+        }
+        $email = $digits . '@' . $domain;
+      }
+      else {
+        return $result;
+      }
+
+      $base_name = mb_substr($username, 0, 55);
+      $username = $base_name;
+      for ($i = 2; $user_storage->loadByProperties(['name' => $username]); $i++) {
+        $username = mb_substr($base_name, 0, 55 - strlen((string) $i) - 1) . '_' . $i;
+      }
+      $base_mail = $email;
+      for ($i = 2; $user_storage->loadByProperties(['mail' => $email]); $i++) {
+        $parts = explode('@', $base_mail, 2);
+        $email = $parts[0] . '_' . $i . '@' . $parts[1];
+      }
+
+      $account = $user_storage->create([
+        'name' => $username,
+        'mail' => $email,
+        'pass' => \Drupal::service('password_generator')->generate(16),
+        'status' => 1,
+        'roles' => ['hotel_client'],
+        'init' => $email,
+      ]);
+      $account->save();
+      $result = [
+        'account' => $account,
+        'created' => TRUE,
+        'login_url' => user_pass_reset_url($account)->toString(),
+      ];
+    }
+    catch (\Exception $e) {
+      $this->getLogger('hotel_reservation')->error('Failed to ensure guest account: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+    }
+    return $result;
   }
 
   /**
