@@ -464,6 +464,9 @@ class ApiController extends ControllerBase {
       'reservation_id' => (int) $reservation->id(),
       'account_created' => $account_created,
       'account_token' => $account_token,
+      // An existing account was linked (not created): no password token is
+      // issued, the guest logs in with their own credentials.
+      'account_linked' => !$account_created && $guest_uid !== NULL,
     ]);
   }
 

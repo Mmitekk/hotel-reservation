@@ -439,6 +439,11 @@
             if (response.account_created && response.account_token && response.reservation_id) {
               showRedirectNotice(response.reservation_id, response.account_token);
             }
+            // An existing account was linked: no password token is issued,
+            // point the guest to the login page instead.
+            else if (response.account_linked) {
+              showLoginHint();
+            }
           },
           error: function (xhr) {
             let msg = Drupal.t('Ошибка бронирования. Попробуйте ещё раз.');
@@ -463,10 +468,22 @@
         });
       }
 
+      var loginUrl = config.loginUrl || '/user/login';
+
       // ---- Redirect to the password setup page ----
       // After a fresh guest account is created, warn the guest about the
       // upcoming redirect, count down and send them to the setup page.
       var redirectTimer = null;
+
+      function showLoginHint() {
+        $form.find('.hr-success-redirect').remove();
+        $form.find('.hr-section--success').append(
+          '<div class="hr-success-redirect">' +
+          '<p class="hr-success-redirect__text">' + Drupal.t('У вас уже есть учётная запись. Войдите, чтобы видеть свои бронирования.') + '</p>' +
+          '<a class="hr-btn hr-btn--primary hr-success-redirect__link" href="' + loginUrl + '">' + Drupal.t('Войти') + '</a>' +
+          '</div>'
+        );
+      }
 
       function showRedirectNotice(reservationId, accountToken) {
         $form.find('.hr-success-redirect').remove();

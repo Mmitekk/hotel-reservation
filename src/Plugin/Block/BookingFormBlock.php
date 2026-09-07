@@ -159,6 +159,7 @@ class BookingFormBlock extends BlockBase {
       'apiSubmitUrl' => Url::fromRoute('hotel_reservation.api_submit_reservation')->toString(),
       'apiSetPasswordUrl' => Url::fromRoute('hotel_reservation.api_set_guest_password')->toString(),
       'setPasswordPageUrl' => Url::fromRoute('hotel_reservation.set_guest_password_page')->toString(),
+      'loginUrl' => Url::fromRoute('user.login')->toString(),
       'buttonText' => (string) $button_text,
       'successTitle' => (string) $success_title,
       'successText' => (string) $success_text,
