@@ -279,9 +279,10 @@ class ReservationListBuilder extends EntityListBuilder {
     $total_price = number_format((float) $entity->get('total_price')->value, 2, '.', ' ') . ' ' . $this->currencySymbol;
     $row['total_price'] = $total_price;
 
-    // Operations (managers only): edit, delete, and status change links.
+    // Operations: edit/delete for full admins, status changes also for
+    // users with the status permission (e.g. hotel_owner role).
+    $operations = [];
     if (\Drupal::currentUser()->hasPermission('administer hotel reservation')) {
-      $operations = [];
       $operations['edit'] = [
         'title' => $this->t('Изменить'),
         'url' => $entity->toUrl('edit-form'),
@@ -290,19 +291,28 @@ class ReservationListBuilder extends EntityListBuilder {
         'title' => $this->t('Удалить'),
         'url' => $entity->toUrl('delete-form'),
       ];
+    }
 
-      // Add quick status change links.
+    // Add quick status change links (CSRF token added explicitly because
+    // operations links are rendered without Link element processing).
+    if (\Drupal::currentUser()->hasPermission('administer hotel reservation') || \Drupal::currentUser()->hasPermission('update hotel reservation status')) {
       $status_transitions = $this->getStatusTransitions($status_value);
       foreach ($status_transitions as $transition_status => $transition_label) {
+        $status_url = Url::fromRoute('hotel_reservation.reservation_status', [
+          'hr_reservation' => $entity->id(),
+          'status' => $transition_status,
+        ]);
+        $status_url->setOption('query', [
+          'token' => \Drupal::csrfToken()->get($status_url->getInternalPath()),
+        ]);
         $operations['status_' . $transition_status] = [
           'title' => $transition_label,
-          'url' => Url::fromRoute('hotel_reservation.reservation_status', [
-            'hr_reservation' => $entity->id(),
-            'status' => $transition_status,
-          ]),
+          'url' => $status_url,
         ];
       }
+    }
 
+    if (!empty($operations)) {
       $row['operations']['data'] = [
         '#type' => 'operations',
         '#links' => $operations,

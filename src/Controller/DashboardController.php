@@ -118,14 +118,24 @@ class DashboardController extends ControllerBase {
         $created_time = (int) $reservation->get('created')->value;
         $created_formatted = \Drupal::service('date.formatter')->format($created_time, 'short');
 
+        // CSRF-protected route: the token must be added explicitly because
+        // the URLs are printed as raw hrefs (no Link element processing).
         $confirm_url = Url::fromRoute('hotel_reservation.reservation_status', [
           'hr_reservation' => $reservation->id(),
           'status' => 'confirmed',
-        ])->setOption('query', ['destination' => '/admin/hotel-reservation/dashboard']);
+        ]);
+        $confirm_url->setOption('query', [
+          'destination' => '/admin/hotel-reservation/dashboard',
+          'token' => \Drupal::csrfToken()->get($confirm_url->getInternalPath()),
+        ]);
         $cancel_url = Url::fromRoute('hotel_reservation.reservation_status', [
           'hr_reservation' => $reservation->id(),
           'status' => 'cancelled',
-        ])->setOption('query', ['destination' => '/admin/hotel-reservation/dashboard']);
+        ]);
+        $cancel_url->setOption('query', [
+          'destination' => '/admin/hotel-reservation/dashboard',
+          'token' => \Drupal::csrfToken()->get($cancel_url->getInternalPath()),
+        ]);
 
         $pending_reservations_list[] = [
           'id' => $reservation->id(),
@@ -258,6 +268,7 @@ class DashboardController extends ControllerBase {
       '#weekly_total' => number_format($weekly_total, 2, '.', ' ') . ' ' . $currency,
       '#export_url' => $export_url,
       '#can_manage' => \Drupal::currentUser()->hasPermission('administer hotel reservation'),
+      '#can_confirm' => \Drupal::currentUser()->hasPermission('administer hotel reservation') || \Drupal::currentUser()->hasPermission('update hotel reservation status'),
       '#attached' => [
         'library' => [
           'hotel_reservation/admin-styles',

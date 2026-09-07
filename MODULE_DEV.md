@@ -336,7 +336,8 @@ $hotelName = $config->get('hotel_name') ?: \Drupal::config('system.site')->get('
 | `hotel_reservation.calendar` | `/admin/hotel-reservation/calendar/{month}/{year}` | `HotelReservationController::calendar` | Календарь занятости |
 | `hotel_reservation.room_pricing` | `/admin/hotel-reservation/rooms/{hr_room}/pricing/{month}/{year}` | `HotelReservationController::roomPricing` | Календарь цен номера |
 | `hotel_reservation.room_pricing_save` | `/admin/hotel-reservation/rooms/{hr_room}/pricing/save` | `HotelReservationController::roomPricingSave` | Сохранение цен (POST) |
-| `hotel_reservation.reservation_status` | `/admin/hotel-reservation/reservations/{hr_reservation}/status/{status}` | `HotelReservationController::changeReservationStatus` | Смена статуса (CSRF) |
+| `hotel_reservation.reservation_status` | `/admin/hotel-reservation/reservations/{hr_reservation}/status/{status}` | `HotelReservationController::changeReservationStatus` | Смена статуса (CSRF; доступ: админ или право `update hotel reservation status`, токен добавляется в URL явно) |
+| `hotel_reservation.set_guest_password_page` | `/hotel-reservation/set-password?reservation_id=&token=` | `ApiController::setPasswordPage` | Страница установки постоянного пароля гостя |
 | `hotel_reservation.export_csv` | `/admin/hotel-reservation/reservations/export` | `DashboardController::exportCsv` | Экспорт CSV |
 
 ### 6.2 Маршруты сущностей (автогенерация)
@@ -443,7 +444,7 @@ Content-Type: application/json
 }
 ```
 
-`account_token` — одноразовый токен (24 часа, только для freshly created аккаунтов), чтобы гость задал пароль. Далее:
+`account_token` — одноразовый токен (24 часа, только для freshly created аккаунтов). После успешной брони форма показывает предупреждение о скором редиректе и через 5 секунд ведёт гостя на страницу `/hotel-reservation/set-password?reservation_id=42&token=a1b2…`, где он задаёт постоянный пароль. Далее:
 
 ```
 POST /api/hotel-reservation/set-password
@@ -779,6 +780,12 @@ expired    → (нет)
 | `administer hotel reservation` | Да (admin) | Все админские страницы: номера, бронирования, настройки, календарь, аналитика |
 | `view hotel reservation` | Нет | Определено, но **не используется** в маршрутах |
 | `create hotel reservation` | Нет | Определено, но **не используется** в маршрутах |
+| `view hotel reservation dashboard` | Нет | Панель (админ + `hotel_owner`) |
+| `view hotel reservation analytics` | Нет | Аналитика (админ + `hotel_owner`) |
+| `view hotel reservation calendar` | Нет | Календарь (админ + `hotel_owner`) |
+| `view hotel reservations` | Нет | Список и просмотр бронирований (админ + `hotel_owner`) |
+| `view own hotel reservations` | Нет | «Мои бронирования» гостя (`hotel_client`) |
+| `update hotel reservation status` | Нет | Смена статусов бронирований (админ + `hotel_owner`); без доступа к настройкам, номерам и ценам |
 
 > API-эндпоинты (`/api/hotel-reservation/*`) требуют только `_permission: 'access content'`. При необходимости ограничьте доступ через настройки маршрутов.
 

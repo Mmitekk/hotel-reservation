@@ -27,6 +27,7 @@ class HotelReservationAccessCheck {
       'view hotel reservation analytics',
       'view hotel reservation calendar',
       'view hotel reservations',
+      'update hotel reservation status',
     ];
   }
 
@@ -85,6 +86,13 @@ class HotelReservationAccessCheck {
    */
   public function accessReservations(AccountInterface $account): AccessResultInterface {
     return $this->adminOrClient($account, 'view hotel reservations');
+  }
+
+  /**
+   * Checks access to reservation status changes.
+   */
+  public function accessReservationStatus(AccountInterface $account): AccessResultInterface {
+    return $this->adminOrClient($account, 'update hotel reservation status');
   }
 
 }

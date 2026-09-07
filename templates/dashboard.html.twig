@@ -11,7 +11,8 @@
   - weekly_revenue: [{day: "Mon", day_short: "Пн", amount: 5000}, ...] (7 items, Mon-Sun)
   - weekly_total: formatted total string
   - export_url: URL to CSV export
-  - can_manage: TRUE for full admins (shows export links and action buttons)
+  - can_manage: TRUE for full admins (shows export links)
+  - can_confirm: TRUE for admins and users allowed to change statuses (shows action buttons)
 #}
 
 <div class="hr-dashboard-wrapper">
@@ -103,7 +104,7 @@
             <th>{{ 'Выезд'|t }}</th>
             <th>{{ 'Сумма'|t }}</th>
             <th>{{ 'Создано'|t }}</th>
-            {% if can_manage %}<th>{{ 'Действия'|t }}</th>{% endif %}
+            {% if can_confirm %}<th>{{ 'Действия'|t }}</th>{% endif %}
           </tr>
         </thead>
         <tbody>
@@ -115,7 +116,7 @@
               <td class="hr-dashboard-table__cell hr-dashboard-table__cell--date">{{ res.check_out }}</td>
               <td class="hr-dashboard-table__cell hr-dashboard-table__cell--price">{{ res.total_price }} {{ currency }}</td>
               <td class="hr-dashboard-table__cell hr-dashboard-table__cell--date">{{ res.created }}</td>
-              {% if can_manage %}
+              {% if can_confirm %}
               <td class="hr-dashboard-table__cell hr-dashboard-table__cell--actions">
                 <a href="{{ res.confirm_url }}" class="hr-dashboard-btn hr-dashboard-btn--confirm">{{ 'Подтвердить'|t }}</a>
                 <a href="{{ res.cancel_url }}" class="hr-dashboard-btn hr-dashboard-btn--cancel">{{ 'Отменить'|t }}</a>

@@ -330,6 +330,13 @@ function hotel_reservation_update_10008() {
 }
 
 /**
+ * Grant the status permission to the hotel_owner role.
+ */
+function hotel_reservation_update_10010() {
+  hotel_reservation_ensure_owner_role();
+}
+
+/**
  * Add guest account reference to hr_reservation.
  */
 function hotel_reservation_update_10009() {

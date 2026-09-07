@@ -3,6 +3,7 @@
 namespace Drupal\hotel_reservation\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse as SymfonyJsonResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -467,6 +468,112 @@ class ApiController extends ControllerBase {
   }
 
   /**
+   * Validates a one-time password token.
+   *
+   * @param int $reservation_id
+   *   The reservation ID from the request.
+   * @param string $token
+   *   The raw token from the request.
+   *
+   * @return array
+   *   Either ['account' => $account, 'reservation' => $reservation] or
+   *   ['error' => $message, 'status' => $code].
+   */
+  protected function loadPasswordTokenContext(int $reservation_id, string $token): array {
+    $expired = [
+      'error' => 'Ссылка устарела. Войдите через страницу входа или восстановление пароля.',
+      'status' => 403,
+    ];
+    if (empty($reservation_id) || $token === '') {
+      return ['error' => 'Некорректные данные.', 'status' => 400];
+    }
+
+    $state_key = 'hotel_reservation.pw.' . $reservation_id;
+    try {
+      $stored = \Drupal::state()->get($state_key);
+    }
+    catch (\Throwable $e) {
+      $stored = NULL;
+    }
+    if (empty($stored) || empty($stored['hash']) || empty($stored['uid'])) {
+      return $expired;
+    }
+    if ($stored['expires'] < \Drupal::time()->getRequestTime() || !hash_equals($stored['hash'], hash('sha256', $token))) {
+      return $expired;
+    }
+
+    $account = $this->entityTypeManager->getStorage('user')->load((int) $stored['uid']);
+    if (!$account) {
+      return ['error' => 'Учётная запись не найдена.', 'status' => 404];
+    }
+    // The token must belong to the account linked to this reservation.
+    $reservation = $this->entityTypeManager->getStorage('hr_reservation')->load($reservation_id);
+    $linked_uid = NULL;
+    if ($reservation && hotel_reservation_reservation_has_uid()) {
+      $linked_uid = $reservation->get('uid')->target_id;
+    }
+    if ($linked_uid === NULL || (int) $linked_uid !== (int) $account->id()) {
+      return $expired;
+    }
+
+    return ['account' => $account, 'reservation' => $reservation];
+  }
+
+  /**
+   * Password setup page for a freshly created guest account.
+   *
+   * Accepts ?reservation_id= and ?token= query parameters (the one-time
+   * token from the submitReservation response). Renders a password form;
+   * the form itself posts to the set-password JSON endpoint.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The current request.
+   *
+   * @return array
+   *   A render array.
+   */
+  public function setPasswordPage(Request $request) {
+    $reservation_id = (int) $request->query->get('reservation_id');
+    $token = (string) $request->query->get('token', '');
+    $context = $this->loadPasswordTokenContext($reservation_id, $token);
+
+    if (isset($context['error'])) {
+      return [
+        '#markup' => '<div class="hr-set-password"><p>' . $this->t('Ссылка недействительна или устарела. Войдите через страницу входа или воспользуйтесь восстановлением пароля.') . '</p></div>',
+        '#allowed_tags' => ['div', 'p'],
+        '#cache' => ['max-age' => 0],
+      ];
+    }
+
+    return [
+      '#markup' => '<div class="hr-set-password" data-reservation-id="' . $reservation_id . '" data-token="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '" data-api-url="' . Url::fromRoute('hotel_reservation.api_set_guest_password')->toString() . '">'
+        . '<h2>' . $this->t('Установка постоянного пароля') . '</h2>'
+        . '<p>' . $this->t('Задайте постоянный пароль для входа в личный кабинет, где видны ваши бронирования.') . '</p>'
+        . '<div class="hr-success-password__errors"></div>'
+        . '<input type="password" class="hr-success-password__input" autocomplete="new-password" placeholder="' . $this->t('Пароль (минимум 8 символов)') . '">'
+        . '<input type="password" class="hr-success-password__confirm" autocomplete="new-password" placeholder="' . $this->t('Повторите пароль') . '">'
+        . '<button type="button" class="hr-btn hr-btn--primary hr-set-password__btn">' . $this->t('Сохранить пароль и войти') . '</button>'
+        . '</div>',
+      '#allowed_tags' => ['div', 'h2', 'p', 'input', 'button'],
+      '#attached' => [
+        'library' => [
+          'hotel_reservation/set-password',
+        ],
+        'html_head' => [
+          [
+            [
+              '#tag' => 'meta',
+              '#attributes' => ['name' => 'robots', 'content' => 'noindex, nofollow'],
+            ],
+            'hr-set-password-noindex',
+          ],
+        ],
+      ],
+      '#cache' => ['max-age' => 0],
+    ];
+  }
+
+  /**
    * Sets the password of a freshly created guest account.
    *
    * Accepts JSON POST data: reservation_id, token, password.
@@ -500,50 +607,19 @@ class ApiController extends ControllerBase {
       ], 400);
     }
 
-    $state_key = 'hotel_reservation.pw.' . $reservation_id;
-    try {
-      $stored = \Drupal::state()->get($state_key);
-    }
-    catch (\Throwable $e) {
-      $stored = NULL;
-    }
-    if (empty($stored) || empty($stored['hash']) || empty($stored['uid'])) {
+    $context = $this->loadPasswordTokenContext($reservation_id, $token);
+    if (isset($context['error'])) {
       return new SymfonyJsonResponse([
         'success' => FALSE,
-        'message' => 'Ссылка устарела. Войдите через страницу входа или восстановление пароля.',
-      ], 403);
+        'message' => $context['error'],
+      ], $context['status']);
     }
-    if ($stored['expires'] < \Drupal::time()->getRequestTime() || !hash_equals($stored['hash'], hash('sha256', $token))) {
-      return new SymfonyJsonResponse([
-        'success' => FALSE,
-        'message' => 'Ссылка устарела. Войдите через страницу входа или восстановление пароля.',
-      ], 403);
-    }
+    $account = $context['account'];
 
     try {
-      $account = $this->entityTypeManager->getStorage('user')->load((int) $stored['uid']);
-      if (!$account) {
-        return new SymfonyJsonResponse([
-          'success' => FALSE,
-          'message' => 'Учётная запись не найдена.',
-        ], 404);
-      }
-      // The token must belong to the account linked to this reservation.
-      $reservation = $this->entityTypeManager->getStorage('hr_reservation')->load($reservation_id);
-      $linked_uid = NULL;
-      if ($reservation && hotel_reservation_reservation_has_uid()) {
-        $linked_uid = $reservation->get('uid')->target_id;
-      }
-      if ($linked_uid === NULL || (int) $linked_uid !== (int) $account->id()) {
-        return new SymfonyJsonResponse([
-          'success' => FALSE,
-          'message' => 'Ссылка устарела. Войдите через страницу входа или восстановление пароля.',
-        ], 403);
-      }
-
       $account->setPassword($password);
       $account->save();
-      \Drupal::state()->delete($state_key);
+      \Drupal::state()->delete('hotel_reservation.pw.' . $reservation_id);
 
       try {
         user_login_finalize($account);

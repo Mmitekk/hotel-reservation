@@ -1023,6 +1023,56 @@
   color: var(--hr-success);
 }
 
+/* ---------- Redirect notice after booking ---------- */
+.hr-success-redirect {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid var(--hr-primary-border);
+  border-radius: var(--hr-radius-sm);
+  background: var(--hr-primary-bg);
+  text-align: center;
+}
+
+.hr-success-redirect__text {
+  font-size: 14px;
+  color: var(--hr-text);
+  margin: 0 0 12px 0;
+}
+
+.hr-redirect-count {
+  font-weight: 700;
+}
+
+.hr-success-redirect__link {
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+/* ---------- Standalone set-password page ---------- */
+.hr-set-password {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 28px 24px;
+  border: 1px solid var(--hr-border, #e5e7eb);
+  border-radius: 16px;
+  background: var(--hr-bg, #ffffff);
+}
+
+.hr-set-password h2 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+}
+
+.hr-set-password > p {
+  font-size: 14px;
+  color: var(--hr-text-secondary, #6b7280);
+  margin: 0 0 16px 0;
+}
+
+.hr-set-password .hr-set-password__btn {
+  width: 100%;
+}
+
 /* ---------- Error ---------- */
 .hr-error {
   background: var(--hr-danger-bg);

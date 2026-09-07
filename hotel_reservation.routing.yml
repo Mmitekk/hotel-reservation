@@ -51,7 +51,7 @@ hotel_reservation.reservation_status:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::changeReservationStatus'
     _title: 'Изменение статуса бронирования'
   requirements:
-    _permission: 'administer hotel reservation'
+    _custom_access: '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessReservationStatus'
     _csrf_token: 'TRUE'
 
 hotel_reservation.calendar:
@@ -102,6 +102,14 @@ hotel_reservation.api_room_prices:
   requirements:
     _permission: 'access content'
     _format: json
+
+hotel_reservation.set_guest_password_page:
+  path: '/hotel-reservation/set-password'
+  defaults:
+    _controller: '\Drupal\hotel_reservation\Controller\ApiController::setPasswordPage'
+    _title: 'Установка пароля'
+  requirements:
+    _permission: 'access content'
 
 hotel_reservation.api_room:
   path: '/api/hotel-reservation/room/{room_id}'
