@@ -974,6 +974,55 @@
   margin: 0;
 }
 
+/* ---------- Set password after booking ---------- */
+.hr-success-password {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid var(--hr-primary-border);
+  border-radius: var(--hr-radius-sm);
+  background: var(--hr-primary-bg);
+  text-align: left;
+}
+
+.hr-success-password__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hr-text);
+  margin: 0 0 4px 0;
+}
+
+.hr-success-password__text {
+  font-size: 13px;
+  color: var(--hr-text-secondary);
+  margin: 0 0 12px 0;
+}
+
+.hr-success-password__input,
+.hr-success-password__confirm {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--hr-border);
+  border-radius: var(--hr-radius-sm);
+  font-size: 14px;
+  color: var(--hr-text);
+  background: var(--hr-bg);
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.hr-success-password__input:focus,
+.hr-success-password__confirm:focus {
+  border-color: var(--hr-border-focus);
+  box-shadow: 0 0 0 3px var(--hr-primary-bg);
+}
+
+.hr-success-password__done {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hr-success);
+}
+
 /* ---------- Error ---------- */
 .hr-error {
   background: var(--hr-danger-bg);

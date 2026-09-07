@@ -438,8 +438,21 @@ Content-Type: application/json
   "success": true,
   "message": "Бронирование создано. Ваша заявка ожидает подтверждения.",
   "reservation_id": 42,
-  "account_created": true
+  "account_created": true,
+  "account_token": "a1b2…"
 }
+```
+
+`account_token` — одноразовый токен (24 часа, только для freshly created аккаунтов), чтобы гость задал пароль. Далее:
+
+```
+POST /api/hotel-reservation/set-password
+Content-Type: application/json
+```
+
+**Запрос:** `{"reservation_id": 42, "token": "a1b2…", "password": "secret123"}` (минимум 8 символов).
+
+**Успешный ответ (200):** `{"success": true, "message": "…", "redirect": "/hotel-reservation/my-bookings"}` — пароль сохранён, гость автоматически залогинен, редирект в личный кабинет. Токен одноразовый. Для привязанных (не новых) аккаунтов токен не выдаётся — такие гости входят своими данными.
 ```
 
 При включённой настройке `auto_create_guest_account` бронь создаёт (или привязывает) учётную запись с ролью «Клиент отеля»: по `guest_email`, а если email пуст — логином становятся цифры телефона. Ссылка разового входа доступна гостю через токен `@login_url` в письме. Привязка хранится в поле `uid` бронирования (update 10009); страница «Мои бронирования» показывает брони по `uid` или совпадению `guest_email`.

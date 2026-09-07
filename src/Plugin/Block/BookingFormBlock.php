@@ -157,6 +157,7 @@ class BookingFormBlock extends BlockBase {
       'bookingConditions' => $booking_conditions,
       'apiCheckUrl' => Url::fromRoute('hotel_reservation.api_check_availability')->toString(),
       'apiSubmitUrl' => Url::fromRoute('hotel_reservation.api_submit_reservation')->toString(),
+      'apiSetPasswordUrl' => Url::fromRoute('hotel_reservation.api_set_guest_password')->toString(),
       'buttonText' => (string) $button_text,
       'successTitle' => (string) $success_title,
       'successText' => (string) $success_text,

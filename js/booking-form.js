@@ -53,6 +53,7 @@
       const config = drupalSettings.hotelReservation || {};
       const apiCheckUrl = config.apiCheckUrl || '/api/hotel-reservation/check-availability';
       const apiSubmitUrl = config.apiSubmitUrl || '/api/hotel-reservation/submit';
+      const apiSetPasswordUrl = config.apiSetPasswordUrl || '/api/hotel-reservation/set-password';
       const currencySymbol = config.currencySymbol || '₽';
       const minStay = parseInt(config.minStay) || 1;
       const maxStay = parseInt(config.maxStay) || 30;
@@ -433,6 +434,11 @@
                 Drupal.checkPlain(template.replace('@id', response.reservation_id))
               );
             }
+            // A fresh guest account was created: offer to set a password
+            // for the personal account right away.
+            if (response.account_created && response.account_token && response.reservation_id) {
+              showPasswordForm(response.reservation_id, response.account_token);
+            }
           },
           error: function (xhr) {
             let msg = Drupal.t('Ошибка бронирования. Попробуйте ещё раз.');
@@ -450,6 +456,75 @@
               else msg = Drupal.t('Ошибка сервера (@code).', {'@code': xhr.status});
             }
             showErrors('.hr-book-errors', [msg]);
+          },
+          complete: function () {
+            $btn.prop('disabled', false).html(originalText);
+          }
+        });
+      }
+
+      // ---- Set password for a freshly created guest account ----
+      function showPasswordForm(reservationId, accountToken) {
+        const $box = $form.find('.hr-success-password');
+        if ($box.length) {
+          $box.remove();
+        }
+        $form.find('.hr-section--success').append(
+          '<div class="hr-success-password">' +
+          '<div class="hr-success-password__title">' + Drupal.t('Задайте пароль для личного кабинета') + '</div>' +
+          '<p class="hr-success-password__text">' + Drupal.t('Войдите под ним, чтобы видеть свои бронирования.') + '</p>' +
+          '<div class="hr-success-password__errors"></div>' +
+          '<input type="password" class="hr-success-password__input" autocomplete="new-password" placeholder="' + Drupal.t('Пароль (минимум 8 символов)') + '">' +
+          '<input type="password" class="hr-success-password__confirm" autocomplete="new-password" placeholder="' + Drupal.t('Повторите пароль') + '">' +
+          '<button type="button" class="hr-btn hr-btn--primary hr-success-password__btn">' + Drupal.t('Сохранить пароль и войти') + '</button>' +
+          '</div>'
+        );
+        $form.find('.hr-success-password__btn').on('click', function () {
+          submitPassword(reservationId, accountToken, $(this));
+        });
+      }
+
+      function submitPassword(reservationId, accountToken, $btn) {
+        const $box = $form.find('.hr-success-password');
+        const $errors = $box.find('.hr-success-password__errors');
+        $errors.empty();
+        const p1 = $box.find('.hr-success-password__input').val() || '';
+        const p2 = $box.find('.hr-success-password__confirm').val() || '';
+        if (p1.length < 8) {
+          $errors.html('<div class="hr-error">' + Drupal.t('Пароль должен содержать не менее 8 символов.') + '</div>');
+          return;
+        }
+        if (p1 !== p2) {
+          $errors.html('<div class="hr-error">' + Drupal.t('Пароли не совпадают.') + '</div>');
+          return;
+        }
+        const originalText = $btn.html();
+        $btn.prop('disabled', true).html('<span class="hr-spinner"></span>' + Drupal.t('Сохранение...'));
+        $.ajax({
+          url: apiSetPasswordUrl,
+          method: 'POST',
+          contentType: 'application/json',
+          dataType: 'json',
+          data: JSON.stringify({
+            reservation_id: reservationId,
+            token: accountToken,
+            password: p1
+          }),
+          success: function (response) {
+            $box.html('<div class="hr-success-password__done">' + Drupal.checkPlain(response.message || Drupal.t('Пароль сохранён.')) + '</div>');
+            if (response.redirect) {
+              setTimeout(function () {
+                window.location.href = response.redirect;
+              }, 1200);
+            }
+          },
+          error: function (xhr) {
+            let msg = Drupal.t('Не удалось сохранить пароль. Попробуйте ещё раз.');
+            try {
+              const data = JSON.parse(xhr.responseText);
+              if (data.message) msg = data.message;
+            } catch (e) { /* keep default */ }
+            $errors.html('<div class="hr-error">' + Drupal.checkPlain(msg) + '</div>');
           },
           complete: function () {
             $btn.prop('disabled', false).html(originalText);

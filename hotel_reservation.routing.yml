@@ -87,6 +87,14 @@ hotel_reservation.api_submit_reservation:
     _permission: 'access content'
     _format: json
 
+hotel_reservation.api_set_guest_password:
+  path: '/api/hotel-reservation/set-password'
+  defaults:
+    _controller: '\Drupal\hotel_reservation\Controller\ApiController::setGuestPassword'
+  requirements:
+    _permission: 'access content'
+    _format: json
+
 hotel_reservation.api_room_prices:
   path: '/api/hotel-reservation/room-prices/{room_id}'
   defaults:

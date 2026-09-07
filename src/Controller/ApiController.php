@@ -417,12 +417,139 @@ class ApiController extends ControllerBase {
       );
     }
 
+    // One-time token so a freshly created account owner can set a password
+    // right away. Issued only for newly created accounts, never for linked
+    // existing ones. Single use, 24h expiry.
+    $account_token = '';
+    if ($account_created && $guest_uid !== NULL) {
+      try {
+        $raw_token = bin2hex(random_bytes(32));
+        \Drupal::state()->set('hotel_reservation.pw.' . $reservation->id(), [
+          'uid' => $guest_uid,
+          'hash' => hash('sha256', $raw_token),
+          'expires' => \Drupal::time()->getRequestTime() + 86400,
+        ]);
+        $account_token = $raw_token;
+      }
+      catch (\Exception $e) {
+        $this->getLogger('hotel_reservation')->error('Failed to issue password token: @message', [
+          '@message' => $e->getMessage(),
+        ]);
+      }
+    }
+
     return new SymfonyJsonResponse([
       'success' => TRUE,
       'message' => $this->t('Бронирование создано. Ваша заявка ожидает подтверждения.'),
       'reservation_id' => (int) $reservation->id(),
       'account_created' => $account_created,
+      'account_token' => $account_token,
     ]);
+  }
+
+  /**
+   * Sets the password of a freshly created guest account.
+   *
+   * Accepts JSON POST data: reservation_id, token, password.
+   * The token is issued once in submitReservation response and is valid
+   * for 24 hours. On success the guest is logged in.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The current request.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   *   JSON response with success/error.
+   */
+  public function setGuestPassword(Request $request) {
+    $content = $request->getContent();
+    $data = json_decode($content, TRUE);
+
+    $reservation_id = (int) ($data['reservation_id'] ?? 0);
+    $token = (string) ($data['token'] ?? '');
+    $password = (string) ($data['password'] ?? '');
+
+    if (empty($reservation_id) || $token === '') {
+      return new SymfonyJsonResponse([
+        'success' => FALSE,
+        'message' => 'Некорректные данные.',
+      ], 400);
+    }
+    if (mb_strlen($password) < 8) {
+      return new SymfonyJsonResponse([
+        'success' => FALSE,
+        'message' => 'Пароль должен содержать не менее 8 символов.',
+      ], 400);
+    }
+
+    $state_key = 'hotel_reservation.pw.' . $reservation_id;
+    try {
+      $stored = \Drupal::state()->get($state_key);
+    }
+    catch (\Exception $e) {
+      $stored = NULL;
+    }
+    if (empty($stored) || empty($stored['hash']) || empty($stored['uid'])) {
+      return new SymfonyJsonResponse([
+        'success' => FALSE,
+        'message' => 'Ссылка устарела. Войдите через страницу входа или восстановление пароля.',
+      ], 403);
+    }
+    if ($stored['expires'] < \Drupal::time()->getRequestTime() || !hash_equals($stored['hash'], hash('sha256', $token))) {
+      return new SymfonyJsonResponse([
+        'success' => FALSE,
+        'message' => 'Ссылка устарела. Войдите через страницу входа или восстановление пароля.',
+      ], 403);
+    }
+
+    try {
+      $account = $this->entityTypeManager->getStorage('user')->load((int) $stored['uid']);
+      if (!$account) {
+        return new SymfonyJsonResponse([
+          'success' => FALSE,
+          'message' => 'Учётная запись не найдена.',
+        ], 404);
+      }
+      // The token must belong to the account linked to this reservation.
+      $reservation = $this->entityTypeManager->getStorage('hr_reservation')->load($reservation_id);
+      $linked_uid = NULL;
+      if ($reservation && hotel_reservation_reservation_has_uid()) {
+        $linked_uid = $reservation->get('uid')->target_id;
+      }
+      if ($linked_uid === NULL || (int) $linked_uid !== (int) $account->id()) {
+        return new SymfonyJsonResponse([
+          'success' => FALSE,
+          'message' => 'Ссылка устарела. Войдите через страницу входа или восстановление пароля.',
+        ], 403);
+      }
+
+      $account->setPassword($password);
+      $account->save();
+      \Drupal::state()->delete($state_key);
+
+      try {
+        user_login_finalize($account);
+      }
+      catch (\Exception $e) {
+        $this->getLogger('hotel_reservation')->error('Auto-login after password set failed: @message', [
+          '@message' => $e->getMessage(),
+        ]);
+      }
+
+      return new SymfonyJsonResponse([
+        'success' => TRUE,
+        'message' => $this->t('Пароль сохранён. Вы вошли в личный кабинет.'),
+        'redirect' => '/hotel-reservation/my-bookings',
+      ]);
+    }
+    catch (\Exception $e) {
+      $this->getLogger('hotel_reservation')->error('Failed to set guest password: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      return new SymfonyJsonResponse([
+        'success' => FALSE,
+        'message' => 'Не удалось сохранить пароль. Попробуйте ещё раз.',
+      ], 500);
+    }
   }
 
   /**
