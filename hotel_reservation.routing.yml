@@ -125,5 +125,5 @@ hotel_reservation.my_bookings:
     _controller: '\Drupal\hotel_reservation\Controller\MyBookingsController::myBookings'
     _title: 'Мои бронирования'
   requirements:
-    _permission: 'view own hotel reservations,administer hotel reservation'
+    _permission: 'view own hotel reservations+administer hotel reservation'
 
