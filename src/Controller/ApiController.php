@@ -458,6 +458,13 @@ class ApiController extends ControllerBase {
       }
     }
 
+    $this->getLogger('hotel_reservation')->info('Booking @rid submitted: guest account uid=@uid, created=@created, password token=@token.', [
+      '@rid' => $reservation->id(),
+      '@uid' => $guest_uid !== NULL ? $guest_uid : 'none',
+      '@created' => $account_created ? 'yes' : 'no',
+      '@token' => $account_token !== '' ? 'issued' : 'none',
+    ]);
+
     return new SymfonyJsonResponse([
       'success' => TRUE,
       'message' => $this->t('Бронирование создано. Ваша заявка ожидает подтверждения.'),
@@ -514,6 +521,26 @@ class ApiController extends ControllerBase {
     $linked_uid = NULL;
     if ($reservation && hotel_reservation_reservation_has_uid()) {
       $linked_uid = $reservation->get('uid')->target_id;
+    }
+    elseif ($reservation) {
+      // Fallback when update 10009 has not run: match by contact data.
+      $reservation_email = trim((string) $reservation->get('guest_email')->value);
+      if ($reservation_email !== '' && $reservation_email === $account->getEmail()) {
+        $linked_uid = (int) $account->id();
+      }
+      else {
+        $reservation_digits = preg_replace('/\D/', '', (string) $reservation->get('guest_phone')->value);
+        if (strlen($reservation_digits) === 11 && $reservation_digits[0] === '8') {
+          $reservation_digits = '7' . substr($reservation_digits, 1);
+        }
+        $account_digits = preg_replace('/\D/', '', $account->getAccountName());
+        if (strlen($account_digits) === 11 && $account_digits[0] === '8') {
+          $account_digits = '7' . substr($account_digits, 1);
+        }
+        if ($reservation_digits !== '' && $reservation_digits === $account_digits) {
+          $linked_uid = (int) $account->id();
+        }
+      }
     }
     if ($linked_uid === NULL || (int) $linked_uid !== (int) $account->id()) {
       return $expired;
