@@ -352,6 +352,66 @@ function hotel_reservation_update_10009() {
 }
 
 /**
+ * Grant hotel_client role to all users linked to reservations.
+ *
+ * Fixes 403 on «Мои бронирования» for guest accounts created before the
+ * role was assigned (e.g. older module versions).
+ */
+function hotel_reservation_update_10011() {
+  hotel_reservation_ensure_guest_role();
+  $user_storage = \Drupal::entityTypeManager()->getStorage('user');
+  $reservation_storage = \Drupal::entityTypeManager()->getStorage('hr_reservation');
+  $has_uid = hotel_reservation_reservation_has_uid();
+  $uids = [];
+  $emails = [];
+  $ids = $reservation_storage->getQuery()->accessCheck(FALSE)->execute();
+  foreach (array_chunk(array_values($ids), 100) as $chunk) {
+    foreach ($reservation_storage->loadMultiple($chunk) as $reservation) {
+      if ($has_uid && !$reservation->get('uid')->isEmpty()) {
+        $uids[(int) $reservation->get('uid')->target_id] = TRUE;
+      }
+      $mail = trim((string) $reservation->get('guest_email')->value);
+      if ($mail !== '') {
+        $emails[strtolower($mail)] = $mail;
+      }
+    }
+  }
+  $candidates = [];
+  foreach (array_keys($uids) as $uid) {
+    if ($uid > 1) {
+      $candidates[$uid] = TRUE;
+    }
+  }
+  foreach ($emails as $mail) {
+    foreach ($user_storage->loadByProperties(['mail' => $mail]) as $account) {
+      $candidates[(int) $account->id()] = TRUE;
+    }
+  }
+  unset($candidates[0], $candidates[1]);
+  foreach (array_keys($candidates) as $uid) {
+    try {
+      $account = $user_storage->load($uid);
+      if (!$account || $account->isAnonymous() || $account->isBlocked()) {
+        continue;
+      }
+      if ($account->hasPermission('administer hotel reservation')) {
+        continue;
+      }
+      if (!$account->hasRole('hotel_client')) {
+        $account->addRole('hotel_client');
+        $account->save();
+      }
+    }
+    catch (\Throwable $e) {
+      \Drupal::logger('hotel_reservation')->warning('Backfill hotel_client role failed for uid @uid: @message', [
+        '@uid' => $uid,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+}
+
+/**
  * Implements hook_uninstall().
  */
 function hotel_reservation_uninstall(bool $is_syncing) {
