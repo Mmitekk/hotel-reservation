@@ -434,9 +434,15 @@
                 Drupal.checkPlain(template.replace('@id', response.reservation_id))
               );
             }
-            // A fresh guest account was created: tell the guest about the
-            // redirect to the password setup page, then redirect.
-            if (response.account_created && response.account_token && response.reservation_id) {
+            // The guest was logged in during booking: take them straight
+            // to their bookings after a short countdown.
+            if (response.logged_in && response.redirect) {
+              showLoggedInNotice(response.redirect, response.reservation_id, response.account_token);
+            }
+            // A fresh guest account was created but auto-login did not
+            // happen: tell the guest about the redirect to the password
+            // setup page, then redirect.
+            else if (response.account_created && response.account_token && response.reservation_id) {
               showRedirectNotice(response.reservation_id, response.account_token);
             }
             // An existing account was linked: no password token is issued,
@@ -469,6 +475,48 @@
       }
 
       var loginUrl = config.loginUrl || '/user/login';
+
+      // ---- Redirect to the personal account after auto-login ----
+      // The guest was authorized during booking: warn about the upcoming
+      // redirect, count down and send them to their bookings. A link to
+      // set a permanent password is offered as well.
+      function showLoggedInNotice(redirectUrl, reservationId, accountToken) {
+        $form.find('.hr-success-redirect').remove();
+        if (redirectTimer) {
+          clearTimeout(redirectTimer);
+          redirectTimer = null;
+        }
+        var seconds = 5;
+        var html = '<div class="hr-success-redirect">' +
+          '<p class="hr-success-redirect__text">' + Drupal.t('Вы вошли в личный кабинет. Через <span class="hr-redirect-count">5</span> секунд вы будете перенаправлены к своим бронированиям.') + '</p>' +
+          '<a class="hr-btn hr-btn--primary hr-success-redirect__link" href="' + redirectUrl + '">' + Drupal.t('Перейти в личный кабинет') + '</a>';
+        if (reservationId && accountToken) {
+          var pageUrl = (setPasswordPageUrl || '/hotel-reservation/set-password')
+            + '?reservation_id=' + encodeURIComponent(reservationId)
+            + '&token=' + encodeURIComponent(accountToken);
+          html += '<p class="hr-success-redirect__alt"><a href="' + pageUrl + '">' + Drupal.t('Установить постоянный пароль') + '</a></p>';
+        }
+        html += '</div>';
+        $form.find('.hr-section--success').append(html);
+        var $count = $form.find('.hr-redirect-count');
+        redirectTimer = setInterval(function () {
+          seconds -= 1;
+          if (seconds <= 0) {
+            clearInterval(redirectTimer);
+            redirectTimer = null;
+            window.location.href = redirectUrl;
+          }
+          else {
+            $count.text(seconds);
+          }
+        }, 1000);
+        $form.find('.hr-success-redirect__link').on('click', function () {
+          if (redirectTimer) {
+            clearInterval(redirectTimer);
+            redirectTimer = null;
+          }
+        });
+      }
 
       // ---- Redirect to the password setup page ----
       // After a fresh guest account is created, warn the guest about the

@@ -315,6 +315,7 @@ class ApiController extends ControllerBase {
     $guest_uid = NULL;
     $account_created = FALSE;
     $login_url = '';
+    $guest_account = [];
     if ($config->get('auto_create_guest_account') ?? TRUE) {
       $guest_account = $this->ensureGuestAccount($guest_name, $guest_email, $guest_phone);
       if (!empty($guest_account['account'])) {
@@ -458,11 +459,31 @@ class ApiController extends ControllerBase {
       }
     }
 
-    $this->getLogger('hotel_reservation')->info('Booking @rid submitted: guest account uid=@uid, created=@created, password token=@token.', [
+    // Log the guest into a freshly created account right away so the
+    // frontend can take them straight to their bookings. Only for accounts
+    // created by this request and only for anonymous visitors: an already
+    // authenticated user (e.g. an admin testing the form) must never be
+    // logged out of their own account.
+    $logged_in = FALSE;
+    if ($account_created && $guest_uid !== NULL && $this->currentUser()->isAnonymous() && !empty($guest_account['account'])) {
+      try {
+        user_login_finalize($guest_account['account']);
+        $logged_in = TRUE;
+      }
+      catch (\Throwable $e) {
+        $this->getLogger('hotel_reservation')->warning('Auto-login after booking failed for uid @uid: @message', [
+          '@uid' => $guest_uid,
+          '@message' => $e->getMessage(),
+        ]);
+      }
+    }
+
+    $this->getLogger('hotel_reservation')->info('Booking @rid submitted: guest account uid=@uid, created=@created, password token=@token, auto-login=@login.', [
       '@rid' => $reservation->id(),
       '@uid' => $guest_uid !== NULL ? $guest_uid : 'none',
       '@created' => $account_created ? 'yes' : 'no',
       '@token' => $account_token !== '' ? 'issued' : 'none',
+      '@login' => $logged_in ? 'yes' : 'no',
     ]);
 
     return new SymfonyJsonResponse([
@@ -474,6 +495,8 @@ class ApiController extends ControllerBase {
       // An existing account was linked (not created): no password token is
       // issued, the guest logs in with their own credentials.
       'account_linked' => !$account_created && $guest_uid !== NULL,
+      'logged_in' => $logged_in,
+      'redirect' => $logged_in ? '/hotel-reservation/my-bookings' : '',
     ]);
   }
 
@@ -721,7 +744,15 @@ class ApiController extends ControllerBase {
           $account->save();
         }
         $result['account'] = $account;
-        $result['login_url'] = user_pass_reset_url($account)->toString();
+        try {
+          $result['login_url'] = user_pass_reset_url($account)->toString();
+        }
+        catch (\Throwable $e) {
+          $this->getLogger('hotel_reservation')->warning('Failed to build login URL for uid @uid: @message', [
+            '@uid' => $account->id(),
+            '@message' => $e->getMessage(),
+          ]);
+        }
         return $result;
       }
 
@@ -761,11 +792,18 @@ class ApiController extends ControllerBase {
         'init' => $email,
       ]);
       $account->save();
-      $result = [
-        'account' => $account,
-        'created' => TRUE,
-        'login_url' => user_pass_reset_url($account)->toString(),
-      ];
+      $result['account'] = $account;
+      $result['created'] = TRUE;
+      try {
+        $result['login_url'] = user_pass_reset_url($account)->toString();
+      }
+      catch (\Throwable $e) {
+        $this->getLogger('hotel_reservation')->warning('Failed to build login URL for new uid @uid: @message', [
+          '@uid' => $account->id(),
+          '@message' => $e->getMessage(),
+        ]);
+      }
+      return $result;
     }
     catch (\Throwable $e) {
       $this->getLogger('hotel_reservation')->error('Failed to ensure guest account: @message', [

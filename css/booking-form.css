@@ -1048,6 +1048,11 @@
   margin: 0 auto;
 }
 
+.hr-success-redirect__alt {
+  margin: 12px 0 0 0;
+  font-size: 13px;
+}
+
 /* ---------- Standalone set-password page ---------- */
 .hr-set-password {
   max-width: 480px;

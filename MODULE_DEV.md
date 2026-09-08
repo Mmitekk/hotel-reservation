@@ -445,7 +445,7 @@ Content-Type: application/json
 }
 ```
 
-`account_token` — одноразовый токен (24 часа, только для freshly created аккаунтов). После успешной брони форма показывает предупреждение о скором редиректе и через 5 секунд ведёт гостя на страницу `/hotel-reservation/set-password?reservation_id=42&token=a1b2…`, где он задаёт постоянный пароль. Далее:
+`account_token` — одноразовый токен (24 часа, только для freshly created аккаунтов). Если гость был анонимен, submit сразу авторизует его (`logged_in: true`) и форма через 5 секунд ведёт в `/hotel-reservation/my-bookings` (в ответе поле `redirect`); там же предлагается ссылка на страницу пароля. Если автовход не случился — форма показывает предупреждение о скором редиректе на страницу `/hotel-reservation/set-password?reservation_id=42&token=a1b2…`, где гость задаёт постоянный пароль. Далее:
 
 ```
 POST /api/hotel-reservation/set-password
