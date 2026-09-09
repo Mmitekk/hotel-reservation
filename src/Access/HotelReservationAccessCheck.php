@@ -14,20 +14,34 @@ class HotelReservationAccessCheck {
   /**
    * Permissions granted to the hotel_owner role.
    *
+   * No admin entry permissions (toolbar, administration pages, admin
+   * theme): the owner works only on module pages via direct links.
+   *
    * @return string[]
    *   Permission machine names.
    */
   public static function clientPermissions(): array {
     return [
       'access content',
-      'access administration pages',
-      'access toolbar',
-      'view the administration theme',
       'view hotel reservation dashboard',
       'view hotel reservation analytics',
       'view hotel reservation calendar',
       'view hotel reservations',
       'update hotel reservation status',
+    ];
+  }
+
+  /**
+   * Admin entry permissions, revoked from both hotel roles.
+   *
+   * @return string[]
+   *   Permission machine names.
+   */
+  public static function revokedAdminPermissions(): array {
+    return [
+      'access administration pages',
+      'access toolbar',
+      'view the administration theme',
     ];
   }
 

@@ -22,6 +22,9 @@ function hotel_reservation_ensure_owner_role() {
   foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::clientPermissions() as $permission) {
     $role->grantPermission($permission);
   }
+  foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::revokedAdminPermissions() as $permission) {
+    $role->revokePermission($permission);
+  }
   $role->save();
 }
 
@@ -41,6 +44,9 @@ function hotel_reservation_ensure_guest_role() {
   }
   foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::guestPermissions() as $permission) {
     $role->grantPermission($permission);
+  }
+  foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::revokedAdminPermissions() as $permission) {
+    $role->revokePermission($permission);
   }
   $role->save();
 }
@@ -409,6 +415,17 @@ function hotel_reservation_update_10011() {
       ]);
     }
   }
+}
+
+/**
+ * Strip admin entry permissions from hotel roles.
+ *
+ * hotel_client loses toolbar/administration pages/admin theme (no admin
+ * access at all); hotel_owner keeps module pages only, without the admin
+ * toolbar menu.
+ */
+function hotel_reservation_update_10012() {
+  hotel_reservation_ensure_hotel_roles();
 }
 
 /**
