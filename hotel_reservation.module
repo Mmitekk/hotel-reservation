@@ -499,8 +499,9 @@ function hotel_reservation_page_top(array &$page_top) {
   if ($account->isAnonymous()) {
     return;
   }
-  $is_owner = $account->hasRole('hotel_owner');
-  $is_client = $account->hasRole('hotel_client');
+  $roles = $account->getRoles();
+  $is_owner = in_array('hotel_owner', $roles, TRUE);
+  $is_client = in_array('hotel_client', $roles, TRUE);
   if (!$is_owner && !$is_client) {
     return;
   }
