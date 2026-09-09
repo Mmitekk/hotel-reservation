@@ -30,8 +30,14 @@ class HotelReservationRouteSubscriber extends RouteSubscriberBase {
       $requirements['_custom_access'] = '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessReservations';
       $route->setRequirements($requirements);
     }
-    // Owner may create and delete reservations; edit stays admin-only
-    // (owners change status via the dedicated route instead).
+    // Owner may create, edit and delete reservations (status changes are
+    // also available via the dedicated route).
+    if ($route = $collection->get('entity.hr_reservation.edit-form')) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_permission'], $requirements['_entity_access']);
+      $requirements['_custom_access'] = '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessReservationEdit';
+      $route->setRequirements($requirements);
+    }
     if ($route = $collection->get('entity.hr_reservation.add-form')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission'], $requirements['_entity_access'], $requirements['_entity_create_access']);

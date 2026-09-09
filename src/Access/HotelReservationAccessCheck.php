@@ -129,6 +129,13 @@ class HotelReservationAccessCheck {
   }
 
   /**
+   * Checks access to the reservation edit form.
+   */
+  public function accessReservationEdit(AccountInterface $account): AccessResultInterface {
+    return $this->adminOrOwner($account);
+  }
+
+  /**
    * Checks access to reservation status changes.
    */
   public function accessReservationStatus(AccountInterface $account): AccessResultInterface {
