@@ -38,6 +38,18 @@
   text-decoration: none;
 }
 
+.hr-account-menu__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hr-account-menu__group--profile {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 4px;
+  padding-top: 8px;
+}
+
 @media (max-width: 640px) {
   .hr-account-menu {
     top: auto;
@@ -47,6 +59,18 @@
     transform: none;
     flex-direction: row;
     overflow-x: auto;
+  }
+
+  .hr-account-menu__group {
+    flex-direction: row;
+    flex: 0 0 auto;
+  }
+
+  .hr-account-menu__group--profile {
+    border-top: none;
+    border-left: 1px solid #e5e7eb;
+    margin: 0 0 0 4px;
+    padding: 0 0 0 8px;
   }
 
   .hr-account-menu__link {

@@ -519,25 +519,31 @@ function hotel_reservation_page_top(array &$page_top) {
     ];
   }
   $uid = (int) $account->id();
-  $links[] = ['title' => t('Профиль'), 'route' => 'entity.user.canonical', 'params' => ['user' => $uid]];
-  $links[] = ['title' => t('Редактировать'), 'route' => 'entity.user.edit_form', 'params' => ['user' => $uid]];
-  $links[] = ['title' => t('Выход'), 'route' => 'user.logout'];
-  $items = [];
-  foreach ($links as $link) {
-    try {
-      $url = \Drupal\Core\Url::fromRoute($link['route'], $link['params'] ?? []);
+  $build_links = function (array $links) {
+    $items = [];
+    foreach ($links as $link) {
+      try {
+        $url = \Drupal\Core\Url::fromRoute($link['route'], $link['params'] ?? []);
+      }
+      catch (\Exception $e) {
+        continue;
+      }
+      $items[] = [
+        '#type' => 'link',
+        '#title' => $link['title'],
+        '#url' => $url,
+        '#attributes' => ['class' => ['hr-account-menu__link']],
+      ];
     }
-    catch (\Exception $e) {
-      continue;
-    }
-    $items[] = [
-      '#type' => 'link',
-      '#title' => $link['title'],
-      '#url' => $url,
-      '#attributes' => ['class' => ['hr-account-menu__link']],
-    ];
-  }
-  if (empty($items)) {
+    return $items;
+  };
+  $module_items = $build_links($links);
+  $profile_items = $build_links([
+    ['title' => t('Профиль'), 'route' => 'entity.user.canonical', 'params' => ['user' => $uid]],
+    ['title' => t('Редактировать'), 'route' => 'entity.user.edit_form', 'params' => ['user' => $uid]],
+    ['title' => t('Выход'), 'route' => 'user.logout'],
+  ]);
+  if (empty($module_items) && empty($profile_items)) {
     return;
   }
   $page_top['hotel_reservation_account_menu'] = [
@@ -547,7 +553,16 @@ function hotel_reservation_page_top(array &$page_top) {
     '#cache' => [
       'contexts' => ['user.roles', 'user'],
     ],
-    'links' => $items,
+    'module' => [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['hr-account-menu__group']],
+      'links' => $module_items,
+    ],
+    'profile' => [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['hr-account-menu__group', 'hr-account-menu__group--profile']],
+      'links' => $profile_items,
+    ],
   ];
 }
 

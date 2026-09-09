@@ -73,13 +73,13 @@ room-comparison:
     - hotel_reservation/room-modal
 
 my-bookings:
-  version: 1.23.0
+  version: 1.23.2
   css:
     theme:
       css/my-bookings.css: {}
 
 account-menu:
-  version: 1.23.0
+  version: 1.23.2
   css:
     theme:
       css/account-menu.css: {}
