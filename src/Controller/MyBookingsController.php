@@ -42,22 +42,53 @@ class MyBookingsController extends ControllerBase {
       }
       $ids = $query
         ->condition($or)
-        ->sort('check_in', 'DESC')
         ->execute();
     }
     elseif ($email !== '') {
       $ids = $query
         ->condition('guest_email', $email)
-        ->sort('check_in', 'DESC')
         ->execute();
     }
     else {
       $ids = [];
     }
 
+    // Phone fallback: same person, different account (or a booking made
+    // before the uid link existed). Phone formats differ
+    // ("+7 (999) 123-45-67" vs "79991234567"), so normalize in PHP.
+    $account_digits = preg_replace('/\D/', '', (string) $account->getAccountName());
+    if (strlen($account_digits) >= 10) {
+      if (strlen($account_digits) === 11 && $account_digits[0] === '8') {
+        $account_digits = '7' . substr($account_digits, 1);
+      }
+      try {
+        $all_ids = $storage->getQuery()->accessCheck(FALSE)->execute();
+        $rest = array_values(array_diff(array_values($all_ids), array_values($ids)));
+        foreach (array_chunk($rest, 200) as $chunk) {
+          foreach ($storage->loadMultiple($chunk) as $reservation) {
+            $phone_digits = preg_replace('/\D/', '', (string) $reservation->get('guest_phone')->value);
+            if (strlen($phone_digits) === 11 && $phone_digits[0] === '8') {
+              $phone_digits = '7' . substr($phone_digits, 1);
+            }
+            if ($phone_digits !== '' && $phone_digits === $account_digits) {
+              $ids[] = $reservation->id();
+            }
+          }
+        }
+      }
+      catch (\Throwable $e) {
+        $this->getLogger('hotel_reservation')->warning('Phone fallback for my-bookings failed: @message', ['@message' => $e->getMessage()]);
+      }
+    }
+
     if (!empty($ids)) {
         /** @var \Drupal\hotel_reservation\Entity\Reservation[] $reservations */
         $reservations = $storage->loadMultiple($ids);
+        uasort($reservations, function ($a, $b) {
+          $a_date = $a->getCheckInDate() ? (int) $a->getCheckInDate()->format('U') : 0;
+          $b_date = $b->getCheckInDate() ? (int) $b->getCheckInDate()->format('U') : 0;
+          return $b_date <=> $a_date;
+        });
         foreach ($reservations as $reservation) {
           $room = $reservation->getRoom();
           $check_in = $reservation->getCheckInDate();
