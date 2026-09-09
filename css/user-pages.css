@@ -1,0 +1,87 @@
+/**
+ * @file
+ * Light styling for core user profile pages (view/edit).
+ */
+
+body.path-user .region-content {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(17, 24, 39, 0.06);
+}
+
+body.path-user nav.tabs ul.tabs.primary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 0;
+  border-bottom: none;
+}
+
+body.path-user nav.tabs ul.tabs.primary li {
+  margin: 0;
+}
+
+body.path-user nav.tabs ul.tabs.primary li a {
+  display: block;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid transparent;
+  color: #374151;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+body.path-user nav.tabs ul.tabs.primary li a:hover {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+body.path-user nav.tabs ul.tabs.primary li.is-active a {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #fff;
+}
+
+body.path-user .user-form .form-text,
+body.path-user .user-form .form-email,
+body.path-user .user-form .form-select {
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+body.path-user .user-form .form-item {
+  margin-bottom: 18px;
+}
+
+body.path-user .user-form .description {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+body.path-user .user-form .button--primary {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  border-radius: 10px;
+  padding: 10px 28px;
+  font-size: 15px;
+}
+
+body.path-user .user-form .button--primary:hover {
+  background: #6d28d9;
+  border-color: #6d28d9;
+}
+
+body.path-user .user-form details {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+}

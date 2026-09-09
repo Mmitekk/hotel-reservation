@@ -73,10 +73,22 @@ room-comparison:
     - hotel_reservation/room-modal
 
 my-bookings:
-  version: 1.15.0
+  version: 1.23.0
   css:
     theme:
       css/my-bookings.css: {}
+
+account-menu:
+  version: 1.23.0
+  css:
+    theme:
+      css/account-menu.css: {}
+
+user-pages:
+  version: 1.23.0
+  css:
+    theme:
+      css/user-pages.css: {}
 
 set-password:
   version: 1.18.0

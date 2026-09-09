@@ -3,6 +3,13 @@
  * Guest's own bookings ("Мои бронирования") page.
  */
 
+.hr-mybookings__title {
+  font-size: 28px;
+  line-height: 1.25;
+  margin: 0 0 4px;
+  color: #111827;
+}
+
 .hr-mybookings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

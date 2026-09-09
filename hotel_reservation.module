@@ -487,3 +487,77 @@ function hotel_reservation_get_mail_text(string $key): string {
   }
   return hotel_reservation_default_mail_text($key);
 }
+
+/**
+ * Implements hook_page_top().
+ *
+ * Fixed account menu for hotel guests and owners: cabinet links plus
+ * profile view/edit/logout, always visible on the right side of the page.
+ */
+function hotel_reservation_page_top(array &$page_top) {
+  $account = \Drupal::currentUser();
+  if ($account->isAnonymous()) {
+    return;
+  }
+  $is_owner = $account->hasRole('hotel_owner');
+  $is_client = $account->hasRole('hotel_client');
+  if (!$is_owner && !$is_client) {
+    return;
+  }
+  if ($is_owner) {
+    $links = [
+      ['title' => t('Панель'), 'route' => 'hotel_reservation.dashboard'],
+      ['title' => t('Бронирования'), 'route' => 'entity.hr_reservation.collection'],
+      ['title' => t('Календарь'), 'route' => 'hotel_reservation.calendar'],
+      ['title' => t('Аналитика'), 'route' => 'hotel_reservation.analytics'],
+    ];
+  }
+  else {
+    $links = [
+      ['title' => t('Мои бронирования'), 'route' => 'hotel_reservation.my_bookings'],
+    ];
+  }
+  $uid = (int) $account->id();
+  $links[] = ['title' => t('Профиль'), 'route' => 'entity.user.canonical', 'params' => ['user' => $uid]];
+  $links[] = ['title' => t('Редактировать'), 'route' => 'entity.user.edit_form', 'params' => ['user' => $uid]];
+  $links[] = ['title' => t('Выход'), 'route' => 'user.logout'];
+  $items = [];
+  foreach ($links as $link) {
+    try {
+      $url = \Drupal\Core\Url::fromRoute($link['route'], $link['params'] ?? []);
+    }
+    catch (\Exception $e) {
+      continue;
+    }
+    $items[] = [
+      '#type' => 'link',
+      '#title' => $link['title'],
+      '#url' => $url,
+      '#attributes' => ['class' => ['hr-account-menu__link']],
+    ];
+  }
+  if (empty($items)) {
+    return;
+  }
+  $page_top['hotel_reservation_account_menu'] = [
+    '#type' => 'container',
+    '#attributes' => ['class' => ['hr-account-menu']],
+    '#attached' => ['library' => ['hotel_reservation/account-menu']],
+    '#cache' => [
+      'contexts' => ['user.roles', 'user'],
+    ],
+    'links' => $items,
+  ];
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Light styling for core user profile pages (view/edit).
+ */
+function hotel_reservation_page_attachments(array &$attachments) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if (in_array($route_name, ['entity.user.canonical', 'entity.user.edit_form'], TRUE)) {
+    $attachments['#attached']['library'][] = 'hotel_reservation/user-pages';
+  }
+}
