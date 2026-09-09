@@ -103,6 +103,32 @@ class HotelReservationAccessCheck {
   }
 
   /**
+   * Full admin access or the hotel_owner role.
+   *
+   * Role-based on purpose: the generic 'create hotel reservation'
+   * permission may be held by guest accounts, so it must not open admin
+   * forms.
+   */
+  protected function adminOrOwner(AccountInterface $account): AccessResultInterface {
+    return AccessResult::allowedIfHasPermission($account, 'administer hotel reservation')
+      ->orIf(AccessResult::allowedIf($account->hasRole('hotel_owner')));
+  }
+
+  /**
+   * Checks access to the reservation add form.
+   */
+  public function accessReservationCreate(AccountInterface $account): AccessResultInterface {
+    return $this->adminOrOwner($account);
+  }
+
+  /**
+   * Checks access to the reservation delete form.
+   */
+  public function accessReservationDelete(AccountInterface $account): AccessResultInterface {
+    return $this->adminOrOwner($account);
+  }
+
+  /**
    * Checks access to reservation status changes.
    */
   public function accessReservationStatus(AccountInterface $account): AccessResultInterface {
