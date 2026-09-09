@@ -50,3 +50,10 @@ hotel_reservation.settings_menu:
   route_name: hotel_reservation.settings
   parent: hotel_reservation.admin
   weight: 10
+
+hotel_reservation.my_bookings:
+  title: 'Мои бронирования'
+  description: 'Мои бронирования номеров.'
+  route_name: hotel_reservation.my_bookings
+  menu_name: account
+  weight: 10
