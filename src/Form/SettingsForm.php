@@ -335,6 +335,21 @@ class SettingsForm extends ConfigFormBase {
     $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
     $owner_exists = (bool) $role_storage->load('hotel_owner');
     $guest_exists = (bool) $role_storage->load('hotel_client');
+    $forbidden = \Drupal\hotel_reservation\Access\HotelReservationAccessCheck::revokedAdminPermissions();
+    $bad_roles = [];
+    foreach (['hotel_owner' => 'Владелец отеля', 'hotel_client' => 'Клиент отеля'] as $role_id => $role_label) {
+      $role = $role_storage->load($role_id);
+      if ($role && array_intersect($forbidden, $role->getPermissions())) {
+        $bad_roles[] = $role_label;
+      }
+    }
+    if (!empty($bad_roles)) {
+      $form['client_role']['warning'] = [
+        '#markup' => '<p><strong>' . $this->t('У ролей (@roles) есть лишние админ-права (тулбар, страницы администрирования). Просто сохраните эту форму — права будут сняты автоматически.', [
+          '@roles' => implode(', ', $bad_roles),
+        ]) . '</strong></p>',
+      ];
+    }
     if ($owner_exists && $guest_exists) {
       $form['client_role']['info'] = [
         '#markup' => '<p>' . $this->t('Обе роли существуют. Создайте пользователей на странице <a href=":url">Люди → Добавить пользователя</a> и назначьте им нужную роль.', [
@@ -452,6 +467,9 @@ class SettingsForm extends ConfigFormBase {
       }
       foreach ($definition['permissions'] as $permission) {
         $role->grantPermission($permission);
+      }
+      foreach (\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::revokedAdminPermissions() as $permission) {
+        $role->revokePermission($permission);
       }
       $role->save();
     }
