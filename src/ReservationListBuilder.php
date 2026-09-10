@@ -416,6 +416,9 @@ class ReservationListBuilder extends EntityListBuilder {
       '#type' => 'pager',
     ];
 
+    $build['#prefix'] = '<div class="wrapper"><div class="hr-reservations-list">';
+    $build['#suffix'] = '</div></div>';
+
     return $build;
   }
 

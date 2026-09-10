@@ -34,8 +34,8 @@
 .hr-calendar-table .hr-calendar-room-name {
   text-align: left;
   font-weight: 600;
-  white-space: nowrap;
-  min-width: 160px;
+  white-space: normal;
+  min-width: 230px;
   background: #f9fafb;
   position: sticky;
   left: 0;

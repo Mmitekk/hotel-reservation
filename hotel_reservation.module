@@ -569,11 +569,33 @@ function hotel_reservation_page_top(array &$page_top) {
 /**
  * Implements hook_page_attachments().
  *
- * Light styling for core user profile pages (view/edit).
+ * Light styling for core user profile pages (view/edit) and admin styles
+ * on all module pages (entity admin pages have no template of their own).
  */
 function hotel_reservation_page_attachments(array &$attachments) {
-  $route_name = \Drupal::routeMatch()->getRouteName();
+  $route_name = (string) \Drupal::routeMatch()->getRouteName();
   if (in_array($route_name, ['entity.user.canonical', 'entity.user.edit_form'], TRUE)) {
     $attachments['#attached']['library'][] = 'hotel_reservation/user-pages';
   }
+  if (strpos($route_name, 'hotel_reservation.') === 0 || strpos($route_name, 'entity.hr_') === 0) {
+    $attachments['#attached']['library'][] = 'hotel_reservation/admin-styles';
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ *
+ * Wraps core user profile pages (view/edit) in the theme .wrapper container
+ * for consistent gutters with the rest of the site.
+ */
+function hotel_reservation_preprocess_page(&$variables) {
+  $route_name = (string) \Drupal::routeMatch()->getRouteName();
+  if (!in_array($route_name, ['entity.user.canonical', 'entity.user.edit_form'], TRUE)) {
+    return;
+  }
+  if (!isset($variables['page']['content'])) {
+    return;
+  }
+  $variables['page']['content']['#prefix'] = '<div class="wrapper">';
+  $variables['page']['content']['#suffix'] = '</div>';
 }
