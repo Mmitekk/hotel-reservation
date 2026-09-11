@@ -279,10 +279,13 @@ class ReservationListBuilder extends EntityListBuilder {
     $total_price = number_format((float) $entity->get('total_price')->value, 2, '.', ' ') . ' ' . $this->currencySymbol;
     $row['total_price'] = $total_price;
 
-    // Operations: edit/delete for full admins, status changes also for
-    // users with the status permission (e.g. hotel_owner role).
+    // Operations: edit/delete for full admins and the hotel_owner role,
+    // status changes also for users with the status permission.
+    $account = \Drupal::currentUser();
+    $can_manage = $account->hasPermission('administer hotel reservation')
+      || in_array('hotel_owner', $account->getRoles(), TRUE);
     $operations = [];
-    if (\Drupal::currentUser()->hasPermission('administer hotel reservation')) {
+    if ($can_manage) {
       $operations['edit'] = [
         'title' => $this->t('Изменить'),
         'url' => $entity->toUrl('edit-form'),
@@ -363,6 +366,17 @@ class ReservationListBuilder extends EntityListBuilder {
       '#markup' => '<h1 class="hr-admin-page-title">' . $this->t('Бронирования') . '</h1>',
       '#weight' => -100,
     ];
+    $account = \Drupal::currentUser();
+    if ($account->hasPermission('administer hotel reservation')
+      || in_array('hotel_owner', $account->getRoles(), TRUE)) {
+      $build['add_button'] = [
+        '#type' => 'link',
+        '#title' => $this->t('＋ Добавить бронь'),
+        '#url' => Url::fromRoute('entity.hr_reservation.add-form'),
+        '#attributes' => ['class' => ['button', 'button--primary', 'hr-reservations-list__add']],
+        '#weight' => -90,
+      ];
+    }
     $build['filter'] = $this->buildFilterForm();
 
     // Build export URL with current filter params preserved.

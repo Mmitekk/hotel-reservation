@@ -99,6 +99,11 @@ function hotel_reservation_theme($existing, $type, $theme, $path) {
       'variables' => [
         'reservation' => NULL,
         'room' => NULL,
+        'reservation_id' => NULL,
+        'room_name' => '',
+        'status_label' => '',
+        'check_in_date' => '',
+        'check_out_date' => '',
         'currency' => '₽',
         'hotel_name' => '',
         'check_in_time' => '14:00',
@@ -347,27 +352,17 @@ function hotel_reservation_form_user_form_alter(&$form, FormStateInterface $form
 }
 
 /**
- * Implements hook_preprocess_hr_reservation().
+ * Implements hook_form_alter().
  *
- * Wraps the reservation view page in the theme .wrapper container with a
- * heading and card styling hooks.
+ * Wraps reservation entity forms (add/edit/delete) in the theme .wrapper
+ * container with card styling hooks.
  */
-function hotel_reservation_preprocess_hr_reservation(&$variables) {
-  if (!isset($variables['content']) || !is_array($variables['content'])) {
+function hotel_reservation_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (strpos((string) $form_id, 'hr_reservation') !== 0) {
     return;
   }
-  /** @var \Drupal\hotel_reservation\Entity\Reservation $reservation */
-  $reservation = $variables['elements']['#hr_reservation'] ?? NULL;
-  $title = t('Бронирование');
-  if ($reservation) {
-    $title = t('Бронирование №@id', ['@id' => $reservation->id()]);
-  }
-  $variables['content']['hr_page_title'] = [
-    '#markup' => '<h1 class="hr-res-page__title">' . $title . '</h1>',
-    '#weight' => -100,
-  ];
-  $variables['content']['#prefix'] = '<div class="wrapper"><div class="hr-res-page">';
-  $variables['content']['#suffix'] = '</div></div>';
+  $form['#prefix'] = '<div class="wrapper"><div class="hr-entity-form">';
+  $form['#suffix'] = '</div></div>';
 }
 
 /**
@@ -579,6 +574,7 @@ function hotel_reservation_page_top(array &$page_top) {
     $links = [
       ['title' => t('Панель'), 'route' => 'hotel_reservation.dashboard'],
       ['title' => t('Бронирования'), 'route' => 'entity.hr_reservation.collection'],
+      ['title' => t('Добавить бронь'), 'route' => 'entity.hr_reservation.add-form'],
       ['title' => t('Календарь'), 'route' => 'hotel_reservation.calendar'],
       ['title' => t('Аналитика'), 'route' => 'hotel_reservation.analytics'],
     ];

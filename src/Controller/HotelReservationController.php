@@ -41,6 +41,38 @@ class HotelReservationController extends ControllerBase {
   }
 
   /**
+   * Displays a single reservation (canonical page).
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $hr_reservation
+   *   The reservation entity from route upcasting.
+   *
+   * @return array
+   *   A render array.
+   */
+  public function viewReservation(EntityInterface $hr_reservation) {
+    $config = $this->config('hotel_reservation.settings');
+    $room_name = $this->t('Номер удалён');
+    if (!$hr_reservation->get('room_id')->isEmpty() && $hr_reservation->get('room_id')->entity) {
+      $room_name = $hr_reservation->get('room_id')->entity->label();
+    }
+    $check_in = $hr_reservation->getCheckInDate() ? $hr_reservation->getCheckInDate()->format('d.m.Y') : '—';
+    $check_out = $hr_reservation->getCheckOutDate() ? $hr_reservation->getCheckOutDate()->format('d.m.Y') : '—';
+    return [
+      '#theme' => 'hotel_reservation_view',
+      '#reservation' => $hr_reservation,
+      '#reservation_id' => (int) $hr_reservation->id(),
+      '#room_name' => $room_name,
+      '#status_label' => $hr_reservation->getStatusLabel(),
+      '#check_in_date' => $check_in,
+      '#check_out_date' => $check_out,
+      '#currency' => $config->get('currency_symbol') ?: '₽',
+      '#hotel_name' => $config->get('hotel_name') ?: $this->config('system.site')->get('name'),
+      '#check_in_time' => $config->get('check_in_time') ?: '14:00',
+      '#check_out_time' => $config->get('check_out_time') ?: '12:00',
+    ];
+  }
+
+  /**
    * Status letter mapping for the calendar.
    */
   protected function getStatusLetter($status) {

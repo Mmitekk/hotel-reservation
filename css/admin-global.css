@@ -696,41 +696,49 @@
   background: var(--hr-admin-bg-alt);
 }
 
-/* Reservation view page. */
-.hr-res-page {
+/* Reservation entity forms (add/edit/delete) in the frontend theme. */
+.hr-entity-form {
   background: var(--hr-admin-bg);
   border: 1px solid var(--hr-admin-border);
   border-radius: var(--hr-admin-radius);
   box-shadow: var(--hr-admin-shadow);
   padding: 24px;
+  max-width: 880px;
 }
 
-.hr-res-page__title {
-  font-size: 28px;
-  line-height: 1.25;
-  margin: 0 0 20px;
-  color: var(--hr-admin-text);
+.hr-entity-form .form-item {
+  margin-bottom: 16px;
 }
 
-.hr-res-page .field {
-  display: flex;
-  gap: 12px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--hr-admin-border-light);
+.hr-entity-form .form-text,
+.hr-entity-form .form-tel,
+.hr-entity-form .form-email,
+.hr-entity-form .form-number,
+.hr-entity-form .form-date,
+.hr-entity-form .form-select,
+.hr-entity-form textarea {
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 14px;
+  border: 1px solid var(--hr-admin-border);
+  border-radius: var(--hr-admin-radius-sm);
+  font-size: 15px;
 }
 
-.hr-res-page .field:last-child {
-  border-bottom: none;
-}
-
-.hr-res-page .field__label {
-  flex: 0 0 170px;
-  font-weight: 600;
+.hr-entity-form .description {
   color: var(--hr-admin-text-muted);
+  font-size: 13px;
 }
 
-.hr-res-page .field__items {
-  margin: 0;
+.hr-entity-form .form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hr-reservations-list__add {
+  margin-bottom: 16px;
 }
 
 /* Core .visually-hidden may be missing in the frontend theme: hide the

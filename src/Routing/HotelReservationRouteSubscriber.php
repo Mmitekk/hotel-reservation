@@ -29,6 +29,7 @@ class HotelReservationRouteSubscriber extends RouteSubscriberBase {
       unset($requirements['_permission'], $requirements['_entity_access']);
       $requirements['_custom_access'] = '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessReservations';
       $route->setRequirements($requirements);
+      $route->setDefault('_controller', '\Drupal\hotel_reservation\Controller\HotelReservationController::viewReservation');
     }
     // Owner may create, edit and delete reservations (status changes are
     // also available via the dedicated route).

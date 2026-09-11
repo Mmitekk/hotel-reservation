@@ -11,10 +11,12 @@
 
 {{ attach_library('hotel_reservation/admin-styles') }}
 
+<div class="wrapper">
+<h1 class="hr-admin-page-title">{{ 'Бронирование №@id'|t({'@id': reservation_id}) }}</h1>
 <div class="hr-res-view">
   <div class="hr-res-view__header">
     <div class="hr-res-view__logo">{{ hotel_name }}</div>
-    <div class="hr-res-view__subtitle">{{ 'Ваучер на бронирование'|t }} #{{ reservation.id.value }}</div>
+    <div class="hr-res-view__subtitle">{{ 'Ваучер на бронирование'|t }} #{{ reservation_id }}</div>
   </div>
 
   <div class="hr-res-view__grid">
@@ -47,19 +49,19 @@
         <h3 class="hr-res-view__section-title">{{ 'Детали бронирования'|t }}</h3>
         <div class="hr-res-view__field">
           <span class="hr-res-view__label">{{ 'Номер'|t }}</span>
-          <span class="hr-res-view__value">{{ room.label }}</span>
+          <span class="hr-res-view__value">{{ room_name }}</span>
         </div>
         <div class="hr-res-view__field">
           <span class="hr-res-view__label">{{ 'Заезд'|t }}</span>
-          <span class="hr-res-view__value">{{ check_in_time }}</span>
+          <span class="hr-res-view__value">{{ check_in_date }} · {{ check_in_time }}</span>
         </div>
         <div class="hr-res-view__field">
           <span class="hr-res-view__label">{{ 'Выезд'|t }}</span>
-          <span class="hr-res-view__value">{{ check_out_time }}</span>
+          <span class="hr-res-view__value">{{ check_out_date }} · {{ check_out_time }}</span>
         </div>
         <div class="hr-res-view__field">
           <span class="hr-res-view__label">{{ 'Статус'|t }}</span>
-          <span class="hr-res-view__value hr-res-view__status hr-res-view__status--{{ reservation.status.value }}">{{ reservation.getStatusLabel() }}</span>
+          <span class="hr-res-view__value hr-res-view__status hr-res-view__status--{{ reservation.status.value }}">{{ status_label }}</span>
         </div>
       </div>
     </div>
@@ -82,6 +84,7 @@
   <div class="hr-res-view__footer">
     <p>{{ 'Создано: @date'|t({'@date': reservation.created.value|date('d.m.Y H:i') }) }}</p>
   </div>
+</div>
 </div>
 
 <style>
