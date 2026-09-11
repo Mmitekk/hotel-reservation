@@ -705,7 +705,9 @@
 
 .hr-res-ops .hr-op-button {
   padding: 4px 12px;
-  font-size: 13px;
+  min-width: 34px;
+  text-align: center;
+  font-size: 15px;
   line-height: 1.4;
   border-radius: 8px;
   text-decoration: none;
