@@ -109,9 +109,13 @@ class ReservationForm extends ContentEntityForm {
       ];
     }
 
-    // Datelist parts (day/month/year) sometimes render titles with a
-    // trailing colon ("День :") and a detached required marker: strip the
-    // colon so theming stays on one line.
+    // Datelist parts get explicit titles with an even colon ("День:").
+    // The theme's own colon/marker decorations are neutralized in CSS.
+    $part_titles = [
+      'day' => $this->t('День:'),
+      'month' => $this->t('Месяц:'),
+      'year' => $this->t('Год:'),
+    ];
     foreach (['check_in', 'check_out'] as $field_name) {
       if (!isset($form[$field_name]['widget'][0]) || !is_array($form[$field_name]['widget'][0])) {
         continue;
@@ -121,10 +125,9 @@ class ReservationForm extends ContentEntityForm {
         $containers[] = &$form[$field_name]['widget'][0]['value'];
       }
       foreach ($containers as &$container) {
-        foreach (['day', 'month', 'year', 'hour', 'minute'] as $part) {
-          if (isset($container[$part]['#title'])) {
-            $clean = preg_replace('/\s*:\s*$/u', '', trim((string) $container[$part]['#title']));
-            $container[$part]['#title'] = $clean;
+        foreach ($part_titles as $part => $title) {
+          if (isset($container[$part])) {
+            $container[$part]['#title'] = $title;
           }
         }
       }

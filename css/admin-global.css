@@ -852,14 +852,20 @@
   font-size: 13px;
 }
 
-/* Datelist part labels (day/month/year): keep title and required marker
-   on one line. */
-.hr-entity-form .form-type-datelist label {
-  display: inline-block;
+/* Neutralize theme label decorations inside our forms: titles already
+   carry an even colon, the required marker stays inline after the text. */
+.hr-entity-form label::after {
+  content: none !important;
 }
 
-.hr-entity-form .form-type-datelist .form-required {
-  display: inline-block;
+.hr-entity-form label {
+  flex-direction: row;
+}
+
+.hr-entity-form label .form-required {
+  display: inline !important;
+  float: none !important;
+  position: static !important;
   vertical-align: baseline;
 }
 
