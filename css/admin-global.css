@@ -852,6 +852,17 @@
   font-size: 13px;
 }
 
+/* Datelist part labels (day/month/year): keep title and required marker
+   on one line. */
+.hr-entity-form .form-type-datelist label {
+  display: inline-block;
+}
+
+.hr-entity-form .form-type-datelist .form-required {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
 .hr-entity-form .form-actions {
   margin-top: 20px;
   display: flex;

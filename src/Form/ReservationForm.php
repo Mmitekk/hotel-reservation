@@ -67,8 +67,14 @@ class ReservationForm extends ContentEntityForm {
         'progress' => ['type' => 'throbber', 'message' => $this->t('Расчёт цены...')],
       ],
     ];
+    $form['hr_title'] = [
+      '#markup' => '<h1 class="hr-admin-page-title">' . ($entity->isNew() ? $this->t('Добавить бронь') : $this->t('Редактировать бронь №@id', ['@id' => $entity->id()])) . '</h1>',
+      '#weight' => -100,
+    ];
     if (isset($form['room_id']['widget'][0]['target_id'])) {
       $form['room_id']['widget'][0]['target_id'] = $room_select;
+      $form['room_id']['widget']['#title'] = $this->t('Номер');
+      $form['room_id']['widget']['#required'] = TRUE;
     }
     else {
       $form['room_id'] = [
@@ -101,6 +107,28 @@ class ReservationForm extends ContentEntityForm {
         'event' => 'change',
         'progress' => ['type' => 'throbber', 'message' => $this->t('Расчёт цены...')],
       ];
+    }
+
+    // Datelist parts (day/month/year) sometimes render titles with a
+    // trailing colon ("День :") and a detached required marker: strip the
+    // colon so theming stays on one line.
+    foreach (['check_in', 'check_out'] as $field_name) {
+      if (!isset($form[$field_name]['widget'][0]) || !is_array($form[$field_name]['widget'][0])) {
+        continue;
+      }
+      $containers = [&$form[$field_name]['widget'][0]];
+      if (isset($form[$field_name]['widget'][0]['value']) && is_array($form[$field_name]['widget'][0]['value'])) {
+        $containers[] = &$form[$field_name]['widget'][0]['value'];
+      }
+      foreach ($containers as &$container) {
+        foreach (['day', 'month', 'year', 'hour', 'minute'] as $part) {
+          if (isset($container[$part]['#title'])) {
+            $clean = preg_replace('/\s*:\s*$/u', '', trim((string) $container[$part]['#title']));
+            $container[$part]['#title'] = $clean;
+          }
+        }
+      }
+      unset($container);
     }
 
     // Build the initial price breakdown.
