@@ -110,8 +110,11 @@ class HotelReservationAccessCheck {
    * forms.
    */
   protected function adminOrOwner(AccountInterface $account): AccessResultInterface {
+    // getRoles() is interface-guaranteed; hasRole() exists only on the user
+    // entity and may not be available on every account implementation.
+    $is_owner = in_array('hotel_owner', $account->getRoles(), TRUE);
     return AccessResult::allowedIfHasPermission($account, 'administer hotel reservation')
-      ->orIf(AccessResult::allowedIf($account->hasRole('hotel_owner')));
+      ->orIf(AccessResult::allowedIf($is_owner));
   }
 
   /**
