@@ -689,6 +689,26 @@
   background: var(--hr-admin-bg-alt);
 }
 
+/* Core .visually-hidden may be missing in the frontend theme: hide the
+   tablesort indicator text locally so it never overlaps headers. */
+.hr-reservations-list .visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* The frontend theme may force table-layout: fixed, which ignores column
+   min-widths. Revert to auto so the room column keeps its width. */
+.hr-calendar-container .hr-calendar-table {
+  table-layout: auto;
+}
+
 /* Export link style */
 .hr-admin-export-link {
   display: inline-flex;

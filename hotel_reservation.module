@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\block\Entity\Block;
 
 /**
  * Implements hook_help().
@@ -324,8 +325,32 @@ function hotel_reservation_room_type_allowed_values(): array {
  * 'use_page_content_section' configuration is enabled. This ensures the
  * class wraps BOTH the block title and content (not just the content).
  */
+/**
+ * Implements hook_block_access().
+ *
+ * Hides core local tasks (tabs) from hotel roles: their navigation lives
+ * in the fixed account menu instead.
+ */
+function hotel_reservation_block_access(Block $block, $operation, AccountInterface $account) {
+  if ($operation === 'view' && $block->getPluginId() === 'local_tasks_block') {
+    $roles = $account->getRoles();
+    if (in_array('hotel_owner', $roles, TRUE) || in_array('hotel_client', $roles, TRUE)) {
+      return AccessResult::forbidden()->addCacheContexts(['user.roles']);
+    }
+  }
+  return AccessResult::neutral();
+}
+
 function hotel_reservation_preprocess_block(&$variables) {
   $plugin_id = $variables['elements']['#plugin_id'] ?? '';
+  // Main content on user profile pages gets the theme .wrapper container.
+  if ($plugin_id === 'system_main_block') {
+    $route_name = (string) \Drupal::routeMatch()->getRouteName();
+    if (in_array($route_name, ['entity.user.canonical', 'entity.user.edit_form'], TRUE)) {
+      $variables['attributes']['class'][] = 'wrapper';
+    }
+    return;
+  }
   $our_blocks = [
     'hotel_reservation_booking_form',
     'hotel_reservation_rooms',
@@ -582,20 +607,4 @@ function hotel_reservation_page_attachments(array &$attachments) {
   }
 }
 
-/**
- * Implements hook_preprocess_page().
- *
- * Wraps core user profile pages (view/edit) in the theme .wrapper container
- * for consistent gutters with the rest of the site.
- */
-function hotel_reservation_preprocess_page(&$variables) {
-  $route_name = (string) \Drupal::routeMatch()->getRouteName();
-  if (!in_array($route_name, ['entity.user.canonical', 'entity.user.edit_form'], TRUE)) {
-    return;
-  }
-  if (!isset($variables['page']['content'])) {
-    return;
-  }
-  $variables['page']['content']['#prefix'] = '<div class="wrapper">';
-  $variables['page']['content']['#suffix'] = '</div>';
-}
+

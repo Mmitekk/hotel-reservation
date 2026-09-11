@@ -13,7 +13,7 @@ booking-form:
     - hotel_reservation/room-modal
 
 admin-styles:
-  version: 1.24.0
+  version: 1.24.1
   css:
     theme:
       css/admin-global.css: {}
