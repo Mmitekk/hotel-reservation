@@ -37,12 +37,13 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "uuid" = "uuid",
  *     "label" = "guest_name",
  *   },
- *   links = {
- *     "collection" = "/admin/hotel-reservation/reservations",
- *     "canonical" = "/admin/hotel-reservation/reservations/{hr_reservation}",
- *     "edit-form" = "/admin/hotel-reservation/reservations/{hr_reservation}/edit",
- *     "delete-form" = "/admin/hotel-reservation/reservations/{hr_reservation}/delete",
- *   },
+  *   links = {
+  *     "collection" = "/admin/hotel-reservation/reservations",
+  *     "canonical" = "/admin/hotel-reservation/reservations/{hr_reservation}",
+  *     "add-form" = "/admin/hotel-reservation/reservations/add",
+  *     "edit-form" = "/admin/hotel-reservation/reservations/{hr_reservation}/edit",
+  *     "delete-form" = "/admin/hotel-reservation/reservations/{hr_reservation}/delete",
+  *   },
  * )
  */
 class Reservation extends ContentEntityBase {

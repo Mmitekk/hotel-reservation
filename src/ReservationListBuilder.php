@@ -367,8 +367,16 @@ class ReservationListBuilder extends EntityListBuilder {
       '#weight' => -100,
     ];
     $account = \Drupal::currentUser();
-    if ($account->hasPermission('administer hotel reservation')
-      || in_array('hotel_owner', $account->getRoles(), TRUE)) {
+    $add_exists = FALSE;
+    try {
+      \Drupal::service('router.route_provider')->getRouteByName('entity.hr_reservation.add-form');
+      $add_exists = TRUE;
+    }
+    catch (\Exception $e) {
+      $add_exists = FALSE;
+    }
+    if ($add_exists && ($account->hasPermission('administer hotel reservation')
+      || in_array('hotel_owner', $account->getRoles(), TRUE))) {
       $build['add_button'] = [
         '#type' => 'link',
         '#title' => $this->t('＋ Добавить бронь'),

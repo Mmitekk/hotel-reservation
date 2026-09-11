@@ -587,8 +587,10 @@ function hotel_reservation_page_top(array &$page_top) {
   $uid = (int) $account->id();
   $build_links = function (array $links) {
     $items = [];
+    $route_provider = \Drupal::service('router.route_provider');
     foreach ($links as $link) {
       try {
+        $route_provider->getRouteByName($link['route']);
         $url = \Drupal\Core\Url::fromRoute($link['route'], $link['params'] ?? []);
       }
       catch (\Exception $e) {
