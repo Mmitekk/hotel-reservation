@@ -356,11 +356,11 @@ class ReservationListBuilder extends EntityListBuilder {
         }
         $icon_map = [
           'edit' => '✎',
-          'delete' => '🗑',
+          'delete' => '✕',
           'status_confirmed' => '✓',
-          'status_cancelled' => '✕',
-          'status_checked_in' => '🔑',
-          'status_checked_out' => '🚪',
+          'status_cancelled' => '⨯',
+          'status_checked_in' => '→',
+          'status_checked_out' => '←',
         ];
         $buttons[$key] = [
           '#type' => 'inline_template',

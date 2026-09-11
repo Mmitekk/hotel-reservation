@@ -642,9 +642,19 @@
 }
 
 .reservation-filter-actions .button {
-  font-size: 16px;
-  padding: 9px 16px;
+  font-size: 18px;
+  padding: 8px 14px;
   text-decoration: none;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 8px;
+  color: var(--hr-admin-text-muted) !important;
+}
+
+.reservation-filter-actions .button:hover {
+  background: var(--hr-admin-bg-alt) !important;
+  color: var(--hr-admin-text) !important;
 }
 
 @media (max-width: 900px) {
@@ -742,14 +752,26 @@
   border-radius: 8px;
   text-decoration: none;
   white-space: nowrap;
-  border: 1px solid var(--hr-admin-border);
-  background: #fff;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--hr-admin-text-muted);
+}
+
+.hr-res-ops .hr-op-button:hover {
+  background: var(--hr-admin-bg-alt);
   color: var(--hr-admin-text);
 }
 
 .hr-op-button__icon {
   font-size: 14px;
   line-height: 1;
+  filter: grayscale(1);
+  opacity: 0.75;
+}
+
+.hr-res-ops .hr-op-button:hover .hr-op-button__icon {
+  filter: none;
+  opacity: 1;
 }
 
 .hr-op-button__text {
@@ -764,44 +786,32 @@
 
 .hr-res-ops .hr-op-button--confirm,
 .hr-res-ops .hr-op-button--checkin {
-  background: #15803d;
-  border-color: #15803d;
-  color: #fff;
+  color: #15803d;
 }
 
 .hr-res-ops .hr-op-button--confirm:hover,
 .hr-res-ops .hr-op-button--checkin:hover {
-  background: #166534;
-  border-color: #166534;
-  color: #fff;
+  color: #166534;
 }
 
 .hr-res-ops .hr-op-button--checkout,
 .hr-res-ops .hr-op-button--edit {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-  color: #fff;
+  color: #1d4ed8;
 }
 
 .hr-res-ops .hr-op-button--checkout:hover,
 .hr-res-ops .hr-op-button--edit:hover {
-  background: #1e40af;
-  border-color: #1e40af;
-  color: #fff;
+  color: #1e40af;
 }
 
 .hr-res-ops .hr-op-button--cancel,
 .hr-res-ops .hr-op-button--delete {
-  background: #fff;
-  border-color: #dc2626;
-  color: #dc2626;
+  color: #b91c1c;
 }
 
 .hr-res-ops .hr-op-button--cancel:hover,
 .hr-res-ops .hr-op-button--delete:hover {
-  background: #dc2626;
-  border-color: #dc2626;
-  color: #fff;
+  color: #991b1b;
 }
 
 /* Reservation entity forms (add/edit/delete) in the frontend theme. */
@@ -846,7 +856,7 @@
 }
 
 .hr-reservations-list__add {
-  margin-bottom: 16px;
+  margin-bottom: 15px;
 }
 
 /* Core .visually-hidden may be missing in the frontend theme: hide the
