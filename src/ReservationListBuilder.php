@@ -129,7 +129,7 @@ class ReservationListBuilder extends EntityListBuilder {
       '#attributes' => [
         'type' => 'submit',
         'title' => (string) $this->t('Фильтр'),
-        'class' => ['button', 'button--primary'],
+        'class' => ['hr-filter-button'],
       ],
     ];
 
@@ -138,7 +138,7 @@ class ReservationListBuilder extends EntityListBuilder {
       '#title' => '↺',
       '#url' => Url::fromRoute('entity.hr_reservation.collection'),
       '#attributes' => [
-        'class' => ['button'],
+        'class' => ['hr-filter-button'],
         'title' => (string) $this->t('Сброс'),
       ],
     ];
@@ -469,10 +469,10 @@ class ReservationListBuilder extends EntityListBuilder {
 
     $build['filter']['buttons']['export'] = [
       '#type' => 'link',
-      '#title' => '📥',
+      '#title' => '⤓',
       '#url' => $export_url,
       '#attributes' => [
-        'class' => ['button', 'button--primary'],
+        'class' => ['hr-filter-button'],
         'title' => (string) $this->t('Экспорт CSV'),
       ],
     ];
