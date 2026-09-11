@@ -326,6 +326,51 @@ function hotel_reservation_room_type_allowed_values(): array {
  * class wraps BOTH the block title and content (not just the content).
  */
 /**
+ * Implements hook_form_user_form_alter().
+ *
+ * Adds a visible heading on the profile edit page of hotel users.
+ */
+function hotel_reservation_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  try {
+    $edited = $form_state->getFormObject()->getEntity();
+  }
+  catch (\Exception $e) {
+    return;
+  }
+  if (!$edited instanceof \Drupal\user\UserInterface) {
+    return;
+  }
+  if (!$edited->hasRole('hotel_owner') && !$edited->hasRole('hotel_client')) {
+    return;
+  }
+  $form['#prefix'] = '<h1 class="hr-user-form__title">' . t('Редактирование профиля') . '</h1>';
+}
+
+/**
+ * Implements hook_preprocess_hr_reservation().
+ *
+ * Wraps the reservation view page in the theme .wrapper container with a
+ * heading and card styling hooks.
+ */
+function hotel_reservation_preprocess_hr_reservation(&$variables) {
+  if (!isset($variables['content']) || !is_array($variables['content'])) {
+    return;
+  }
+  /** @var \Drupal\hotel_reservation\Entity\Reservation $reservation */
+  $reservation = $variables['elements']['#hr_reservation'] ?? NULL;
+  $title = t('Бронирование');
+  if ($reservation) {
+    $title = t('Бронирование №@id', ['@id' => $reservation->id()]);
+  }
+  $variables['content']['hr_page_title'] = [
+    '#markup' => '<h1 class="hr-res-page__title">' . $title . '</h1>',
+    '#weight' => -100,
+  ];
+  $variables['content']['#prefix'] = '<div class="wrapper"><div class="hr-res-page">';
+  $variables['content']['#suffix'] = '</div></div>';
+}
+
+/**
  * Implements hook_block_access().
  *
  * Hides core local tasks (tabs) from hotel roles: their navigation lives

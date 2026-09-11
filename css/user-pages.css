@@ -11,6 +11,13 @@ body.path-user .region-content {
   box-shadow: 0 2px 12px rgba(17, 24, 39, 0.06);
 }
 
+.hr-user-form__title {
+  font-size: 28px;
+  line-height: 1.25;
+  margin: 0 0 20px;
+  color: #111827;
+}
+
 body.path-user nav.tabs ul.tabs.primary {
   display: flex;
   flex-wrap: wrap;

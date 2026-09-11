@@ -45,12 +45,12 @@ class HotelReservationController extends ControllerBase {
    */
   protected function getStatusLetter($status) {
     $map = [
-      'pending' => 'P',
-      'confirmed' => 'C',
-      'checked_in' => 'I',
-      'checked_out' => 'O',
-      'cancelled' => 'X',
-      'expired' => 'E',
+      'pending' => 'П',
+      'confirmed' => 'Пд',
+      'checked_in' => 'З',
+      'checked_out' => 'В',
+      'cancelled' => 'Х',
+      'expired' => 'И',
     ];
     return $map[$status] ?? '?';
   }

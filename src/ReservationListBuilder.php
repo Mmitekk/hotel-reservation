@@ -359,6 +359,10 @@ class ReservationListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function render() {
+    $build['title'] = [
+      '#markup' => '<h1 class="hr-admin-page-title">' . $this->t('Бронирования') . '</h1>',
+      '#weight' => -100,
+    ];
     $build['filter'] = $this->buildFilterForm();
 
     // Build export URL with current filter params preserved.

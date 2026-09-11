@@ -638,6 +638,13 @@
   box-shadow: 0 2px 6px rgba(217, 119, 6, 0.2);
 }
 
+.hr-admin-page-title {
+  font-size: 28px;
+  line-height: 1.25;
+  margin: 0 0 20px;
+  color: var(--hr-admin-text);
+}
+
 .hr-reservations-list {
   background: var(--hr-admin-bg);
   border: 1px solid var(--hr-admin-border);
@@ -687,6 +694,43 @@
 
 .hr-reservations-list tbody tr:hover td {
   background: var(--hr-admin-bg-alt);
+}
+
+/* Reservation view page. */
+.hr-res-page {
+  background: var(--hr-admin-bg);
+  border: 1px solid var(--hr-admin-border);
+  border-radius: var(--hr-admin-radius);
+  box-shadow: var(--hr-admin-shadow);
+  padding: 24px;
+}
+
+.hr-res-page__title {
+  font-size: 28px;
+  line-height: 1.25;
+  margin: 0 0 20px;
+  color: var(--hr-admin-text);
+}
+
+.hr-res-page .field {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hr-admin-border-light);
+}
+
+.hr-res-page .field:last-child {
+  border-bottom: none;
+}
+
+.hr-res-page .field__label {
+  flex: 0 0 170px;
+  font-weight: 600;
+  color: var(--hr-admin-text-muted);
+}
+
+.hr-res-page .field__items {
+  margin: 0;
 }
 
 /* Core .visually-hidden may be missing in the frontend theme: hide the
