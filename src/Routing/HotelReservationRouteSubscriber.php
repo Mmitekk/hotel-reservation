@@ -33,19 +33,19 @@ class HotelReservationRouteSubscriber extends RouteSubscriberBase {
     }
     // Granular admin permissions (OR with full administer access): separate
     // checkboxes, no role magic. '+' means OR, ',' would mean AND.
-    if ($route = $collection->get('entity.hr_reservation.edit-form')) {
+    if ($route = $collection->get('entity.hr_reservation.edit_form')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission'], $requirements['_entity_access']);
       $requirements['_permission'] = 'administer hotel reservation+edit hotel reservations';
       $route->setRequirements($requirements);
     }
-    if ($route = $collection->get('entity.hr_reservation.add-form')) {
+    if ($route = $collection->get('entity.hr_reservation.add_form')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission'], $requirements['_entity_access'], $requirements['_entity_create_access']);
       $requirements['_permission'] = 'administer hotel reservation+create hotel reservations';
       $route->setRequirements($requirements);
     }
-    if ($route = $collection->get('entity.hr_reservation.delete-form')) {
+    if ($route = $collection->get('entity.hr_reservation.delete_form')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission'], $requirements['_entity_access']);
       $requirements['_permission'] = 'administer hotel reservation+delete hotel reservations';
