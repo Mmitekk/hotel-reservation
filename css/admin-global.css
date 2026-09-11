@@ -104,7 +104,7 @@
    ============================================ */
 .hr-res-view {
   max-width: 680px;
-  margin: 0 auto;
+  margin: 0;
   background: var(--hr-admin-bg);
   border-radius: 16px;
   box-shadow: var(--hr-admin-shadow-lg);
@@ -694,6 +694,73 @@
 
 .hr-reservations-list tbody tr:hover td {
   background: var(--hr-admin-bg-alt);
+}
+
+/* Inline operation buttons (dropbutton replacement). */
+.hr-res-ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hr-res-ops .hr-op-button {
+  padding: 4px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  border: 1px solid var(--hr-admin-border);
+  background: #fff;
+  color: var(--hr-admin-text);
+}
+
+.hr-res-ops .hr-op-button:hover {
+  text-decoration: none;
+  border-color: var(--hr-admin-primary);
+  color: var(--hr-admin-primary-dark);
+}
+
+.hr-res-ops .hr-op-button--confirm,
+.hr-res-ops .hr-op-button--checkin {
+  background: #15803d;
+  border-color: #15803d;
+  color: #fff;
+}
+
+.hr-res-ops .hr-op-button--confirm:hover,
+.hr-res-ops .hr-op-button--checkin:hover {
+  background: #166534;
+  border-color: #166534;
+  color: #fff;
+}
+
+.hr-res-ops .hr-op-button--checkout,
+.hr-res-ops .hr-op-button--edit {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+.hr-res-ops .hr-op-button--checkout:hover,
+.hr-res-ops .hr-op-button--edit:hover {
+  background: #1e40af;
+  border-color: #1e40af;
+  color: #fff;
+}
+
+.hr-res-ops .hr-op-button--cancel,
+.hr-res-ops .hr-op-button--delete {
+  background: #fff;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.hr-res-ops .hr-op-button--cancel:hover,
+.hr-res-ops .hr-op-button--delete:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
 }
 
 /* Reservation entity forms (add/edit/delete) in the frontend theme. */

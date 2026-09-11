@@ -316,10 +316,58 @@ class ReservationListBuilder extends EntityListBuilder {
     }
 
     if (!empty($operations)) {
-      $row['operations']['data'] = [
-        '#type' => 'operations',
-        '#links' => $operations,
-      ];
+      // Inline buttons instead of the operations dropbutton: the dropbutton
+      // widget is unstyled/broken in the frontend theme. Access was already
+      // checked above; links render without an extra access check so CSRF
+      // status links are never hidden by mistake.
+      $buttons = [];
+      foreach ($operations as $key => $operation) {
+        try {
+          $url_string = $operation['url']->toString();
+        }
+        catch (\Throwable $e) {
+          continue;
+        }
+        $class = ['button', 'button--small', 'hr-op-button'];
+        if (strpos($key, 'status_') === 0) {
+          $class[] = 'hr-op-button--status';
+          $target_map = [
+            'confirmed' => 'hr-op-button--confirm',
+            'cancelled' => 'hr-op-button--cancel',
+            'checked_in' => 'hr-op-button--checkin',
+            'checked_out' => 'hr-op-button--checkout',
+          ];
+          $target = substr($key, 7);
+          if (isset($target_map[$target])) {
+            $class[] = $target_map[$target];
+          }
+        }
+        elseif ($key === 'edit') {
+          $class[] = 'hr-op-button--edit';
+        }
+        elseif ($key === 'delete') {
+          $class[] = 'hr-op-button--delete';
+        }
+        $buttons[$key] = [
+          '#type' => 'inline_template',
+          '#template' => '<a href="{{ url }}" class="{{ classes }}">{{ title }}</a>',
+          '#context' => [
+            'url' => $url_string,
+            'classes' => implode(' ', $class),
+            'title' => (string) $operation['title'],
+          ],
+        ];
+      }
+      if (!empty($buttons)) {
+        $row['operations']['data'] = [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['hr-res-ops']],
+          'buttons' => $buttons,
+        ];
+      }
+      else {
+        $row['operations'] = '';
+      }
     }
     else {
       $row['operations'] = '';
