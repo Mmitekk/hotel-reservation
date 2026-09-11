@@ -31,24 +31,24 @@ class HotelReservationRouteSubscriber extends RouteSubscriberBase {
       $route->setRequirements($requirements);
       $route->setDefault('_controller', '\Drupal\hotel_reservation\Controller\HotelReservationController::viewReservation');
     }
-    // Owner may create, edit and delete reservations (status changes are
-    // also available via the dedicated route).
+    // Granular admin permissions (OR with full administer access): separate
+    // checkboxes, no role magic. '+' means OR, ',' would mean AND.
     if ($route = $collection->get('entity.hr_reservation.edit-form')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission'], $requirements['_entity_access']);
-      $requirements['_custom_access'] = '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessReservationEdit';
+      $requirements['_permission'] = 'administer hotel reservation+edit hotel reservations';
       $route->setRequirements($requirements);
     }
     if ($route = $collection->get('entity.hr_reservation.add-form')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission'], $requirements['_entity_access'], $requirements['_entity_create_access']);
-      $requirements['_custom_access'] = '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessReservationCreate';
+      $requirements['_permission'] = 'administer hotel reservation+create hotel reservations';
       $route->setRequirements($requirements);
     }
     if ($route = $collection->get('entity.hr_reservation.delete-form')) {
       $requirements = $route->getRequirements();
       unset($requirements['_permission'], $requirements['_entity_access']);
-      $requirements['_custom_access'] = '\Drupal\hotel_reservation\Access\HotelReservationAccessCheck::accessReservationDelete';
+      $requirements['_permission'] = 'administer hotel reservation+delete hotel reservations';
       $route->setRequirements($requirements);
     }
   }

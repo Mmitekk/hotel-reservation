@@ -285,17 +285,18 @@ class ReservationListBuilder extends EntityListBuilder {
     $total_price = number_format((float) $entity->get('total_price')->value, 2, '.', ' ') . ' ' . $this->currencySymbol;
     $row['total_price'] = $total_price;
 
-    // Operations: edit/delete for full admins and the hotel_owner role,
-    // status changes also for users with the status permission.
+    // Operations: edit/delete for full admins and holders of the granular
+    // admin permissions; status changes also for the status permission.
     $account = \Drupal::currentUser();
-    $can_manage = $account->hasPermission('administer hotel reservation')
-      || in_array('hotel_owner', $account->getRoles(), TRUE);
+    $can_admin = $account->hasPermission('administer hotel reservation');
     $operations = [];
-    if ($can_manage) {
+    if ($can_admin || $account->hasPermission('edit hotel reservations')) {
       $operations['edit'] = [
         'title' => $this->t('Изменить'),
         'url' => $entity->toUrl('edit-form'),
       ];
+    }
+    if ($can_admin || $account->hasPermission('delete hotel reservations')) {
       $operations['delete'] = [
         'title' => $this->t('Удалить'),
         'url' => $entity->toUrl('delete-form'),
@@ -431,7 +432,7 @@ class ReservationListBuilder extends EntityListBuilder {
     ];
     $account = \Drupal::currentUser();
     if ($account->hasPermission('administer hotel reservation')
-      || in_array('hotel_owner', $account->getRoles(), TRUE)) {
+      || $account->hasPermission('create hotel reservations')) {
       // Plain path link on purpose: no route lookup, always renders when
       // the user is allowed to add bookings.
       $build['add_button'] = [

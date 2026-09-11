@@ -27,6 +27,9 @@ class HotelReservationAccessCheck {
       'view hotel reservation analytics',
       'view hotel reservation calendar',
       'view hotel reservations',
+      'create hotel reservations',
+      'edit hotel reservations',
+      'delete hotel reservations',
       'update hotel reservation status',
     ];
   }
@@ -100,42 +103,6 @@ class HotelReservationAccessCheck {
    */
   public function accessReservations(AccountInterface $account): AccessResultInterface {
     return $this->adminOrClient($account, 'view hotel reservations');
-  }
-
-  /**
-   * Full admin access or the hotel_owner role.
-   *
-   * Role-based on purpose: the generic 'create hotel reservation'
-   * permission may be held by guest accounts, so it must not open admin
-   * forms.
-   */
-  protected function adminOrOwner(AccountInterface $account): AccessResultInterface {
-    // getRoles() is interface-guaranteed; hasRole() exists only on the user
-    // entity and may not be available on every account implementation.
-    $is_owner = in_array('hotel_owner', $account->getRoles(), TRUE);
-    return AccessResult::allowedIfHasPermission($account, 'administer hotel reservation')
-      ->orIf(AccessResult::allowedIf($is_owner));
-  }
-
-  /**
-   * Checks access to the reservation add form.
-   */
-  public function accessReservationCreate(AccountInterface $account): AccessResultInterface {
-    return $this->adminOrOwner($account);
-  }
-
-  /**
-   * Checks access to the reservation delete form.
-   */
-  public function accessReservationDelete(AccountInterface $account): AccessResultInterface {
-    return $this->adminOrOwner($account);
-  }
-
-  /**
-   * Checks access to the reservation edit form.
-   */
-  public function accessReservationEdit(AccountInterface $account): AccessResultInterface {
-    return $this->adminOrOwner($account);
   }
 
   /**

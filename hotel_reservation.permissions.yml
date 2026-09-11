@@ -33,6 +33,21 @@ view hotel reservations:
   description: 'Доступ к списку и просмотру бронирований в админке. Без права создавать, менять и удалять.'
   restrict access: false
 
+create hotel reservations:
+  title: 'Создание броней (админка)'
+  description: 'Создание бронирований через админ-форму. Без доступа к настройкам, номерам и ценам.'
+  restrict access: false
+
+edit hotel reservations:
+  title: 'Редактирование броней (админка)'
+  description: 'Изменение бронирований через админ-форму. Без доступа к настройкам, номерам и ценам.'
+  restrict access: false
+
+delete hotel reservations:
+  title: 'Удаление броней (админка)'
+  description: 'Удаление бронирований. Без доступа к настройкам, номерам и ценам.'
+  restrict access: false
+
 view own hotel reservations:
   title: 'Просмотр своих бронирований'
   description: 'Гость видит только свои бронирования (по email учётной записи) на странице «Мои бронирования».'

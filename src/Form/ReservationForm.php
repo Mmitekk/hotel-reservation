@@ -36,13 +36,50 @@ class ReservationForm extends ContentEntityForm {
       '#weight' => 10,
     ];
 
-    // Attach AJAX to room_id field.
-    if (isset($form['room_id']['widget'][0]['target_id'])) {
-      $form['room_id']['widget'][0]['target_id']['#ajax'] = [
+    // Room selector as a plain dropdown: always present regardless of the
+    // configured widget, with the same value structure so price AJAX and
+    // entity mapping keep working.
+    $room_options = [];
+    try {
+      $rooms = \Drupal::entityTypeManager()->getStorage('hr_room')->loadMultiple();
+      foreach ($rooms as $room) {
+        $room_options[$room->id()] = $room->label();
+      }
+      natcasesort($room_options);
+    }
+    catch (\Throwable $e) {
+      $room_options = [];
+    }
+    $current_room = NULL;
+    if (!$entity->get('room_id')->isEmpty()) {
+      $current_room = (int) $entity->get('room_id')->target_id;
+    }
+    $room_select = [
+      '#type' => 'select',
+      '#options' => $room_options,
+      '#default_value' => $current_room,
+      '#empty_option' => $this->t('— Выберите номер —'),
+      '#required' => TRUE,
+      '#ajax' => [
         'callback' => '::recalculatePrice',
         'wrapper' => $ajax_wrapper,
         'event' => 'change',
         'progress' => ['type' => 'throbber', 'message' => $this->t('Расчёт цены...')],
+      ],
+    ];
+    if (isset($form['room_id']['widget'][0]['target_id'])) {
+      $form['room_id']['widget'][0]['target_id'] = $room_select;
+    }
+    else {
+      $form['room_id'] = [
+        '#type' => 'container',
+        '#tree' => TRUE,
+        '#weight' => -6,
+        'widget' => [
+          0 => [
+            'target_id' => $room_select + ['#title' => $this->t('Номер')],
+          ],
+        ],
       ];
     }
 
@@ -221,7 +258,21 @@ class ReservationForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
+  /**
+   * Copies the selected room into the entity.
+   *
+   * Needed when the room selector is not part of the configured form
+   * display: then automatic value mapping skips it.
+   */
+  protected function applySelectedRoom(FormStateInterface $form_state): void {
+    $room_target = $form_state->getValue(['room_id', 0, 'target_id']);
+    if ($room_target !== NULL && $room_target !== '') {
+      $this->getEntity()->set('room_id', (int) $room_target);
+    }
+  }
+
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    $this->applySelectedRoom($form_state);
     parent::validateForm($form, $form_state);
 
     $check_in_input = $form_state->getValue(['check_in', 0, 'value']);
@@ -280,6 +331,7 @@ class ReservationForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $this->applySelectedRoom($form_state);
     // Set the calculated total price on the entity before saving.
     $calculated_total = $form_state->get('calculated_total_price');
     if ($calculated_total !== NULL) {

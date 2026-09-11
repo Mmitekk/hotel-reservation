@@ -429,6 +429,13 @@ function hotel_reservation_update_10012() {
 }
 
 /**
+ * Grant granular reservation permissions to the hotel_owner role.
+ */
+function hotel_reservation_update_10013() {
+  hotel_reservation_ensure_hotel_roles();
+}
+
+/**
  * Implements hook_uninstall().
  */
 function hotel_reservation_uninstall(bool $is_syncing) {
