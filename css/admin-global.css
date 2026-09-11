@@ -616,18 +616,45 @@
    ============================================ */
 .reservation-filter-form {
   display: flex;
-  flex-wrap: wrap;
- gap: 12px;
+  gap: 12px;
   align-items: flex-end;
   margin-bottom: 20px;
   padding: 16px;
- background: var(--hr-admin-bg);
+  background: var(--hr-admin-bg);
   border: 1px solid var(--hr-admin-border);
   border-radius: var(--hr-admin-radius);
 }
 
 .reservation-filter-form .form-item {
   margin: 0;
+}
+
+.reservation-filter-form > .form-item {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.reservation-filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.reservation-filter-actions .button {
+  font-size: 16px;
+  padding: 9px 16px;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .reservation-filter-form {
+    flex-wrap: wrap;
+  }
+
+  .reservation-filter-form > .form-item {
+    flex: 1 1 200px;
+  }
 }
 
 .reservation-filter-form .button--primary {
@@ -696,18 +723,21 @@
   background: var(--hr-admin-bg-alt);
 }
 
-/* Inline operation buttons (dropbutton replacement). */
+/* Inline operation buttons (dropbutton replacement): stacked list with
+   a small icon next to small text. */
 .hr-res-ops {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
 }
 
 .hr-res-ops .hr-op-button {
-  padding: 4px 12px;
-  min-width: 34px;
-  text-align: center;
-  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px;
+  font-size: 12px;
   line-height: 1.4;
   border-radius: 8px;
   text-decoration: none;
@@ -715,6 +745,15 @@
   border: 1px solid var(--hr-admin-border);
   background: #fff;
   color: var(--hr-admin-text);
+}
+
+.hr-op-button__icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.hr-op-button__text {
+  white-space: nowrap;
 }
 
 .hr-res-ops .hr-op-button:hover {

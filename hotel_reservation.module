@@ -574,7 +574,6 @@ function hotel_reservation_page_top(array &$page_top) {
     $links = [
       ['title' => t('Панель'), 'route' => 'hotel_reservation.dashboard'],
       ['title' => t('Бронирования'), 'route' => 'entity.hr_reservation.collection'],
-      ['title' => t('Добавить бронь'), 'route' => 'entity.hr_reservation.add-form'],
       ['title' => t('Календарь'), 'route' => 'hotel_reservation.calendar'],
       ['title' => t('Аналитика'), 'route' => 'hotel_reservation.analytics'],
     ];
@@ -606,6 +605,16 @@ function hotel_reservation_page_top(array &$page_top) {
     return $items;
   };
   $module_items = $build_links($links);
+  if ($is_owner) {
+    // Plain path link on purpose: always renders for the owner, no route
+    // lookup involved. Placed right after «Бронирования».
+    $add_item = [
+      '#type' => 'inline_template',
+      '#template' => '<a href="/admin/hotel-reservation/reservations/add" class="hr-account-menu__link">{{ title }}</a>',
+      '#context' => ['title' => t('Добавить бронь')],
+    ];
+    array_splice($module_items, 2, 0, [$add_item]);
+  }
   $profile_items = $build_links([
     ['title' => t('Профиль'), 'route' => 'entity.user.canonical', 'params' => ['user' => $uid]],
     ['title' => t('Редактировать'), 'route' => 'entity.user.edit_form', 'params' => ['user' => $uid]],

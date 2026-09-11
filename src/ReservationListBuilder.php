@@ -117,23 +117,29 @@ class ReservationListBuilder extends EntityListBuilder {
       '#attributes' => ['name' => 'room'],
     ];
 
-    $form['submit'] = [
+    $form['buttons'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['reservation-filter-actions']],
+    ];
+
+    $form['buttons']['submit'] = [
       '#type' => 'html_tag',
       '#tag' => 'button',
-      '#value' => $this->t('Фильтр'),
+      '#value' => '🔍',
       '#attributes' => [
         'type' => 'submit',
+        'title' => (string) $this->t('Фильтр'),
         'class' => ['button', 'button--primary'],
       ],
     ];
 
-    $form['reset'] = [
+    $form['buttons']['reset'] = [
       '#type' => 'link',
-      '#title' => $this->t('Сброс'),
+      '#title' => '↺',
       '#url' => Url::fromRoute('entity.hr_reservation.collection'),
       '#attributes' => [
         'class' => ['button'],
-        'style' => 'margin-left: 0.5rem;',
+        'title' => (string) $this->t('Сброс'),
       ],
     ];
 
@@ -358,7 +364,7 @@ class ReservationListBuilder extends EntityListBuilder {
         ];
         $buttons[$key] = [
           '#type' => 'inline_template',
-          '#template' => '<a href="{{ url }}" class="{{ classes }}" title="{{ title }}">{{ icon }}</a>',
+          '#template' => '<a href="{{ url }}" class="{{ classes }}" title="{{ title }}"><span class="hr-op-button__icon">{{ icon }}</span><span class="hr-op-button__text">{{ title }}</span></a>',
           '#context' => [
             'url' => $url_string,
             'classes' => implode(' ', $class),
@@ -424,21 +430,14 @@ class ReservationListBuilder extends EntityListBuilder {
       '#weight' => -100,
     ];
     $account = \Drupal::currentUser();
-    $add_exists = FALSE;
-    try {
-      \Drupal::service('router.route_provider')->getRouteByName('entity.hr_reservation.add-form');
-      $add_exists = TRUE;
-    }
-    catch (\Exception $e) {
-      $add_exists = FALSE;
-    }
-    if ($add_exists && ($account->hasPermission('administer hotel reservation')
-      || in_array('hotel_owner', $account->getRoles(), TRUE))) {
+    if ($account->hasPermission('administer hotel reservation')
+      || in_array('hotel_owner', $account->getRoles(), TRUE)) {
+      // Plain path link on purpose: no route lookup, always renders when
+      // the user is allowed to add bookings.
       $build['add_button'] = [
-        '#type' => 'link',
-        '#title' => $this->t('＋ Добавить бронь'),
-        '#url' => Url::fromRoute('entity.hr_reservation.add-form'),
-        '#attributes' => ['class' => ['button', 'button--primary', 'hr-reservations-list__add']],
+        '#type' => 'inline_template',
+        '#template' => '<a href="/admin/hotel-reservation/reservations/add" class="button button--primary hr-reservations-list__add">{{ title }}</a>',
+        '#context' => ['title' => $this->t('＋ Добавить бронь')],
         '#weight' => -90,
       ];
     }
@@ -468,14 +467,13 @@ class ReservationListBuilder extends EntityListBuilder {
       $export_url->setOption('query', $export_params);
     }
 
-    $build['filter']['actions'] = [
-      '#type' => 'container',
-      '#attributes' => ['style' => 'margin-bottom: 12px; display: flex; align-items: center; gap: 8px;'],
-      'link' => [
-        '#type' => 'link',
-        '#title' => $this->t('📥 Экспорт CSV'),
-        '#url' => $export_url,
-        '#attributes' => ['class' => ['button', 'button--primary']],
+    $build['filter']['buttons']['export'] = [
+      '#type' => 'link',
+      '#title' => '📥',
+      '#url' => $export_url,
+      '#attributes' => [
+        'class' => ['button', 'button--primary'],
+        'title' => (string) $this->t('Экспорт CSV'),
       ],
     ];
 
