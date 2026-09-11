@@ -363,7 +363,65 @@ class SettingsForm extends ConfigFormBase {
       ];
     }
 
+    $form['system'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Состояние системы'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#description' => $this->t('Если после обновления модуля доступ для владельца не меняется — нажмите кнопку ниже. Она сбрасывает PHP OPcache и пересобирает маршруты.'),
+    ];
+
+    $opcache_status = FALSE;
+    if (function_exists('opcache_get_status')) {
+      try {
+        $status = @opcache_get_status(FALSE);
+        $opcache_status = !empty($status['opcache_enabled']);
+      }
+      catch (\Throwable $e) {
+        $opcache_status = FALSE;
+      }
+    }
+    $form['system']['opcache_status'] = [
+      '#markup' => '<p>' . ($opcache_status ? $this->t('PHP OPcache включён.') : $this->t('PHP OPcache выключен или недоступен.')) . '</p>',
+    ];
+    $form['system']['rebuild'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Сбросить OPcache и пересобрать роуты'),
+      '#submit' => [[$this, 'rebuildCachesSubmit']],
+      '#limit_validation_errors' => [],
+    ];
+
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * Resets PHP OPcache and rebuilds routes.
+   */
+  public function rebuildCachesSubmit(array &$form, FormStateInterface $form_state) {
+    if (function_exists('opcache_reset')) {
+      try {
+        if (@opcache_reset()) {
+          $this->messenger()->addStatus($this->t('OPcache сброшен.'));
+        }
+        else {
+          $this->messenger()->addWarning($this->t('Не удалось сбросить OPcache (возможно, запрещён настройками сервера).'));
+        }
+      }
+      catch (\Throwable $e) {
+        $this->messenger()->addWarning($e->getMessage());
+      }
+    }
+    else {
+      $this->messenger()->addWarning($this->t('OPcache недоступен.'));
+    }
+    try {
+      \Drupal::service('router.builder')->rebuild();
+      $this->messenger()->addStatus($this->t('Маршруты пересобраны. Проверьте доступ под владельцем.'));
+    }
+    catch (\Throwable $e) {
+      $this->messenger()->addError($e->getMessage());
+    }
+    $form_state->setRedirect('hotel_reservation.settings');
   }
 
   /**
