@@ -485,9 +485,26 @@ function hotel_reservation_calculate_price($room_id, $check_in, $check_out) {
   $total = 0;
   $current = clone $start;
 
+  $use_weekday = method_exists($room, 'getWeekdayPrice');
   for ($i = 0; $i < $nights; $i++) {
     $date_str = $current->format('Y-m-d');
-    $price = isset($custom_prices[$date_str]) ? $custom_prices[$date_str] : $base_price;
+    if (isset($custom_prices[$date_str])) {
+      $price = $custom_prices[$date_str];
+    }
+    else {
+      $price = $base_price;
+      if ($use_weekday) {
+        try {
+          $weekday_price = $room->getWeekdayPrice((int) $current->format('N'));
+        }
+        catch (\Throwable $e) {
+          $weekday_price = NULL;
+        }
+        if ($weekday_price !== NULL) {
+          $price = $weekday_price;
+        }
+      }
+    }
     $daily_prices[$date_str] = $price;
     $total += $price;
     $current->modify('+1 day');

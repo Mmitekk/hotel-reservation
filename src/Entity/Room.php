@@ -185,6 +185,52 @@ class Room extends ContentEntityBase {
   }
 
   /**
+   * Weekday suffixes and labels (ISO order Mon-Sun).
+   *
+   * @return array
+   *   Suffix => label pairs.
+   */
+  public static function weekdayLabels(): array {
+    return [
+      'mon' => 'Понедельник',
+      'tue' => 'Вторник',
+      'wed' => 'Среда',
+      'thu' => 'Четверг',
+      'fri' => 'Пятница',
+      'sat' => 'Суббота',
+      'sun' => 'Воскресенье',
+    ];
+  }
+
+  /**
+   * Gets the price override for an ISO weekday (1 = Mon, 7 = Sun).
+   *
+   * @param int $iso_weekday
+   *   ISO-8601 weekday number.
+   *
+   * @return float|null
+   *   The price, or NULL when not set (use base price).
+   */
+  public function getWeekdayPrice(int $iso_weekday): ?float {
+    static $map = [1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun'];
+    try {
+      $suffix = $map[$iso_weekday] ?? NULL;
+      if ($suffix === NULL || !$this->hasField('price_' . $suffix)) {
+        return NULL;
+      }
+      $field = $this->get('price_' . $suffix);
+      if ($field->isEmpty()) {
+        return NULL;
+      }
+      $value = $field->value;
+      return ($value === NULL || $value === '') ? NULL : (float) $value;
+    }
+    catch (\Throwable $e) {
+      return NULL;
+    }
+  }
+
+  /**
    * Gets the amenities list.
    *
    * @return string
@@ -602,6 +648,35 @@ class Room extends ContentEntityBase {
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+
+    $weekdays = self::weekdayLabels();
+    $weight = 10;
+    foreach ($weekdays as $suffix => $label) {
+      $fields['price_' . $suffix] = BaseFieldDefinition::create('decimal')
+        ->setLabel(t('Цена: @day', ['@day' => $label]))
+        ->setDescription(t('Цена за ночь в этот день недели. Пусто — используется базовая цена.'))
+        ->setSettings([
+          'precision' => 10,
+          'scale' => 2,
+        ])
+        ->setRequired(FALSE)
+        ->setDisplayOptions('view', [
+          'label' => 'above',
+          'type' => 'number_decimal',
+          'weight' => $weight,
+        ])
+        ->setDisplayOptions('form', [
+          'type' => 'number',
+          'weight' => $weight,
+          'settings' => [
+            'precision' => 10,
+            'scale' => 2,
+          ],
+        ])
+        ->setDisplayConfigurable('form', TRUE)
+        ->setDisplayConfigurable('view', TRUE);
+      $weight++;
+    }
 
     $fields['amenities'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Удобства'))
