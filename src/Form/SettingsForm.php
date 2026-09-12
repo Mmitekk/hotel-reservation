@@ -384,6 +384,22 @@ class SettingsForm extends ConfigFormBase {
     $form['system']['opcache_status'] = [
       '#markup' => '<p>' . ($opcache_status ? $this->t('PHP OPcache включён.') : $this->t('PHP OPcache выключен или недоступен.')) . '</p>',
     ];
+    $weekday_ok = TRUE;
+    try {
+      $schema = \Drupal::database()->schema();
+      foreach (['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as $suffix) {
+        if (!$schema->fieldExists('hr_room', 'price_' . $suffix . '__value')) {
+          $weekday_ok = FALSE;
+          break;
+        }
+      }
+    }
+    catch (\Throwable $e) {
+      $weekday_ok = FALSE;
+    }
+    $form['system']['weekday_storage'] = [
+      '#markup' => '<p>' . ($weekday_ok ? $this->t('Колонки цен по дням недели: OK.') : $this->t('Колонок цен по дням недели НЕТ — выполните обновления базы (хук 10019). Без них цены не сохраняются.')) . '</p>',
+    ];
     $form['system']['rebuild'] = [
       '#type' => 'submit',
       '#value' => $this->t('Сбросить OPcache и пересобрать роуты'),
