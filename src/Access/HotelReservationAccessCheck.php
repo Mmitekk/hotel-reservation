@@ -46,6 +46,7 @@ class HotelReservationAccessCheck {
       'edit any image media',
       'delete own image media',
       'delete any image media',
+      'view own unpublished media',
       'view files',
     ];
   }
