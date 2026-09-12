@@ -388,7 +388,8 @@ class SettingsForm extends ConfigFormBase {
     try {
       $schema = \Drupal::database()->schema();
       foreach (['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as $suffix) {
-        if (!$schema->fieldExists('hr_room', 'price_' . $suffix . '__value')) {
+        $field_name = 'price_' . $suffix;
+        if (!$schema->fieldExists('hr_room', $field_name . '__value') && !$schema->tableExists('hr_room__' . $field_name)) {
           $weekday_ok = FALSE;
           break;
         }

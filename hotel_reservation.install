@@ -473,18 +473,17 @@ function hotel_reservation_update_10018() {
 }
 
 /**
- * Install weekday price fields on hr_room.
+ * Installs missing hr_room weekday price storages.
  */
-function hotel_reservation_update_10019() {
+function _hotel_reservation_install_weekday_price_fields(): void {
+  $schema = \Drupal::database()->schema();
   $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
   foreach (['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as $suffix) {
     $field_name = 'price_' . $suffix;
-    try {
-      $definition_update_manager->getFieldStorageDefinition($field_name, 'hr_room');
+    // Direct schema check: getFieldStorageDefinition() also sees
+    // code-only definitions and would wrongly report "already exists".
+    if ($schema->fieldExists('hr_room', $field_name . '__value') || $schema->tableExists('hr_room__' . $field_name)) {
       continue;
-    }
-    catch (\Exception $e) {
-      // Missing storage: install below.
     }
     $field_storage_definition = \Drupal\Core\Field\BaseFieldDefinition::create('decimal')
       ->setSettings([
@@ -494,6 +493,21 @@ function hotel_reservation_update_10019() {
       ->setRequired(FALSE);
     $definition_update_manager->installFieldStorageDefinition($field_name, 'hr_room', 'hotel_reservation', $field_storage_definition);
   }
+}
+
+/**
+ * Install weekday price fields on hr_room.
+ */
+function hotel_reservation_update_10019() {
+  _hotel_reservation_install_weekday_price_fields();
+}
+
+/**
+ * Re-run weekday price field install (10019 skipped when storage was
+ * code-defined but missing in DB).
+ */
+function hotel_reservation_update_10020() {
+  _hotel_reservation_install_weekday_price_fields();
 }
 
 /**
