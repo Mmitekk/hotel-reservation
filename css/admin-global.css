@@ -852,6 +852,30 @@
   font-size: 13px;
 }
 
+/* Checkbox rows (e.g. published flag): input + label on one line,
+   description full-width below. */
+.hr-entity-form .form-type-checkbox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 10px;
+}
+
+.hr-entity-form .form-type-checkbox input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: auto;
+  margin-top: 5px;
+}
+
+.hr-entity-form .form-type-checkbox > label {
+  flex: 1 1 auto;
+}
+
+.hr-entity-form .form-type-checkbox > .description {
+  flex: 1 1 100%;
+  margin-top: 2px;
+}
+
 /* Neutralize theme label decorations inside our forms: titles already
    carry an even colon, the required marker stays inline after the text. */
 .hr-entity-form label::after {

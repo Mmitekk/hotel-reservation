@@ -13,7 +13,7 @@ booking-form:
     - hotel_reservation/room-modal
 
 admin-styles:
-  version: 1.29.2
+  version: 1.29.3
   css:
     theme:
       css/admin-global.css: {}
@@ -79,7 +79,7 @@ my-bookings:
       css/my-bookings.css: {}
 
 account-menu:
-  version: 1.23.2
+  version: 1.29.3
   css:
     theme:
       css/account-menu.css: {}
