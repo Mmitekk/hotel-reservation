@@ -63,6 +63,17 @@ class RoomForm extends ContentEntityForm {
     // Fields are MOVED into nested containers (no #tree: values still map
     // to top-level form state keys, so entity mapping keeps working).
     // Integer weights + insertion order make the sequence explicit.
+    // Current week dates (Mon-Sun) shown next to short day names.
+    $week_dates = [];
+    try {
+      $monday = new \DateTime('monday this week');
+      for ($i = 0; $i < 7; $i++) {
+        $week_dates[] = ((clone $monday)->modify('+' . $i . ' days'))->format('j');
+      }
+    }
+    catch (\Throwable $e) {
+      $week_dates = [];
+    }
     $short_days = [
       'price_mon' => 'Пн',
       'price_tue' => 'Вт',
@@ -72,6 +83,13 @@ class RoomForm extends ContentEntityForm {
       'price_sat' => 'Сб',
       'price_sun' => 'Вс',
     ];
+    $day_index = 0;
+    foreach ($short_days as $field_name => $short) {
+      if (isset($week_dates[$day_index])) {
+        $short_days[$field_name] = $short . ', ' . $week_dates[$day_index];
+      }
+      $day_index++;
+    }
     $price_fields = array_merge(['base_price'], array_keys($short_days));
     $groupable = TRUE;
     foreach ($price_fields as $field_name) {
