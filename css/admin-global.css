@@ -880,6 +880,26 @@
   margin-bottom: 15px;
 }
 
+/* Rooms list. */
+.hr-rooms-list {
+  background: var(--hr-admin-bg);
+  border: 1px solid var(--hr-admin-border);
+  border-radius: var(--hr-admin-radius);
+  box-shadow: var(--hr-admin-shadow);
+  padding: 24px;
+  overflow-x: auto;
+}
+
+/* Thumbnail: theme CSS may force img width with !important, so beat it. */
+.hr-rooms-list img.hr-room-thumb {
+  width: 64px !important;
+  height: 48px !important;
+  max-width: 64px !important;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
 /* Core .visually-hidden may be missing in the frontend theme: hide the
    tablesort indicator text locally so it never overlaps headers. */
 .hr-reservations-list .visually-hidden {

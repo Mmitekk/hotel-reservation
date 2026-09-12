@@ -44,7 +44,7 @@ class RoomListBuilder extends EntityListBuilder {
     }
     if (!empty($image_url)) {
       $row['image']['data'] = [
-        '#markup' => '<img src="' . htmlspecialchars($image_url, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($image_alt, ENT_QUOTES, 'UTF-8') . '" style="width:64px;height:48px;object-fit:cover;border-radius:6px;">',
+        '#markup' => '<img class="hr-room-thumb" src="' . htmlspecialchars($image_url, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($image_alt, ENT_QUOTES, 'UTF-8') . '" style="width:64px;height:48px;object-fit:cover;border-radius:6px;">',
       ];
     }
     else {
@@ -126,6 +126,8 @@ class RoomListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function render() {
+    $build['#prefix'] = '<div class="wrapper"><div class="hr-rooms-list">';
+    $build['#suffix'] = '</div></div>';
     $build['table'] = [
       '#type' => 'table',
       '#header' => $this->buildHeader(),
