@@ -23,6 +23,7 @@ class HotelReservationAccessCheck {
   public static function clientPermissions(): array {
     return [
       'access content',
+      'view the administration theme',
       'view hotel reservation dashboard',
       'view hotel reservation analytics',
       'view hotel reservation calendar',
@@ -54,6 +55,12 @@ class HotelReservationAccessCheck {
   /**
    * Admin entry permissions, revoked from both hotel roles.
    *
+   * NOTE: 'view the administration theme' is intentionally NOT revoked
+   * from hotel_owner: entity admin pages (rooms, reservations) must render
+   * in the admin theme, otherwise core widgets (media library, dropbuttons)
+   * break in the frontend theme. Toolbar/menu stay revoked, so no extra
+   * pages become visible or accessible.
+   *
    * @return string[]
    *   Permission machine names.
    */
@@ -61,7 +68,6 @@ class HotelReservationAccessCheck {
     return [
       'access administration pages',
       'access toolbar',
-      'view the administration theme',
     ];
   }
 

@@ -457,6 +457,14 @@ function hotel_reservation_update_10016() {
 }
 
 /**
+ * Grant the administration theme to hotel_owner (entity pages render in
+ * the admin theme, fixing core widgets like the media library).
+ */
+function hotel_reservation_update_10017() {
+  hotel_reservation_ensure_hotel_roles();
+}
+
+/**
  * Implements hook_uninstall().
  */
 function hotel_reservation_uninstall(bool $is_syncing) {
