@@ -28,7 +28,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "route_provider" = {
  *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
- *     "access" = "Drupal\Core\Entity\EntityAccessControlHandler",
+  *     "access" = "Drupal\hotel_reservation\HotelReservationAccessControlHandler",
  *   },
  *   base_table = "hr_reservation",
  *   admin_permission = "administer hotel reservation",
