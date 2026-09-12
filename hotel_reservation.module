@@ -626,18 +626,13 @@ function hotel_reservation_page_top(array &$page_top) {
   };
   $module_items = $build_links($links);
   if ($is_owner) {
-    // Plain path links: after «Бронирования» and «Добавить бронь» + rooms.
-    $add_item = [
-      '#type' => 'inline_template',
-      '#template' => '<a href="/admin/hotel-reservation/reservations/add" class="hr-account-menu__link">{{ title }}</a>',
-      '#context' => ['title' => t('Добавить бронь')],
-    ];
+    // Plain path link: «Номера» right after «Бронирования».
     $rooms_item = [
       '#type' => 'inline_template',
       '#template' => '<a href="/admin/hotel-reservation/rooms" class="hr-account-menu__link">{{ title }}</a>',
       '#context' => ['title' => t('Номера')],
     ];
-    array_splice($module_items, 2, 0, [$add_item, $rooms_item]);
+    array_splice($module_items, 2, 0, [$rooms_item]);
   }
   $profile_items = $build_links([
     ['title' => t('Профиль'), 'route' => 'entity.user.canonical', 'params' => ['user' => $uid]],

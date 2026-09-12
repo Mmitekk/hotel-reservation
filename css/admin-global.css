@@ -1001,8 +1001,8 @@
 
 /* Rooms list. */
 .hr-rooms-list__add {
-  display: inline-block;
-  margin-bottom: 20px;
+  display: inline-block !important;
+  margin-bottom: 20px !important;
 }
 
 .hr-rooms-list {
