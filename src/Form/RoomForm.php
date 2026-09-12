@@ -60,8 +60,9 @@ class RoomForm extends ContentEntityForm {
     }
 
     // Group base price + weekday prices into one week-strip block.
-    // Pure markup wrapper (#prefix/#suffix): element names and values
-    // stay untouched, so entity mapping keeps working.
+    // Fields are MOVED into nested containers (no #tree: values still map
+    // to top-level form state keys, so entity mapping keeps working).
+    // Integer weights + insertion order make the sequence explicit.
     $short_days = [
       'price_mon' => 'Пн',
       'price_tue' => 'Вт',
@@ -71,20 +72,41 @@ class RoomForm extends ContentEntityForm {
       'price_sat' => 'Сб',
       'price_sun' => 'Вс',
     ];
-    $groupable = isset($form['base_price']);
-    foreach ($short_days as $field_name => $short) {
-      if (!isset($form[$field_name]['widget'][0]['value'])) {
+    $price_fields = array_merge(['base_price'], array_keys($short_days));
+    $groupable = TRUE;
+    foreach ($price_fields as $field_name) {
+      if (!isset($form[$field_name])) {
         $groupable = FALSE;
         break;
       }
     }
     if ($groupable) {
       foreach ($short_days as $field_name => $short) {
-        $form[$field_name]['widget'][0]['value']['#title'] = $short;
-        $form[$field_name]['widget'][0]['value']['#description'] = '';
+        if (isset($form[$field_name]['widget'][0]['value'])) {
+          $form[$field_name]['widget'][0]['value']['#title'] = $short;
+          $form[$field_name]['widget'][0]['value']['#description'] = '';
+        }
       }
-      $form['base_price']['#prefix'] = '<div class="hr-weekday-prices"><div class="hr-weekday-prices__title">' . $this->t('Цены по дням недели') . '</div><p class="hr-weekday-prices__hint">' . $this->t('Пустое поле — действует базовая цена.') . '</p><div class="hr-weekday-prices__grid">';
-      $form['price_sun']['#suffix'] = '</div></div>';
+      $form['hr_prices'] = [
+        '#type' => 'container',
+        '#weight' => -2,
+        '#attributes' => ['class' => ['hr-weekday-prices']],
+      ];
+      $form['hr_prices']['heading'] = [
+        '#markup' => '<div class="hr-weekday-prices__title">' . $this->t('Цены по дням недели') . '</div><p class="hr-weekday-prices__hint">' . $this->t('Пустое поле — действует базовая цена.') . '</p>',
+        '#weight' => -100,
+      ];
+      $form['hr_prices']['grid'] = [
+        '#type' => 'container',
+        '#weight' => -99,
+        '#attributes' => ['class' => ['hr-weekday-prices__grid']],
+      ];
+      $weight = 0;
+      foreach ($price_fields as $field_name) {
+        $form['hr_prices']['grid'][$field_name] = $form[$field_name];
+        $form['hr_prices']['grid'][$field_name]['#weight'] = $weight++;
+        unset($form[$field_name]);
+      }
     }
 
     return $form;
