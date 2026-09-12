@@ -888,6 +888,81 @@
   padding: 0;
 }
 
+/* Media widgets inside entity forms: compact, tidy buttons instead of
+   the theme's oversized pill buttons. */
+.hr-entity-form .button {
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  background: #f3f4f6;
+  border: 1px solid var(--hr-admin-border);
+  color: var(--hr-admin-text);
+}
+
+.hr-entity-form .button:hover {
+  background: #ececec;
+}
+
+.hr-entity-form .button--primary {
+  background: var(--hr-admin-primary);
+  border-color: transparent;
+  color: #fff;
+}
+
+.hr-entity-form .media-library-widget,
+.hr-entity-form .media-library-selection,
+.hr-entity-form .media-library-item {
+  overflow: visible;
+}
+
+.hr-entity-form .media-library-widget .button,
+.hr-entity-form .media-library-widget button,
+.hr-entity-form .media-library-selection .button,
+.hr-entity-form .media-library-selection button {
+  font-size: 12px !important;
+  padding: 3px 10px !important;
+  min-width: 0 !important;
+  line-height: 1.4 !important;
+  background: #fff !important;
+  border: 1px solid var(--hr-admin-border) !important;
+  color: var(--hr-admin-text) !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  border-radius: 8px !important;
+}
+
+.hr-entity-form .media-library-widget .button:hover,
+.hr-entity-form .media-library-widget button:hover,
+.hr-entity-form .media-library-selection .button:hover,
+.hr-entity-form .media-library-selection button:hover {
+  border-color: var(--hr-admin-primary) !important;
+  color: var(--hr-admin-primary-dark) !important;
+  background: #fff !important;
+}
+
+.hr-entity-form .media-library-item__remove,
+.hr-entity-form .media-library-widget .media-library-item button[name*="remove"] {
+  color: var(--red, #b91c1c) !important;
+}
+
+.hr-entity-form .media-library-item .thumbnail img,
+.hr-entity-form .media-library-widget img {
+  border-radius: 10px;
+  display: block;
+}
+
+.hr-entity-form .media-library-item {
+  display: inline-block;
+  margin: 0 10px 10px 0;
+  padding: 10px;
+  border: 1px solid var(--hr-admin-border-light);
+  border-radius: 12px;
+  background: #fff;
+  vertical-align: top;
+}
+
 .hr-entity-form .form-actions {
   margin-top: 20px;
   display: flex;
