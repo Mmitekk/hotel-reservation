@@ -141,6 +141,27 @@ class RoomListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function render() {
+    $build['title'] = [
+      '#markup' => '<h1 class="hr-admin-page-title">' . $this->t('Номера') . '</h1>',
+      '#weight' => -100,
+    ];
+    $account_rooms = \Drupal::currentUser();
+    $can_add_room = $account_rooms->hasPermission('administer hotel reservation')
+      || $account_rooms->hasPermission('create hotel rooms');
+    if ($can_add_room) {
+      try {
+        $add_url = Url::fromRoute('entity.hr_room.add_form');
+        $build['add_link'] = [
+          '#type' => 'link',
+          '#title' => $this->t('＋ Добавить номер'),
+          '#url' => $add_url,
+          '#attributes' => ['class' => ['button', 'button--primary', 'hr-rooms-list__add']],
+          '#weight' => -90,
+        ];
+      }
+      catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
+      }
+    }
     $build['#prefix'] = '<div class="wrapper"><div class="hr-rooms-list">';
     $build['#suffix'] = '</div></div>';
     $build['table'] = [
@@ -152,24 +173,6 @@ class RoomListBuilder extends EntityListBuilder {
         'class' => ['table-responsive'],
       ],
     ];
-
-    // Add "Add room" link only if the route exists.
-    try {
-      $add_url = Url::fromRoute('entity.hr_room.add_form');
-      $build['add_link'] = [
-        '#type' => 'operations',
-        '#links' => [
-          'add_room' => [
-            'title' => $this->t('Добавить номер'),
-            'url' => $add_url,
-          ],
-        ],
-        '#attributes' => ['style' => 'margin-bottom: 1rem;'],
-      ];
-    }
-    catch (\Symfony\Component\Routing\Exception\RouteNotFoundException $e) {
-      // Route not available — skip the link.
-    }
 
     foreach ($this->load() as $entity) {
       if ($row = $this->buildRow($entity)) {

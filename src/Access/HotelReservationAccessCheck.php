@@ -35,6 +35,18 @@ class HotelReservationAccessCheck {
       'edit hotel reservations',
       'delete hotel reservations',
       'update hotel reservation status',
+      'view media',
+      'create media',
+      'edit own media',
+      'edit any media',
+      'delete own media',
+      'delete any media',
+      'create image media',
+      'edit own image media',
+      'edit any image media',
+      'delete own image media',
+      'delete any image media',
+      'view files',
     ];
   }
 

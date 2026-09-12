@@ -869,6 +869,25 @@
   vertical-align: baseline;
 }
 
+/* Media library modal in the frontend theme: card styling bleed breaks
+   the overlay layout. Constrain our card styles to the actual entity form. */
+.media-library-widget-modal .hr-entity-form,
+.media-library-widget-modal .hr-entity-form .form-item,
+.media-library-widget-modal .hr-entity-form .form-text,
+.media-library-widget-modal .hr-entity-form .form-select {
+  all: revert;
+}
+
+.media-library-widget-modal {
+  z-index: 1000;
+}
+
+.wrapper .media-library-widget-modal,
+.media-library-widget-modal .wrapper {
+  max-width: none;
+  padding: 0;
+}
+
 .hr-entity-form .form-actions {
   margin-top: 20px;
   display: flex;

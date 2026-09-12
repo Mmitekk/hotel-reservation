@@ -358,8 +358,18 @@ function hotel_reservation_form_user_form_alter(&$form, FormStateInterface $form
  * container with card styling hooks.
  */
 function hotel_reservation_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  if (strpos((string) $form_id, 'hr_reservation') !== 0) {
+  $is_reservation = strpos((string) $form_id, 'hr_reservation') === 0;
+  $is_room = strpos((string) $form_id, 'hr_room') === 0;
+  if (!$is_reservation && !$is_room) {
     return;
+  }
+  $is_edit = strpos((string) $form_id, '_edit') !== FALSE || strpos((string) $form_id, 'edit') !== FALSE;
+  if ($is_room) {
+    $title = $is_edit ? t('Редактировать номер') : t('Добавить номер');
+    $form['hr_title'] = [
+      '#markup' => '<h1 class="hr-admin-page-title">' . $title . '</h1>',
+      '#weight' => -100,
+    ];
   }
   $form['#prefix'] = '<div class="wrapper"><div class="hr-entity-form">';
   $form['#suffix'] = '</div></div>';
