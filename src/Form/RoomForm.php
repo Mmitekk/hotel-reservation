@@ -59,6 +59,34 @@ class RoomForm extends ContentEntityForm {
       }
     }
 
+    // Group base price + weekday prices into one week-strip block.
+    // Pure markup wrapper (#prefix/#suffix): element names and values
+    // stay untouched, so entity mapping keeps working.
+    $short_days = [
+      'price_mon' => 'Пн',
+      'price_tue' => 'Вт',
+      'price_wed' => 'Ср',
+      'price_thu' => 'Чт',
+      'price_fri' => 'Пт',
+      'price_sat' => 'Сб',
+      'price_sun' => 'Вс',
+    ];
+    $groupable = isset($form['base_price']);
+    foreach ($short_days as $field_name => $short) {
+      if (!isset($form[$field_name]['widget'][0]['value'])) {
+        $groupable = FALSE;
+        break;
+      }
+    }
+    if ($groupable) {
+      foreach ($short_days as $field_name => $short) {
+        $form[$field_name]['widget'][0]['value']['#title'] = $short;
+        $form[$field_name]['widget'][0]['value']['#description'] = '';
+      }
+      $form['base_price']['#prefix'] = '<div class="hr-weekday-prices"><div class="hr-weekday-prices__title">' . $this->t('Цены по дням недели') . '</div><p class="hr-weekday-prices__hint">' . $this->t('Пустое поле — действует базовая цена.') . '</p><div class="hr-weekday-prices__grid">';
+      $form['price_sun']['#suffix'] = '</div></div>';
+    }
+
     return $form;
   }
 

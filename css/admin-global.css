@@ -999,6 +999,56 @@
   margin-bottom: 15px;
 }
 
+/* Weekday price strip in the room form. */
+.hr-weekday-prices {
+  border: 1px solid var(--hr-admin-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--hr-admin-bg-alt);
+}
+
+.hr-weekday-prices__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--hr-admin-text);
+}
+
+.hr-weekday-prices__hint {
+  font-size: 13px;
+  color: var(--hr-admin-text-muted);
+  margin: 0 0 12px;
+}
+
+.hr-weekday-prices__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.hr-weekday-prices__grid > :first-child {
+  grid-column: 1 / -1;
+}
+
+.hr-weekday-prices__grid > :first-child input {
+  max-width: 240px;
+}
+
+.hr-weekday-prices__grid .form-item {
+  margin: 0;
+}
+
+.hr-weekday-prices__grid label {
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .hr-weekday-prices__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* Rooms list. */
 .hr-rooms-list__add {
   display: inline-block !important;
