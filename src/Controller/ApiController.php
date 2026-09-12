@@ -32,10 +32,10 @@ class ApiController extends ControllerBase {
   /**
    * Checks room availability and returns available rooms with prices.
    *
-   * Accepts JSON POST data: check_in, check_out, capacity (desired room
-   * capacity, exact match; falls back to guest_count for BC).
-   * If no rooms with the requested capacity are free, other available
-   * rooms are offered with exact_match = FALSE and a notice message.
+   * Accepts JSON POST data: check_in, check_out, capacity (minimum fitting
+   * capacity; falls back to guest_count for BC).
+   * If no fitting rooms are free, other available rooms are offered with
+   * exact_match = FALSE and a notice message.
    * Returns JSON: [{id, name, capacity, base_price, total_price, nights, available}].
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -58,7 +58,7 @@ class ApiController extends ControllerBase {
     $check_in = $data['check_in'] ?? '';
     $check_out = $data['check_out'] ?? '';
     $guest_count = (int) ($data['guest_count'] ?? 1);
-    // Desired capacity: exact room category filter, decoupled from guests.
+    // Desired capacity: minimum fitting rooms, decoupled from guests.
     $wanted_capacity = isset($data['capacity']) ? (int) $data['capacity'] : $guest_count;
 
     // Validate dates.
@@ -112,16 +112,17 @@ class ApiController extends ControllerBase {
       ], 400);
     }
 
-    // Get rooms with the exact requested capacity.
-    $exact_rooms = hotel_reservation_get_available_rooms($check_in, $check_out, $wanted_capacity, TRUE);
-    $exact_match = !empty($exact_rooms);
+    // Rooms fitting at least the requested capacity (a 1-guest search
+    // matches 2-guest rooms, etc.).
+    $matching_rooms = hotel_reservation_get_available_rooms($check_in, $check_out, $wanted_capacity, FALSE);
+    $exact_match = !empty($matching_rooms);
 
     if ($exact_match) {
-      $rooms_to_show = $exact_rooms;
+      $rooms_to_show = $matching_rooms;
       $notice = '';
     }
     else {
-      // No rooms with this capacity — offer all other available rooms.
+      // Nothing fits — offer all other available rooms, if any.
       $rooms_to_show = hotel_reservation_get_available_rooms($check_in, $check_out);
       $notice = !empty($rooms_to_show)
         ? (string) $this->t('У нас сейчас нет свободных номеров вместимостью @n. Посмотрите другие варианты:', ['@n' => $wanted_capacity])
