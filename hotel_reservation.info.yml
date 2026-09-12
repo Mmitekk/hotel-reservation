@@ -12,5 +12,5 @@ dependencies:
   - drupal:system
   - drupal:media
   - drupal:media_library
-version: '1.30.5'
+version: '1.30.6'
 project: 'hotel_reservation'

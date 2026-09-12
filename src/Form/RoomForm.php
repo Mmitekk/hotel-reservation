@@ -111,7 +111,7 @@ class RoomForm extends ContentEntityForm {
         '#attributes' => ['class' => ['hr-weekday-prices']],
       ];
       $form['hr_prices']['heading'] = [
-        '#markup' => '<div class="hr-weekday-prices__title">' . $this->t('Цены по дням недели') . '</div><p class="hr-weekday-prices__hint">' . $this->t('Пустое поле — действует базовая цена.') . '</p>',
+        '#markup' => '<div class="hr-weekday-prices__title">' . $this->t('Цены по дням недели') . '</div><p class="hr-weekday-prices__hint">' . $this->t('Пустое поле — действует базовая цена. Число рядом с днём — это ориентир (текущая неделя): цена задаётся именно дню недели и действует каждую неделю, а не на конкретную дату. Для конкретных дат — календарь цен номера.') . '</p>',
         '#weight' => -100,
       ];
       $form['hr_prices']['grid'] = [
