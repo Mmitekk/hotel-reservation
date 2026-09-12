@@ -999,6 +999,10 @@
 }
 
 /* Rooms list. */
+.hr-rooms-list__add {
+  margin-bottom: 20px;
+}
+
 .hr-rooms-list {
   background: var(--hr-admin-bg);
   border: 1px solid var(--hr-admin-border);
