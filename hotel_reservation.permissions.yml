@@ -48,6 +48,26 @@ delete hotel reservations:
   description: 'Удаление бронирований. Без доступа к настройкам, номерам и ценам.'
   restrict access: false
 
+view hotel rooms:
+  title: 'Просмотр номеров (админка)'
+  description: 'Доступ к списку и просмотру номеров в админке. Без права создавать, менять и удалять.'
+  restrict access: false
+
+create hotel rooms:
+  title: 'Создание номеров (админка)'
+  description: 'Создание номеров через админ-форму. Без доступа к настройкам и типам номеров.'
+  restrict access: false
+
+edit hotel rooms:
+  title: 'Редактирование номеров (админка)'
+  description: 'Изменение номеров (цены, изображения, описания) через админ-форму. Без доступа к настройкам и типам номеров.'
+  restrict access: false
+
+delete hotel rooms:
+  title: 'Удаление номеров (админка)'
+  description: 'Удаление номеров. Без доступа к настройкам и типам номеров.'
+  restrict access: false
+
 view own hotel reservations:
   title: 'Просмотр своих бронирований'
   description: 'Гость видит только свои бронирования (по email учётной записи) на странице «Мои бронирования».'

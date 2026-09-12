@@ -101,23 +101,38 @@ class RoomListBuilder extends EntityListBuilder {
     $pricing_url = Url::fromRoute('hotel_reservation.room_pricing', [
       'hr_room' => $entity->id(),
     ]);
-    $row['operations']['data'] = [
-      '#type' => 'operations',
-      '#links' => [
-        'edit' => [
-          'title' => $this->t('Изменить'),
-          'url' => $entity->toUrl('edit-form'),
-        ],
-        'delete' => [
-          'title' => $this->t('Удалить'),
-          'url' => $entity->toUrl('delete-form'),
-        ],
-        'pricing' => [
-          'title' => $this->t('Цены'),
-          'url' => $pricing_url,
-        ],
-      ],
-    ];
+    $account_ops = \Drupal::currentUser();
+    $can_admin_ops = $account_ops->hasPermission('administer hotel reservation');
+    $can_edit_room = $can_admin_ops || $account_ops->hasPermission('edit hotel rooms');
+    $can_delete_room = $can_admin_ops || $account_ops->hasPermission('delete hotel rooms');
+    $op_links = [];
+    if ($can_edit_room) {
+      $op_links['edit'] = [
+        'title' => $this->t('Изменить'),
+        'url' => $entity->toUrl('edit-form'),
+      ];
+    }
+    if ($can_delete_room) {
+      $op_links['delete'] = [
+        'title' => $this->t('Удалить'),
+        'url' => $entity->toUrl('delete-form'),
+      ];
+    }
+    if ($can_edit_room) {
+      $op_links['pricing'] = [
+        'title' => $this->t('Цены'),
+        'url' => $pricing_url,
+      ];
+    }
+    if (!empty($op_links)) {
+      $row['operations']['data'] = [
+        '#type' => 'operations',
+        '#links' => $op_links,
+      ];
+    }
+    else {
+      $row['operations'] = '';
+    }
 
     return $row + parent::buildRow($entity);
   }

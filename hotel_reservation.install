@@ -436,6 +436,13 @@ function hotel_reservation_update_10013() {
 }
 
 /**
+ * Grant room permissions to the hotel_owner role.
+ */
+function hotel_reservation_update_10014() {
+  hotel_reservation_ensure_hotel_roles();
+}
+
+/**
  * Implements hook_uninstall().
  */
 function hotel_reservation_uninstall(bool $is_syncing) {

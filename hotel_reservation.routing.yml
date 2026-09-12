@@ -35,7 +35,7 @@ hotel_reservation.room_pricing:
     month: NULL
     year: NULL
   requirements:
-    _permission: 'administer hotel reservation'
+    _permission: 'administer hotel reservation+edit hotel rooms'
 
 hotel_reservation.room_pricing_save:
   path: '/admin/hotel-reservation/rooms/{hr_room}/pricing/save'
@@ -43,7 +43,7 @@ hotel_reservation.room_pricing_save:
     _controller: '\Drupal\hotel_reservation\Controller\HotelReservationController::roomPricingSave'
     _title: 'Сохранение цен'
   requirements:
-    _permission: 'administer hotel reservation'
+    _permission: 'administer hotel reservation+edit hotel rooms'
 
 hotel_reservation.reservation_status:
   path: '/admin/hotel-reservation/reservations/{hr_reservation}/status/{status}'

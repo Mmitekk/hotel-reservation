@@ -51,6 +51,37 @@ class HotelReservationRouteSubscriber extends RouteSubscriberBase {
       $requirements['_permission'] = 'administer hotel reservation+delete hotel reservations';
       $route->setRequirements($requirements);
     }
+    // Rooms: granu­lar admin permissions (OR with full administer).
+    if ($route = $collection->get('entity.hr_room.collection')) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_permission'], $requirements['_entity_access']);
+      $requirements['_permission'] = 'administer hotel reservation+view hotel rooms';
+      $route->setRequirements($requirements);
+    }
+    if ($route = $collection->get('entity.hr_room.canonical')) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_permission'], $requirements['_entity_access']);
+      $requirements['_permission'] = 'administer hotel reservation+view hotel rooms';
+      $route->setRequirements($requirements);
+    }
+    if ($route = $collection->get('entity.hr_room.add_form')) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_permission'], $requirements['_entity_access'], $requirements['_entity_create_access']);
+      $requirements['_permission'] = 'administer hotel reservation+create hotel rooms';
+      $route->setRequirements($requirements);
+    }
+    if ($route = $collection->get('entity.hr_room.edit_form')) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_permission'], $requirements['_entity_access']);
+      $requirements['_permission'] = 'administer hotel reservation+edit hotel rooms';
+      $route->setRequirements($requirements);
+    }
+    if ($route = $collection->get('entity.hr_room.delete_form')) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_permission'], $requirements['_entity_access']);
+      $requirements['_permission'] = 'administer hotel reservation+delete hotel rooms';
+      $route->setRequirements($requirements);
+    }
   }
 
 }
