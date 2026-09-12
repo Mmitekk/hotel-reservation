@@ -457,10 +457,18 @@ function hotel_reservation_update_10016() {
 }
 
 /**
- * Grant the administration theme to hotel_owner (entity pages render in
+ * Grant the administration theme to hotel_owner (entity admin pages render in
  * the admin theme, fixing core widgets like the media library).
  */
 function hotel_reservation_update_10017() {
+  hotel_reservation_ensure_hotel_roles();
+}
+
+/**
+ * Revoke the administration theme from hotel_owner again (frontend theme
+ * is back; media library works via the entity access handler).
+ */
+function hotel_reservation_update_10018() {
   hotel_reservation_ensure_hotel_roles();
 }
 
