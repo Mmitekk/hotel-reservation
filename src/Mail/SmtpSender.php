@@ -215,6 +215,10 @@ class SmtpSender {
       ],
     ]);
 
+    if (filter_var($host, FILTER_VALIDATE_IP) === FALSE && gethostbyname($host) === $host) {
+      throw new \RuntimeException(sprintf('Не удалось разрешить имя %s: на сервере не работает DNS. Проверьте /etc/resolv.conf или укажите IP-адрес SMTP-сервера.', $host));
+    }
+
     $errno = 0;
     $errstr = '';
     $socket = @stream_socket_client(

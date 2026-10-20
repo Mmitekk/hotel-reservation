@@ -286,13 +286,13 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => (bool) $config->get('smtp_debug'),
     ];
 
-    $form['smtp']['connection']['test'] = [
+    $form['smtp']['test'] = [
       '#type' => 'details',
       '#title' => $this->t('Проверка отправки'),
       '#open' => TRUE,
     ];
 
-    $form['smtp']['connection']['test']['smtp_test_email'] = [
+    $form['smtp']['test']['smtp_test_email'] = [
       '#type' => 'email',
       '#title' => $this->t('Кому отправить тест'),
       '#description' => $this->t('Пусто — на email администратора. Тест использует значения из этой формы, сохранять настройки не обязательно.'),
@@ -300,7 +300,7 @@ class SettingsForm extends ConfigFormBase {
       '#maxlength' => 255,
     ];
 
-    $form['smtp']['connection']['test']['smtp_test_send'] = [
+    $form['smtp']['test']['smtp_test_send'] = [
       '#type' => 'submit',
       '#value' => $this->t('Отправить тестовое письмо'),
       '#submit' => [[$this, 'sendTestEmailSubmit']],
@@ -639,35 +639,86 @@ class SettingsForm extends ConfigFormBase {
   }
 
   /**
+   * Reads a submitted value, tolerating nested form keys and raw input.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param string $key
+   *   The element name.
+   *
+   * @return mixed
+   *   The submitted value or NULL.
+   */
+  private function getSubmittedValue(FormStateInterface $form_state, $key) {
+    $value = $form_state->getValue($key);
+    if (is_array($value)) {
+      $value = reset($value);
+    }
+    if ($value === NULL || $value === '') {
+      $input = $form_state->getUserInput();
+      if (isset($input[$key]) && is_scalar($input[$key])) {
+        $value = $input[$key];
+      }
+    }
+    return $value;
+  }
+
+  /**
+   * Strips whitespace and invisible characters from an email address.
+   *
+   * @param mixed $value
+   *   The raw submitted value.
+   *
+   * @return string
+   *   The cleaned address.
+   */
+  private function normalizeEmail($value) {
+    $value = (string) $value;
+    $clean = preg_replace('/[\s\x{00A0}\x{200B}\x{FEFF}]+/u', '', $value);
+    return $clean === NULL ? trim($value) : $clean;
+  }
+
+  /**
    * Sends a test message using the values typed into the form.
    */
   public function sendTestEmailSubmit(array &$form, FormStateInterface $form_state) {
-    $to = trim((string) $form_state->getValue('smtp_test_email'));
+    $to = $this->normalizeEmail($this->getSubmittedValue($form_state, 'smtp_test_email'));
     if ($to === '') {
-      $to = trim((string) $form_state->getValue('admin_notification_email'));
+      $to = $this->normalizeEmail($this->getSubmittedValue($form_state, 'admin_notification_email'));
+    }
+    if ($to === '') {
+      $to = $this->normalizeEmail(\Drupal::config('system.site')->get('mail'));
     }
     if ($to === '' || !\Drupal::service('email.validator')->isValid($to)) {
-      $this->messenger()->addError($this->t('Укажите корректный email для теста.'));
+      \Drupal::logger('hotel_reservation')->warning('SMTP test aborted, invalid recipient: "@to".', ['@to' => $to]);
+      $this->messenger()->addError($this->t('Не удалось определить получателя теста: поле «Кому отправить тест» пустое или содержит некорректный адрес (получено: «@to»).', ['@to' => $to]));
+      $form_state->setRebuild(TRUE);
+      return;
+    }
+
+    $host = trim((string) $this->getSubmittedValue($form_state, 'smtp_host'));
+    if ($host === '') {
+      $this->messenger()->addError($this->t('Сначала заполните поля «SMTP-хост» и «Порт» в блоке выше.'));
       $form_state->setRebuild(TRUE);
       return;
     }
 
     $stored_password = (string) $this->config('hotel_reservation.settings')->get('smtp_password');
-    $typed_password = (string) $form_state->getValue('smtp_password_new');
+    $typed_password = (string) $this->getSubmittedValue($form_state, 'smtp_password_new');
     $overrides = [
       'smtp_enabled' => TRUE,
-      'smtp_host' => (string) $form_state->getValue('smtp_host'),
-      'smtp_port' => (int) $form_state->getValue('smtp_port'),
-      'smtp_encryption' => (string) $form_state->getValue('smtp_encryption'),
-      'smtp_username' => (string) $form_state->getValue('smtp_username'),
+      'smtp_host' => $host,
+      'smtp_port' => (int) $this->getSubmittedValue($form_state, 'smtp_port'),
+      'smtp_encryption' => (string) $this->getSubmittedValue($form_state, 'smtp_encryption'),
+      'smtp_username' => (string) $this->getSubmittedValue($form_state, 'smtp_username'),
       'smtp_password' => $typed_password !== '' ? $typed_password : $stored_password,
-      'smtp_from_email' => (string) $form_state->getValue('smtp_from_email'),
-      'smtp_from_name' => (string) $form_state->getValue('smtp_from_name'),
-      'smtp_timeout' => (int) $form_state->getValue('smtp_timeout'),
-      'smtp_debug' => (bool) $form_state->getValue('smtp_debug'),
+      'smtp_from_email' => (string) $this->getSubmittedValue($form_state, 'smtp_from_email'),
+      'smtp_from_name' => (string) $this->getSubmittedValue($form_state, 'smtp_from_name'),
+      'smtp_timeout' => (int) $this->getSubmittedValue($form_state, 'smtp_timeout'),
+      'smtp_debug' => (bool) $this->getSubmittedValue($form_state, 'smtp_debug'),
     ];
 
-    $hotel = (string) $form_state->getValue('hotel_name');
+    $hotel = (string) $this->getSubmittedValue($form_state, 'hotel_name');
     if ($hotel === '') {
       $hotel = (string) \Drupal::config('system.site')->get('name');
     }
