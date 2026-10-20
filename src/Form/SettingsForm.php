@@ -178,6 +178,136 @@ class SettingsForm extends ConfigFormBase {
     ];
 
     // ============================================================
+    // Fieldset: SMTP transport
+    // ============================================================
+    $form['smtp'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Свой SMTP-сервер (независимая отправка)'),
+      '#description' => $this->t('Когда включено, письма модуля уходят напрямую через указанный SMTP-сервер и не зависят от почты сайта, хостера и настроек домена. Выключено — используется стандартная отправка Drupal (как у Webform).'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    ];
+
+    $form['smtp']['smtp_enabled'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Отправлять письма модуля через свой SMTP'),
+      '#default_value' => (bool) $config->get('smtp_enabled'),
+    ];
+
+    $form['smtp']['connection'] = [
+      '#type' => 'container',
+      '#states' => [
+        'visible' => [
+          ':input[name="smtp_enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['smtp']['connection']['smtp_host'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('SMTP-хост'),
+      '#description' => $this->t('Например: smtp.yandex.ru, smtp.mail.ru, smtp.beget.com.'),
+      '#default_value' => $config->get('smtp_host') ?: '',
+      '#maxlength' => 255,
+      '#attributes' => ['placeholder' => 'smtp.yandex.ru'],
+    ];
+
+    $form['smtp']['connection']['smtp_port'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Порт'),
+      '#description' => $this->t('465 — SSL, 587 — STARTTLS, 25 — без шифрования (обычно блокируется хостерами).'),
+      '#default_value' => $config->get('smtp_port') ?: 465,
+      '#min' => 1,
+      '#max' => 65535,
+      '#size' => 10,
+    ];
+
+    $form['smtp']['connection']['smtp_encryption'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Шифрование'),
+      '#options' => [
+        'ssl' => $this->t('SSL (обычно порт 465)'),
+        'tls' => $this->t('STARTTLS (обычно порт 587)'),
+        'none' => $this->t('Без шифрования'),
+      ],
+      '#default_value' => $config->get('smtp_encryption') ?: 'ssl',
+    ];
+
+    $form['smtp']['connection']['smtp_username'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Логин'),
+      '#description' => $this->t('Обычно полный адрес почты. Оставьте пустым, если сервер не требует авторизации.'),
+      '#default_value' => $config->get('smtp_username') ?: '',
+      '#maxlength' => 255,
+      '#attributes' => ['autocomplete' => 'off'],
+    ];
+
+    $password_set = (string) $config->get('smtp_password') !== '';
+    $form['smtp']['connection']['smtp_password_new'] = [
+      '#type' => 'password',
+      '#title' => $this->t('Пароль'),
+      '#description' => $password_set
+        ? $this->t('Пароль сохранён. Оставьте поле пустым, чтобы не менять. Для Яндекса и Mail.ru нужен пароль приложения, а не основной пароль от почты.')
+        : $this->t('Пароль SMTP. Для Яндекса и Mail.ru нужен пароль приложения, а не основной пароль от почты.'),
+      '#default_value' => '',
+      '#maxlength' => 255,
+      '#attributes' => ['autocomplete' => 'new-password'],
+    ];
+
+    $form['smtp']['connection']['smtp_from_email'] = [
+      '#type' => 'email',
+      '#title' => $this->t('Email отправителя'),
+      '#description' => $this->t('Должен совпадать с логином или быть подтверждён у почтового провайдера. Пусто — берётся системный email сайта.'),
+      '#default_value' => $config->get('smtp_from_email') ?: '',
+      '#maxlength' => 255,
+    ];
+
+    $form['smtp']['connection']['smtp_from_name'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Имя отправителя'),
+      '#description' => $this->t('Отображается в почтовых клиентах. Пусто — название отеля.'),
+      '#default_value' => $config->get('smtp_from_name') ?: '',
+      '#maxlength' => 255,
+    ];
+
+    $form['smtp']['connection']['smtp_timeout'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Таймаут, секунд'),
+      '#default_value' => $config->get('smtp_timeout') ?: 15,
+      '#min' => 1,
+      '#max' => 120,
+      '#size' => 10,
+    ];
+
+    $form['smtp']['connection']['smtp_debug'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Писать диалог с SMTP в журнал'),
+      '#description' => $this->t('Полезно для диагностики. Пароль в журнал не попадает. Отключайте после настройки.'),
+      '#default_value' => (bool) $config->get('smtp_debug'),
+    ];
+
+    $form['smtp']['connection']['test'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Проверка отправки'),
+      '#open' => TRUE,
+    ];
+
+    $form['smtp']['connection']['test']['smtp_test_email'] = [
+      '#type' => 'email',
+      '#title' => $this->t('Кому отправить тест'),
+      '#description' => $this->t('Пусто — на email администратора. Тест использует значения из этой формы, сохранять настройки не обязательно.'),
+      '#default_value' => $config->get('admin_notification_email') ?: '',
+      '#maxlength' => 255,
+    ];
+
+    $form['smtp']['connection']['test']['smtp_test_send'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Отправить тестовое письмо'),
+      '#submit' => [[$this, 'sendTestEmailSubmit']],
+      '#limit_validation_errors' => [],
+    ];
+
+    // ============================================================
     // Fieldset: Email texts
     // ============================================================
     $form['mail_texts'] = [
@@ -488,6 +618,74 @@ class SettingsForm extends ConfigFormBase {
     if ($modal_width < 50 || $modal_width > 95) {
       $form_state->setErrorByName('room_modal_width', $this->t('Ширина должна быть от 50 до 95%.'));
     }
+
+    // Validate the SMTP transport when it is enabled.
+    if ((bool) $form_state->getValue('smtp_enabled')) {
+      if (trim((string) $form_state->getValue('smtp_host')) === '') {
+        $form_state->setErrorByName('smtp_host', $this->t('Укажите SMTP-хост.'));
+      }
+      $port = (int) $form_state->getValue('smtp_port');
+      if ($port < 1 || $port > 65535) {
+        $form_state->setErrorByName('smtp_port', $this->t('Порт должен быть от 1 до 65535.'));
+      }
+      $from_email = trim((string) $form_state->getValue('smtp_from_email'));
+      if ($from_email !== '' && !\Drupal::service('email.validator')->isValid($from_email)) {
+        $form_state->setErrorByName('smtp_from_email', $this->t('Некорректный email отправителя.'));
+      }
+      if (trim((string) $form_state->getValue('smtp_username')) !== '' && (string) $form_state->getValue('smtp_password_new') === '' && (string) $this->config('hotel_reservation.settings')->get('smtp_password') === '') {
+        $form_state->setErrorByName('smtp_password_new', $this->t('Укажите пароль SMTP (для Яндекса и Mail.ru — пароль приложения).'));
+      }
+    }
+  }
+
+  /**
+   * Sends a test message using the values typed into the form.
+   */
+  public function sendTestEmailSubmit(array &$form, FormStateInterface $form_state) {
+    $to = trim((string) $form_state->getValue('smtp_test_email'));
+    if ($to === '') {
+      $to = trim((string) $form_state->getValue('admin_notification_email'));
+    }
+    if ($to === '' || !\Drupal::service('email.validator')->isValid($to)) {
+      $this->messenger()->addError($this->t('Укажите корректный email для теста.'));
+      $form_state->setRebuild(TRUE);
+      return;
+    }
+
+    $stored_password = (string) $this->config('hotel_reservation.settings')->get('smtp_password');
+    $typed_password = (string) $form_state->getValue('smtp_password_new');
+    $overrides = [
+      'smtp_enabled' => TRUE,
+      'smtp_host' => (string) $form_state->getValue('smtp_host'),
+      'smtp_port' => (int) $form_state->getValue('smtp_port'),
+      'smtp_encryption' => (string) $form_state->getValue('smtp_encryption'),
+      'smtp_username' => (string) $form_state->getValue('smtp_username'),
+      'smtp_password' => $typed_password !== '' ? $typed_password : $stored_password,
+      'smtp_from_email' => (string) $form_state->getValue('smtp_from_email'),
+      'smtp_from_name' => (string) $form_state->getValue('smtp_from_name'),
+      'smtp_timeout' => (int) $form_state->getValue('smtp_timeout'),
+      'smtp_debug' => (bool) $form_state->getValue('smtp_debug'),
+    ];
+
+    $hotel = (string) $form_state->getValue('hotel_name');
+    if ($hotel === '') {
+      $hotel = (string) \Drupal::config('system.site')->get('name');
+    }
+    $subject = (string) $this->t('Тестовое письмо — @hotel', ['@hotel' => $hotel]);
+    $body = (string) $this->t(
+      "Это тестовое письмо от модуля Hotel Reservation.\n\nЕсли вы его получили, собственный SMTP настроен верно и уведомления о бронированиях будут доставляться независимо от почты сайта.\n\nДата: @date",
+      ['@date' => date('d.m.Y H:i:s')]
+    );
+
+    try {
+      \Drupal::service('hotel_reservation.smtp_sender')->send($to, $subject, $body, $overrides);
+      $this->messenger()->addStatus($this->t('Тестовое письмо отправлено на @to. Проверьте «Входящие» и папку «Спам».', ['@to' => $to]));
+    }
+    catch (\Throwable $e) {
+      $this->messenger()->addError($this->t('Не удалось отправить письмо: @message', ['@message' => $e->getMessage()]));
+    }
+
+    $form_state->setRebuild(TRUE);
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
@@ -518,7 +716,26 @@ class SettingsForm extends ConfigFormBase {
       ->set('form_success_title', $form_state->getValue('form_success_title'))
       ->set('form_success_text', $form_state->getValue('form_success_text'))
       ->set('room_modal_width', max(50, min(95, (int) $form_state->getValue('room_modal_width') ?: 65)))
+      ->set('smtp_enabled', (bool) $form_state->getValue('smtp_enabled'))
+      ->set('smtp_host', trim((string) $form_state->getValue('smtp_host')))
+      ->set('smtp_port', (int) $form_state->getValue('smtp_port') ?: 465)
+      ->set('smtp_encryption', (string) $form_state->getValue('smtp_encryption'))
+      ->set('smtp_username', trim((string) $form_state->getValue('smtp_username')))
+      ->set('smtp_from_email', trim((string) $form_state->getValue('smtp_from_email')))
+      ->set('smtp_from_name', trim((string) $form_state->getValue('smtp_from_name')))
+      ->set('smtp_timeout', max(1, (int) $form_state->getValue('smtp_timeout') ?: 15))
+      ->set('smtp_debug', (bool) $form_state->getValue('smtp_debug'))
       ->save();
+
+    // Store a new SMTP password only when one was typed, so an empty field
+    // keeps the existing password. The form field is deliberately named
+    // differently from the config key for this reason.
+    $new_password = (string) $form_state->getValue('smtp_password_new');
+    if ($new_password !== '') {
+      $this->config('hotel_reservation.settings')
+        ->set('smtp_password', $new_password)
+        ->save();
+    }
 
     // (Re)create both hotel roles with correct permissions.
     $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');

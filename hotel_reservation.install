@@ -100,6 +100,16 @@ function hotel_reservation_install(bool $is_syncing) {
     ->set('mail_admin_new_booking', hotel_reservation_default_mail_text('admin_new_booking'))
     ->set('mail_guest_pending', hotel_reservation_default_mail_text('guest_pending'))
     ->set('mail_guest_confirmed', hotel_reservation_default_mail_text('guest_confirmed'))
+    ->set('smtp_enabled', FALSE)
+    ->set('smtp_host', '')
+    ->set('smtp_port', 465)
+    ->set('smtp_encryption', 'ssl')
+    ->set('smtp_username', '')
+    ->set('smtp_password', '')
+    ->set('smtp_from_email', '')
+    ->set('smtp_from_name', '')
+    ->set('smtp_timeout', 15)
+    ->set('smtp_debug', FALSE)
     ->save();
 
   hotel_reservation_create_default_room_types();
@@ -508,6 +518,34 @@ function hotel_reservation_update_10019() {
  */
 function hotel_reservation_update_10020() {
   _hotel_reservation_install_weekday_price_fields();
+}
+
+/**
+ * Adds defaults for the independent SMTP transport settings.
+ *
+ * The transport stays disabled until an administrator fills in the server
+ * details, so existing behaviour does not change on update.
+ */
+function hotel_reservation_update_10021() {
+  $config = \Drupal::configFactory()->getEditable('hotel_reservation.settings');
+  $defaults = [
+    'smtp_enabled' => FALSE,
+    'smtp_host' => '',
+    'smtp_port' => 465,
+    'smtp_encryption' => 'ssl',
+    'smtp_username' => '',
+    'smtp_password' => '',
+    'smtp_from_email' => '',
+    'smtp_from_name' => '',
+    'smtp_timeout' => 15,
+    'smtp_debug' => FALSE,
+  ];
+  foreach ($defaults as $key => $value) {
+    if ($config->get($key) === NULL) {
+      $config->set($key, $value);
+    }
+  }
+  $config->save();
 }
 
 /**

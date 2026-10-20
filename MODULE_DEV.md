@@ -573,6 +573,14 @@ GET /api/hotel-reservation/room-prices/{room_id}?check_in=2026-07-15&check_out=2
 ### `hook_mail($key, &$message, $params)`
 Два ключа: `reservation_confirmation` и `reservation_admin_notification`.
 
+### Независимый SMTP-транспорт
+
+`hotel_reservation_send_mail($key, $to, $langcode, $params)` — единая точка отправки писем модуля. Если в настройках включён `smtp_enabled`, письмо уходит через `hotel_reservation.smtp_sender` (`src/Mail/SmtpSender.php`): собственное SMTP-соединение по сокету, SSL/STARTTLS, AUTH LOGIN/PLAIN, без зависимости от почты сайта, хостера и домена. Иначе используется стандартный `plugin.manager.mail`; при отказе бэкенда (`FALSE`) пишется warning в журнал.
+
+Настройки: `admin/config/hotel-reservation/settings` → «Свой SMTP-сервер» (хост, порт, шифрование, логин, пароль, отправитель, таймаут, отладочный журнал) и кнопка отправки тестового письма. Пароль хранится в `hotel_reservation.settings` и в журнал не пишется.
+
+Для Webform: обработчик `Email via hotel SMTP` (`hotel_reservation_smtp_email`, `src/Plugin/WebformHandler/SmtpEmailWebformHandler.php`) отправляет сабмит через тот же транспорт, игнорируя почтовый бэкенд сайта. Поддерживает токены `[webform:...]`, `[webform_submission:...]` и поля «Кому», «Тема», «Текст», «Отправитель». При включённом обработчике встроенный email-обработчик Webform лучше отключить, чтобы не было дублей.
+
 ### `hook_preprocess_block(&$variables)`
 Для 3 блоков модуля проверяет конфигурацию и добавляет CSS-классы к обёртке блока:
 - `use_page_content_section` → класс `.page-content-section`

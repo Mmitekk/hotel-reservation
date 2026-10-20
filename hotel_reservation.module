@@ -181,6 +181,101 @@ function hotel_reservation_mail($key, &$message, $params) {
 }
 
 /**
+ * Builds the subject and body of a notification mail.
+ *
+ * Runs the module's own hook_mail() so the subject lives in one place, no
+ * matter whether the message goes out through the site mail backend or
+ * through the module SMTP transport.
+ *
+ * @param string $key
+ *   Mail key, e.g. reservation_confirmation.
+ * @param array $params
+ *   Mail parameters, must contain 'message'.
+ *
+ * @return array
+ *   ['subject' => string, 'body' => string].
+ */
+function hotel_reservation_build_message(string $key, array $params): array {
+  $message = ['subject' => '', 'body' => []];
+  hotel_reservation_mail($key, $message, $params);
+  return [
+    'subject' => (string) $message['subject'],
+    'body' => is_array($message['body']) ? implode("\n\n", $message['body']) : (string) $message['body'],
+  ];
+}
+
+/**
+ * Sends a module notification, preferring the independent SMTP transport.
+ *
+ * When SMTP is enabled in the module settings the message is delivered over
+ * the module's own SMTP connection (independent of the site mail backend,
+ * hosting or sending domain). Otherwise it falls back to the Drupal mail
+ * manager. Failures are logged and never break the surrounding request.
+ *
+ * @param string $key
+ *   Mail key handled by hook_mail().
+ * @param string $to
+ *   Recipient address.
+ * @param string $langcode
+ *   Language code for the fallback mail manager.
+ * @param array $params
+ *   Mail parameters, must contain 'message'.
+ *
+ * @return bool
+ *   TRUE when the message was accepted for delivery.
+ */
+function hotel_reservation_send_mail(string $key, string $to, string $langcode, array $params = []): bool {
+  if ($to === '') {
+    return FALSE;
+  }
+
+  $config = \Drupal::config('hotel_reservation.settings');
+
+  if ((bool) $config->get('smtp_enabled') && trim((string) $config->get('smtp_host')) !== '') {
+    $built = hotel_reservation_build_message($key, $params);
+    try {
+      \Drupal::service('hotel_reservation.smtp_sender')->send($to, $built['subject'], $built['body']);
+      \Drupal::logger('hotel_reservation')->info('Mail @key sent to @to via module SMTP.', [
+        '@key' => $key,
+        '@to' => $to,
+      ]);
+      return TRUE;
+    }
+    catch (\Throwable $e) {
+      \Drupal::logger('hotel_reservation')->error('Mail @key to @to failed via module SMTP: @message', [
+        '@key' => $key,
+        '@to' => $to,
+        '@message' => $e->getMessage(),
+      ]);
+      return FALSE;
+    }
+  }
+
+  try {
+    $result = \Drupal::service('plugin.manager.mail')->mail('hotel_reservation', $key, $to, $langcode, $params);
+    if ($result !== TRUE) {
+      // The mail manager returns FALSE instead of throwing when the backend
+      // refuses the message, so it must be checked explicitly.
+      \Drupal::logger('hotel_reservation')->warning('Site mail backend did not accept @key to @to (returned @result).', [
+        '@key' => $key,
+        '@to' => $to,
+        '@result' => var_export($result, TRUE),
+      ]);
+      return FALSE;
+    }
+    return TRUE;
+  }
+  catch (\Throwable $e) {
+    \Drupal::logger('hotel_reservation')->error('Mail @key to @to failed via site mail backend: @message', [
+      '@key' => $key,
+      '@to' => $to,
+      '@message' => $e->getMessage(),
+    ]);
+    return FALSE;
+  }
+}
+
+/**
  * Get available rooms for given dates.
  *
  * Capacity is a room category filter and is NOT linked to the number of

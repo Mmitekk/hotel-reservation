@@ -609,13 +609,7 @@ class HotelReservationController extends ControllerBase {
         ]
       );
 
-      \Drupal::service('plugin.manager.mail')->mail(
-        'hotel_reservation',
-        'reservation_confirmation',
-        $guest_email,
-        $langcode,
-        $params
-      );
+      hotel_reservation_send_mail('reservation_confirmation', $guest_email, $langcode, $params);
     }
 
     if ($new_status === 'cancelled') {
@@ -632,13 +626,7 @@ class HotelReservationController extends ControllerBase {
           ]
         );
 
-        \Drupal::service('plugin.manager.mail')->mail(
-          'hotel_reservation',
-          'reservation_admin_notification',
-          $admin_email,
-          $langcode,
-          $params
-        );
+        hotel_reservation_send_mail('reservation_admin_notification', $admin_email, $langcode, $params);
       }
     }
   }

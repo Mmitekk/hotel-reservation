@@ -3,3 +3,9 @@ services:
     class: Drupal\hotel_reservation\Routing\HotelReservationRouteSubscriber
     tags:
       - { name: event_subscriber }
+
+  hotel_reservation.smtp_sender:
+    class: Drupal\hotel_reservation\Mail\SmtpSender
+    arguments:
+      - '@config.factory'
+      - '@logger.factory'

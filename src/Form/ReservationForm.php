@@ -432,13 +432,7 @@ class ReservationForm extends ContentEntityForm {
       ]
     );
 
-    \Drupal::service('plugin.manager.mail')->mail(
-      'hotel_reservation',
-      'reservation_confirmation',
-      $guest_email,
-      $langcode,
-      $params
-    );
+    hotel_reservation_send_mail('reservation_confirmation', $guest_email, $langcode, $params);
   }
 
   /**
@@ -468,13 +462,7 @@ class ReservationForm extends ContentEntityForm {
       ]
     );
 
-    \Drupal::service('plugin.manager.mail')->mail(
-      'hotel_reservation',
-      'reservation_admin_notification',
-      $admin_email,
-      $langcode,
-      $params
-    );
+    hotel_reservation_send_mail('reservation_admin_notification', $admin_email, $langcode, $params);
   }
 
 }

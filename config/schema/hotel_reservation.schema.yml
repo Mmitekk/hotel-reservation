@@ -81,6 +81,37 @@ hotel_reservation.settings:
     mail_guest_confirmed:
       type: text
       label: 'Guest confirmation email text'
+    # Independent SMTP transport.
+    smtp_enabled:
+      type: boolean
+      label: 'Send module mail through the module SMTP server'
+    smtp_host:
+      type: string
+      label: 'SMTP host'
+    smtp_port:
+      type: integer
+      label: 'SMTP port'
+    smtp_encryption:
+      type: string
+      label: 'SMTP encryption (none, tls, ssl)'
+    smtp_username:
+      type: string
+      label: 'SMTP username'
+    smtp_password:
+      type: string
+      label: 'SMTP password'
+    smtp_from_email:
+      type: email
+      label: 'SMTP sender email'
+    smtp_from_name:
+      type: string
+      label: 'SMTP sender name'
+    smtp_timeout:
+      type: integer
+      label: 'SMTP timeout in seconds'
+    smtp_debug:
+      type: boolean
+      label: 'Log the SMTP conversation'
 
 hr_room_type.*:
   type: config_entity

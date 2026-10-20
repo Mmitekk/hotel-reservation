@@ -389,23 +389,10 @@ class ApiController extends ControllerBase {
           $mail_tokens
         );
 
-        try {
-          \Drupal::service('plugin.manager.mail')->mail(
-            'hotel_reservation',
-            'reservation_admin_notification',
-            $admin_email,
-            $langcode,
-            $params
-          );
-        }
-        catch (\Throwable $e) {
-          // A broken mail backend must not fail the booking or corrupt
-          // the JSON response (e.g. PHP warnings printed into output).
-          $this->getLogger('hotel_reservation')->warning('Admin notification email failed for reservation @id: @message', [
-            '@id' => $reservation->id(),
-            '@message' => $e->getMessage(),
-          ]);
-        }
+        // A broken mail backend must not fail the booking or corrupt the JSON
+        // response (e.g. PHP warnings printed into output). Failures are
+        // logged inside the helper.
+        hotel_reservation_send_mail('reservation_admin_notification', $admin_email, $langcode, $params);
       }
     }
 
@@ -421,22 +408,8 @@ class ApiController extends ControllerBase {
         $mail_tokens
       );
 
-      try {
-        \Drupal::service('plugin.manager.mail')->mail(
-          'hotel_reservation',
-          'reservation_confirmation',
-          $guest_email,
-          $langcode,
-          $params2
-        );
-      }
-      catch (\Throwable $e) {
-        // See above: mail failures must not break the booking response.
-        $this->getLogger('hotel_reservation')->warning('Guest confirmation email failed for reservation @id: @message', [
-          '@id' => $reservation->id(),
-          '@message' => $e->getMessage(),
-        ]);
-      }
+      // See above: mail failures must not break the booking response.
+      hotel_reservation_send_mail('reservation_confirmation', $guest_email, $langcode, $params2);
     }
 
     // One-time token so a freshly created account owner can set a password
